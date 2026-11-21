@@ -125,14 +125,14 @@ const vCalc=(el,id)=>{const m=BY[id],f=m&&fichaDe(m.id),c=f&&f.calc,pac=window.C
    <div class="fw full"><label for="kConc">Concentración del producto (miligramos por mililitro, opcional)</label><input id="kConc" inputmode="decimal" placeholder="Por ejemplo 250 mg en 5 ml = 50">${c&&c.conc?`<div class="fr">${c.conc.map(x=>`<button type="button" data-conc="${x[1]}">${esc(x[0])}</button>`).join('')}</div>`:''}</div>
   </div>${pac&&pac.peso?`<p class="hint">Peso tomado del expediente de ${esc(pac.nombre)}.</p>`:''}</div><div class="hx-res glass" id="kRes"></div></div>
   ${c&&c.nota?`<p class="hint" style="margin-top:12px">${esc(c.nota)}</p>`:''}</div>`;
-  let por='dia';
-  const set=e=>{$('#kDosis').value=e.mgkg;por=e.por;el.querySelectorAll('[data-por]').forEach(b=>b.classList.toggle('on',b.dataset.por===por));$('#kInt').value=e.h;$('#kMax').value=e.max||'';$('#kMaxD').value=e.maxd||'';calcK()};
+  let por='dia',unica=false;
+  const set=e=>{unica=!!e.u1;$('#kDosis').value=e.mgkg;por=e.por;el.querySelectorAll('[data-por]').forEach(b=>b.classList.toggle('on',b.dataset.por===por));$('#kInt').value=e.h;$('#kMax').value=e.max||'';$('#kMaxD').value=e.maxd||'';calcK()};
   const calcK=()=>{const n=x=>{const v=parseFloat(($('#'+x).value||'').replace(',','.'));return isFinite(v)?v:null};const p=n('kPeso'),d=n('kDosis'),h=n('kInt'),mx=n('kMax'),md=n('kMaxD'),cc=n('kConc'),box=$('#kRes');
     if(!p||!d||!h){box.className='hx-res glass';box.innerHTML='<p class="hint" style="margin:0">Resultado</p><b class="hx-n" style="font-size:22px;color:var(--ink2)">Escribe peso, dosis e intervalo</b>';return}
     const tomas=24/h;let toma=por==='dia'?p*d/tomas:p*d,tope='';if(mx&&toma>mx){toma=mx;tope='Se aplicó el tope de dosis máxima por toma.'}let dia=toma*tomas;if(md&&dia>md){toma=md/tomas;dia=md;tope='Se aplicó el tope de dosis máxima al día.'}
-    const r=x=>Math.round(x*10)/10;box.className='hx-res glass '+(tope?'warn':'ok');
-    box.innerHTML=`<p class="hint" style="margin:0">Cada ${r(h)} horas (${r(tomas)} tomas al día)</p><b class="hx-n">${r(toma)} miligramos</b>${cc?`<p class="hx-u">${r(toma/cc)} mililitros por toma</p>`:''}<p class="hx-i">${r(dia)} miligramos al día${p?` (${r(dia/p)} miligramos por kilo al día)`:''}</p>${tope?`<p class="hint" style="color:#c27c00;font-weight:600">${tope}</p>`:''}<p class="hint">Confirma la dosis con la ficha y el producto antes de indicarla.</p>`};
-  el.querySelector('.cx').addEventListener('input',calcK);
+    const r=x=>{const a=Math.abs(x),k=a<1?100:a<10?10:1;return Math.round(x*k)/k},U=(c&&c.u)||'miligramos';box.className='hx-res glass '+(tope?'warn':'ok');
+    box.innerHTML=`<p class="hint" style="margin:0">${unica?'Dosis única':`Cada ${r(h)} horas (${r(tomas)} tomas al día)`}</p><b class="hx-n">${r(toma)} ${U}</b>${cc&&U==='miligramos'?`<p class="hx-u">${r(toma/cc)} mililitros por toma</p>`:''}${unica?'':`<p class="hx-i">${r(dia)} ${U} al día${p?` (${r(dia/p)} ${U} por kilo al día)`:''}</p>`}${tope?`<p class="hint" style="color:#c27c00;font-weight:600">${tope}</p>`:''}<p class="hint">Confirma la dosis con la ficha y el producto antes de indicarla.</p>`};
+  el.querySelector('.cx').addEventListener('input',e=>{if(['kInt','kDosis'].includes(e.target.id))unica=false;calcK()});
   $('#kMed').onchange=e=>G.go('medicamentos-calc'+(e.target.value?'-'+e.target.value:''));
   el.querySelectorAll('[data-por]').forEach(b=>b.onclick=()=>{por=b.dataset.por;el.querySelectorAll('[data-por]').forEach(x=>x.classList.toggle('on',x===b));calcK()});
   el.querySelectorAll('[data-es]').forEach(b=>b.onclick=()=>{el.querySelectorAll('[data-es]').forEach(x=>x.classList.toggle('on',x===b));set(c.esquemas[+b.dataset.es])});

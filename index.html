@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="consultas.css">
 <style>
 /* VOICE clínico y sereno, como una app de Apple, con movimiento elegante y vivo
    IDEA consultorio de bolsillo: un latido que se vuelve GCHE2, red neuronal viva de fondo, herramientas a los lados
@@ -30,7 +31,7 @@
 :root.sexp{--sw:232px}
 :root.pcol{--pw:0px}
 *{box-sizing:border-box;min-width:0}
-html,body{height:100%}
+html{height:100%}body{min-height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.47 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.011em;overflow-x:clip;-webkit-font-smoothing:antialiased;transition:background .5s var(--ease),color .5s var(--ease)}
 button,a,input{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;text-decoration:none}
 svg{display:block}
@@ -278,7 +279,8 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
 .toast{bottom:calc(150px + env(safe-area-inset-bottom))!important}
 .wideonly{display:none!important}
 }
-.fab{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));z-index:50;display:grid;justify-items:end;gap:10px}
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));z-index:50;display:grid;justify-items:end;gap:10px;pointer-events:none}
+.fabb{pointer-events:auto}
 .fabb{width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:0 10px 30px -8px color-mix(in srgb,var(--blue) 70%,transparent);transition:transform .45s var(--spring)}
 .fabb:active{transform:scale(.9)}
 .fab.open .fabb{transform:rotate(135deg)}
@@ -394,7 +396,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
         <div class="pins rise" style="--i:3" id="pins"></div>
         <div class="mods" id="mods"></div>
         <div class="tilesec"><div class="sec rise" style="--i:9"><h3>Resumen del día</h3><small>Se llenará con tus datos</small></div><div class="tiles" id="tiles"></div></div>
-        <div class="foot rise" style="--i:14"><span>Versión 1.0.0 · Fase 1. El contenido llega en las siguientes actualizaciones.</span><span class="netst" id="netst">Guardado · En línea</span></div>
+        <div class="foot rise" style="--i:14"><span>Versión 1.1.0 · Consultas ya funciona. Los demás módulos llegan en las siguientes actualizaciones.</span><span class="netst" id="netst">Guardado · En línea</span></div>
       </section>
       <section class="view" id="v-page"></section>
     </div>
@@ -501,15 +503,11 @@ const TEMA=N('Tema de ejemplo','Todo el estudio del tema en un solo lugar',[
 const CATS=['Urgencias','Cardiología','Neumología','Gastroenterología','Nefrología y electrolitos','Endocrinología','Neurología','Salud mental','Infectología','Traumatología','Dermatología','Pediatría','Ginecología y obstetricia','Geriatría','Valoración preoperatoria','Nutrición','Laboratorio','Conversores','Interpretadores','Epidemiología'];
 const MODS={
   consultas:Object.assign(N('Consultas','Pacientes, historia clínica, notas y agenda',[
-    L('Calendario y agenda','Pacientes atendidos y citas por día',['Aquí iría el calendario del mes','Aquí irían los pacientes atendidos ese día','Aquí irían las citas próximas']),
+    L('Calendario y agenda','Pacientes atendidos y citas por día',[]),
     N('Nuevo paciente','Elige el tipo de paciente',['Adulto hombre','Adulto mujer','Embarazada','Pediátrico','Adulto mayor'].map(HC)),
-    N('Buscar paciente','Por nombre o diagnóstico',[N('Expediente de ejemplo','Paciente ficticio para revisar el diseño',[
-      L('Nueva consulta','Nota subsecuente',['Aquí iría la nota de seguimiento','Aquí irían la receta y las indicaciones']),
-      L('Referencia','Hoja de referencia',['Aquí irían el tipo de envío y el destino','Aquí iría el resumen clínico automático','Aquí iría el seguimiento de la contrarreferencia']),
-      L('Documentos en PDF','Receta, certificado y constancia',['Aquí irían los documentos para imprimir o compartir'])
-    ],['Aquí iría el resumen fijo con alergias en rojo','Aquí iría la línea del tiempo de consultas','Aquí irían las gráficas de evolución','Aquí irían los programas de seguimiento'])],['Aquí iría el buscador de pacientes','Aquí iría la lista de resultados']),
+    L('Buscar paciente','Por nombre, teléfono o diagnóstico',[]),
     N('Consulta rápida','Solo nota en formato SOAP',['Adulto','Embarazada','Pediátrico','Adulto mayor'].map(SOAP))
-  ],['Aquí irían los pacientes recientes','Aquí iría el resumen de consultas del día']),{c:'#0071e3',cal:0}),
+  ],[]),{c:'#0071e3',cal:0}),
   medicamentos:Object.assign(N('Medicamentos','Fichas, dosis, calculadora, comparación y receta',[
     L('Buscador','Con medicamentos similares',['Aquí iría la barra de búsqueda','Aquí irían los resultados con similares del mismo grupo']),
     Object.assign(N('Comparar medicamentos','Dos o tres medicamentos lado a lado'),{cmp:1}),
@@ -621,7 +619,7 @@ const CARDS={
   reloj:['Reloj','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',()=>`<div class="clockw" style="margin-top:10px"><svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="37" fill="none" stroke="var(--line)" stroke-width="2"/>${Array.from({length:12},(_,i)=>`<line x1="40" y1="7" x2="40" y2="${i%3?11:14}" stroke="var(--ink2)" stroke-width="${i%3?1.4:2.4}" stroke-linecap="round" transform="rotate(${i*30} 40 40)"/>`).join('')}<line id="hh" class="hand" x1="40" y1="40" x2="40" y2="22" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><line id="mh" class="hand" x1="40" y1="40" x2="40" y2="13" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><line id="sh" class="hand" x1="40" y1="46" x2="40" y2="11" stroke="#ff3b30" stroke-width="1.6" stroke-linecap="round"/><circle cx="40" cy="40" r="3" fill="#ff3b30"/></svg><div><span class="big" id="dclk">--:--</span><small>${fmtDate()}</small></div></div>`,''],
   clima:['Clima','<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 18z"/>',()=>`<div class="wxi">${sunSvg}<div><span class="t" data-count="24">0°</span><small>Parcialmente nublado · Máx 27° · Mín 14°</small></div></div><small style="display:block;margin-top:8px;color:var(--ink2);font-size:12px">Datos de ejemplo. El clima real usará la ubicación de tu celular.</small>`,'s:clima'],
   calendario:['Calendario','cal',mcal,'h:consultas-0'],
-  citas:['Citas de hoy','consultas',()=>sk(80)+sk(60)+pend,'h:consultas-0'],
+  citas:['Citas de hoy','consultas',()=>window.CX?CX.panel('citas'):sk(80)+sk(60)+pend,'h:consultas-0'],
   bloque:['Siguiente bloque de estudio','estudio',()=>sk(70)+pend,'h:estudio-0'],
   avisos:['Avisos','<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/>',()=>sk(85)+sk(55)+pend,'s:bell'],
   semana:['Tu semana','target',()=>`<div class="rings"><svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg)">${[[42,'#0071e3',.68],[31,'#03aa49',.45],[20,'#8668ff',.82]].map(([r,c,v])=>{const Lc=2*Math.PI*r;return `<circle cx="48" cy="48" r="${r}" stroke="${c}" opacity=".18"/><circle class="rg" cx="48" cy="48" r="${r}" stroke="${c}" stroke-dasharray="${Lc.toFixed(1)}" stroke-dashoffset="${Lc.toFixed(1)}" data-v="${(Lc*(1-v)).toFixed(1)}"/>`}).join('')}</svg><ul><li><i style="background:#0071e3"></i>Consultas</li><li><i style="background:#03aa49"></i>Horas de estudio</li><li><i style="background:#8668ff"></i>Preguntas</li></ul></div><small style="display:block;margin-top:6px;color:var(--ink2);font-size:12px">Ejemplo visual. ${PEND}.</small>`,'h:estudio-5'],
@@ -629,8 +627,8 @@ const CARDS={
   recientes:['Recientes','<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',()=>sk(75)+sk(65)+sk(45)+pend,''],
   perla:['Perla del día','star',()=>sk(95)+sk(80)+pend,''],
   notas:['Notas rápidas','note',()=>sk(90)+sk(70)+sk(50)+pend,''],
-  paciente:['Paciente en curso','person',()=>`<div style="display:flex;align-items:center;gap:10px;margin-top:10px"><span class="av" style="background:var(--ctrl);color:var(--ink2)">--</span><div style="flex:1">${sk(80)}${sk(50)}</div></div>${sk(90)}${sk(70)}${pend}`,'h:consultas-2-0'],
-  consultorio:['Resumen del consultorio','chart',()=>`<div class="count"><b>--<small>Semana</small></b><b>--<small>Mes</small></b></div>${pend}`,'h:consultas-0'],
+  paciente:['Paciente en curso','person',()=>window.CX?CX.panel('paciente'):sk(80)+pend,'h:consultas-2'],
+  consultorio:['Resumen del consultorio','chart',()=>window.CX?CX.panel('consultorio'):`<div class="count"><b>--<small>Semana</small></b><b>--<small>Mes</small></b></div>${pend}`,'h:consultas-0'],
   pregunta:['Pregunta del día','quest',()=>sk(95)+sk(85)+sk(60)+pend,'h:estudio-1'],
   temporizador:['Temporizador','timer',()=>`<div class="tring"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="70" stroke="var(--ctrl)"/><circle class="tg" cx="75" cy="75" r="70"/></svg><b>25:00</b></div>${pend}`,'s:timer']
 };
@@ -659,7 +657,7 @@ $('#panel').addEventListener('click',e=>{
     else if(e.target.closest('[data-up]')||e.target.closest('[data-dn]'))setLay(c=>{const i=c.o.indexOf(id),j=i+(e.target.closest('[data-up]')?-1:1);if(j>=0&&j<c.o.length)[c.o[i],c.o[j]]=[c.o[j],c.o[i]]});
     return;
   }
-  const a=b.dataset.act;if(a.startsWith('h:')){closeSides();go(a.slice(2))}else if(a.startsWith('s:')){closeSides();SHEETS[a.slice(2)]()}else pmsg(CARDS[id][0]);
+  const a=window.CX&&['citas','paciente','consultorio'].includes(id)?'h:'+CX.panelAct(id):b.dataset.act;if(a.startsWith('h:')){closeSides();go(a.slice(2))}else if(a.startsWith('s:')){closeSides();SHEETS[a.slice(2)]()}else pmsg(CARDS[id][0]);
 });
 
 /* ventanas flotantes */
@@ -668,7 +666,7 @@ const closeSheet=()=>$('#scrim').classList.remove('on');
 const chips=a=>`<div class="chips">${a.map(c=>Array.isArray(c)?`<button class="chip" data-h="${c[1]}">${c[0]}</button>`:`<button class="chip">${c}</button>`).join('')}</div>`;
 let hist=store.get('gche2-hist',[]);
 const SUG=['consultas-3','medicamentos-1','herramientas-1-0','estudio-1'];
-const sres=q=>{const n=norm(q.trim());if(!n)return `${hist.length?`<p class="slabel" style="margin:14px 0 0">Búsquedas recientes</p>${chips(hist.map(h=>{const r=resolve(h);return r?[r.node.t,h]:null}).filter(Boolean))}`:''}<p class="slabel" style="margin:14px 0 0">Sugerencias</p><div class="nlist">${SUG.map(row).join('')}</div>`;const r=INDEX.filter(x=>norm(x.t).includes(n)).slice(0,8);return r.length?`<div class="nlist">${r.map(x=>row(x.h)).join('')}</div>`:`<p>Sin resultados en la estructura. Aquí también buscaría medicamentos, escalas, temas y pacientes. ${PEND}.</p>`};
+const sres=q=>{const n=norm(q.trim());if(!n)return `${hist.length?`<p class="slabel" style="margin:14px 0 0">Búsquedas recientes</p>${chips(hist.map(h=>{const r=resolve(h);return r?[r.node.t,h]:null}).filter(Boolean))}`:''}<p class="slabel" style="margin:14px 0 0">Sugerencias</p><div class="nlist">${SUG.map(row).join('')}</div>`;const px=window.CX?CX.buscar(n):'';const r=INDEX.filter(x=>norm(x.t).includes(n)).slice(0,8);return r.length||px?px+(r.length?`<div class="nlist">${r.map(x=>row(x.h)).join('')}</div>`:''):`<p>Sin resultados en la estructura. Aquí también buscaría medicamentos, escalas, temas y pacientes. ${PEND}.</p>`};
 const row=h=>{const r=resolve(h);if(!r)return'';return `<button data-h="${h}" style="--c:${r.m.c}"><i></i><span><b style="font-size:15px">${r.node.t}</b><small>${r.trail.slice(0,-1).map(x=>x[0]).join(' › ')||'Módulo'}</small></span>${icon(pickIcon(r.node.t,r.id),18)}</button>`};
 const SHEETS={
   search:()=>{openSheet('Buscar',`<label class="sinput">${icon('search',18)}<input id="sq" type="search" placeholder="Consulta rápida, omeprazol, Glasgow" autocomplete="off" aria-label="Buscar"></label><div id="sres">${sres('')}</div>`);$('#sq').addEventListener('input',e=>{$('#sres').innerHTML=sres(e.target.value)})},
@@ -684,8 +682,9 @@ const SHEETS={
     <button class="srow" style="width:100%" data-sw="full">Pantalla completa ${icon('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',18)}</button>
     <div class="srow">Color de acento <span class="dots">${ACC.map(([n,c])=>`<button aria-label="${n}" data-acc="${c}" style="--c:${c}"></button>`).join('')}</span></div>
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
+    ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.0.0</p>`);syncSw();syncSet()},
+    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.1.0</p>`);syncSw();syncSet()},
   help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
@@ -696,11 +695,11 @@ const setTab=n=>{
 $('#sBody').addEventListener('click',e=>{
   const t=e.target.closest('[data-tab]');if(t){setTab(+t.dataset.tab);vib();return}
   if(e.target.closest('.keys button')){vib();pmsg('Calculadora');return}
-  const s=e.target.closest('[data-sw]');if(s){vib();({dark:()=>toggleTheme(),night:toggleNight,hc:toggleHc,full,install})[s.dataset.sw]();setTimeout(syncSw,60);return}
+  const s=e.target.closest('[data-sw]');if(s){vib();({dark:()=>toggleTheme(),night:toggleNight,hc:toggleHc,full,install,cuenta:()=>window.CX&&CX.cuenta()})[s.dataset.sw]();setTimeout(syncSw,60);return}
   const a=e.target.closest('[data-acc]');if(a){setAcc(a.dataset.acc);syncSet();vib();return}
   const f=e.target.closest('[data-fs]');if(f){setFs(+f.dataset.fs);syncSet();vib();return}
   const h=e.target.closest('[data-h]');if(h){const v=h.dataset.h;if($('#sq')){hist=[v,...hist.filter(x=>x!==v)].slice(0,6);store.set('gche2-hist',hist)}closeSheet();go(v);return}
-  const c=e.target.closest('.chip');if(c)pmsg(c.textContent);
+  const c=e.target.closest('.chip');if(c&&c.textContent==='Datos del médico'&&window.CX){CX.perfil();return}if(c&&!c.closest('.cx'))pmsg(c.textContent);
 });
 $('#bSearch').addEventListener('click',SHEETS.search);$('#bTimer').addEventListener('click',SHEETS.timer);$('#bCalc').addEventListener('click',SHEETS.calc);$('#bPill').addEventListener('click',SHEETS.pill);$('#bBell').addEventListener('click',SHEETS.bell);$('#bMe').addEventListener('click',SHEETS.me);
 $('#rMe').addEventListener('click',()=>{closeSides();SHEETS.me()});$('#rHelp').addEventListener('click',()=>{closeSides();SHEETS.help()});
@@ -739,8 +738,9 @@ const route=()=>{
   const h=location.hash.slice(1),r=resolve(h),pr=$('#prog');
   pr.classList.remove('go');pr.offsetHeight;if(!reduced)pr.classList.add('go');
   $$('.view').forEach(v=>v.classList.remove('on'));
-  if(r){render(r);$('#v-page').classList.add('on')}else{renderPins();const v=$('#v-home');v.classList.add('on');restart(v)}
-  const ctx=r?r.id:'inicio';
+  window.CX&&CX.flush();const cxo=!!(window.CX&&CX.owns(h));
+  if(cxo){CX.show(h,$('#v-page'));$('#v-page').classList.add('on')}else if(r){render(r);$('#v-page').classList.add('on')}else{renderPins();const v=$('#v-home');v.classList.add('on');restart(v)}
+  const ctx=cxo?'consultas':r?r.id:'inicio';
   $$('.nav a,.tabbar a').forEach(a=>a.classList.toggle('on',a.dataset.n===ctx));moveInd();moveTab();
   const nc=LAYOUT[ctx]?ctx:'otro';if(nc!==pctx){pctx=nc;ptab=Object.keys(LAYOUT[nc])[0];editing=false}renderPanel();
   scrollTo({top:0,behavior:'auto'});
@@ -926,9 +926,14 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});
   }).catch(()=>{});
 }
+window.G={$,$$,icon,toast,openSheet,closeSheet,go,route,vib,store,PEND,renderPanel,closeSides,arrow,ILL,isPinned:h=>pins.includes(h)};
 const fontsReady=document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
 fontsReady.then(startIntro);
 }
 </script>
+<script src="firebase-config.js"></script>
+<script src="consultas-esquema.js"></script>
+<script src="consultas.js"></script>
+<script type="module" src="nube.js"></script>
 </body>
 </html>

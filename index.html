@@ -396,7 +396,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
         <div class="pins rise" style="--i:3" id="pins"></div>
         <div class="mods" id="mods"></div>
         <div class="tilesec"><div class="sec rise" style="--i:9"><h3>Resumen del día</h3><small>Se llenará con tus datos</small></div><div class="tiles" id="tiles"></div></div>
-        <div class="foot rise" style="--i:14"><span>Versión 1.6.0 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias y tu curso de Farmacología, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
+        <div class="foot rise" style="--i:14"><span>Versión 1.7.0 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
       </section>
       <section class="view" id="v-page"></section>
     </div>
@@ -483,7 +483,7 @@ const I={
   swap:'<path d="M4 8h14l-4-4M20 16H6l4 4"/>'
 };
 const icon=(p,s=26)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[p]||p}</svg>`;
-const KW=[['calendario','cal'],['agenda','cal'],['nuevo paciente','personplus'],['buscar paciente','search'],['buscador','search'],['buscar más','globe'],['rápida','bolt'],['expediente','folder'],['nueva consulta','note'],['referencia','send'],['documento','doc'],['embarazada','preg'],['pediátrico','baby'],['adulto mayor','elder'],['adulto','person'],['historia','consultas'],['compar','cmp'],['grupos','grid'],['ficha','medicamentos'],['calculadora','calc'],['receta','rx'],['esquemas','layers'],['favoritos','star'],['materias','books'],['cursos','folder'],['repaso','cards'],['tarjetas','cards'],['simulacro','timer'],['biblioteca','books'],['progreso','chart'],['cuaderno','book'],['agregar','plus'],['guardias','moon'],['tema','target'],['resumen','text'],['guía','shield'],['banco','quest'],['caso','steth'],['notas','pen'],['glasgow','gauge'],['urgencias','heart'],['cardiología','heart'],['neumología','lungs'],['nefrología','drop'],['neurología','brain'],['salud mental','brain'],['traumatología','bone'],['laboratorio','flask'],['conversores','swap'],['interpretadores','chart'],['cirugía','steth'],['ginecología','preg'],['pediatría','baby'],['geriatría','elder']];
+const KW=[['calendario','cal'],['agenda','cal'],['nuevo paciente','personplus'],['buscar paciente','search'],['buscador','search'],['buscar más','globe'],['rápida','bolt'],['expediente','folder'],['nueva consulta','note'],['referencia','send'],['documento','doc'],['embarazada','preg'],['pediátrico','baby'],['adulto mayor','elder'],['adulto','person'],['historia','consultas'],['compar','cmp'],['grupos','grid'],['ficha','medicamentos'],['calculadora','calc'],['receta','rx'],['esquemas','layers'],['favoritos','star'],['materias','books'],['cursos','folder'],['guías','doc'],['repaso','cards'],['tarjetas','cards'],['simulacro','timer'],['biblioteca','books'],['progreso','chart'],['cuaderno','book'],['agregar','plus'],['guardias','moon'],['tema','target'],['resumen','text'],['guía','shield'],['banco','quest'],['caso','steth'],['notas','pen'],['glasgow','gauge'],['urgencias','heart'],['cardiología','heart'],['neumología','lungs'],['nefrología','drop'],['neurología','brain'],['salud mental','brain'],['traumatología','bone'],['laboratorio','flask'],['conversores','swap'],['interpretadores','chart'],['cirugía','steth'],['ginecología','preg'],['pediatría','baby'],['geriatría','elder']];
 const pickIcon=(t,id)=>{const s=t.toLowerCase();const k=KW.find(([w])=>s.includes(w));return k?k[1]:(id==='herramientas'?'gauge':id)};
 
 /* contenido */
@@ -511,10 +511,10 @@ const MODS={
   estudio:Object.assign(N('Estudio','Calendario, materias, temas y preguntas',[
     N('Calendario semanal','Clases, estudio y guardias',[L('Agregar bloque','Clase o estudio',['Aquí iría la materia','Aquí iría el tipo: clase o estudio','Aquí irían los días y el horario']),L('Guardias','Recorren tus bloques de estudio',['Aquí iría el patrón de guardias'])],['Aquí iría el horario de la semana','Aquí irían los bloques de hoy']),
     L('Mis materias','7 áreas, 34 materias y 421 temas',[]),
-    L('Mis cursos','Tu curso de Farmacología, aparte de las materias',[]),
+    L('Mis cursos','Farmacología y flashcards Madera, aparte de las materias',[]),
     L('Repaso de hoy','Tarjetas del día',['Aquí irían las tarjetas pendientes','Aquí iría el repaso en audio']),
     L('Simulacros','Banco general cronometrado',['Aquí iría el simulador tipo ENARM','Aquí irían tus resultados']),
-    L('Biblioteca','Libros y Guías de Práctica Clínica',['Aquí irían tus libros por capítulo','Aquí irían las Guías de Práctica Clínica']),
+    L('Guías de Práctica Clínica','Las de tus rotaciones del internado, por tema',[]),
     L('Progreso','Avance, aciertos y racha',['Aquí iría tu avance por materia','Aquí irían tus temas débiles','Aquí iría tu racha']),
     L('Cuaderno','Todas tus notas',['Aquí irían tus notas por materia'])
   ],['Aquí iría el tema que toca hoy']),{c:'#8668ff'}),
@@ -677,7 +677,7 @@ const SHEETS={
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
     ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.6.0</p>`);syncSw();syncSet()},
+    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.7.0</p>`);syncSw();syncSet()},
   help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
@@ -937,6 +937,7 @@ fontsReady.then(startIntro);
 <script src="medicamentos.js"></script>
 <script src="estudio.js"></script>
 <script src="estudio-materias.js"></script>
+<script src="estudio-guias.js"></script>
 <script src="estudio-libros.js"></script>
 <script>{const cargar=()=>{if(window.__nube)return;window.__nube=1;const t=document.createElement('script');t.type='module';t.src='nube.js';document.body.appendChild(t)};setTimeout(cargar,2300);document.getElementById('start').addEventListener('click',cargar)}</script>
 </body>

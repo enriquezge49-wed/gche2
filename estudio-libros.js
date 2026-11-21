@@ -55,10 +55,11 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 let EL=null,H='';
 const crumbs=a=>`<nav class="crumbs rise" aria-label="Ruta"><a href="#inicio">Inicio</a><span>›</span><a href="#estudio">Estudio</a>${a.map(([t,h],i)=>`<span>›</span>${i===a.length-1?`<b>${esc(t)}</b>`:`<a href="#${h}">${esc(t)}</a>`}`).join('')}</nav>`;
 const head=(t,s)=>`<div class="phead"><div><h1 class="rise" style="--i:1">${esc(t)}</h1><p class="lead rise" style="--i:2">${s}</p></div></div>`;
-const owns=h=>/^estudio-[12](-|$)/.test(h);
+const owns=h=>/^estudio-[125](-|$)/.test(h);
 const show=(h,el)=>{EL=el;H=h;el.style.cssText='--c:'+COL;const p=h.split('-').slice(1).map(Number);
   if(p[0]===1){if(p.length===1)materias();else if(p.length===3)materia(p[1],p[2]);else tema(p[1],p[2],p[3])}
-  else{if(p.length===1)cursos();else curso()}};
+  else if(p[0]===5)guias();
+  else{if(p.length===1)cursos();else curso(p[1])}};
 
 /* Mis materias */
 const materias=()=>{EL.innerHTML=`<div class="cx">${crumbs([['Mis materias']])}${head('Mis materias',`${nM} materias y ${nT} temas del ${LIB}, por áreas del ENARM (Examen Nacional de Aspirantes a Residencias Médicas).`)}
@@ -83,49 +84,71 @@ const tema=(a,j,i)=>{const m=A[a]&&A[a][1][j],t=m&&m[2][i];if(!t){G.go('estudio-
 /* al iniciar sesión, las notas del dispositivo pasan a la cuenta */
 const migra=()=>{const n=store.get('gche2-notas',{});const v=Object.values(n);if(enCuenta()&&v.length){v.forEach(o=>CX.guarda('estudio',o));store.set('gche2-notas',{})}};
 
-/* Mis cursos */
-const DOCS=[['350_mapas_de_farmacologia','350 mapas de farmacología',374,'#8668ff','350 mapas',['350']],['Flashcards_farmacologia_cardiovascular','Flashcards de farmacología cardiovascular',60,'#e5484d','Flash cards',['flashcard']],['60_mapas_dosificacion_dilucion_administracion','60 mapas de dosificación, dilución y administración',63,'#0071e3','60 mapas',['60_mapas','dosificacion']],['Casos_clinicos_farmacos','Casos clínicos de fármacos',26,'#03aa49','Casos',['casos']],['Plantillas_de_verificacion_clinica','Plantillas de verificación clínica',21,'#c76b00','Plantillas clínicas',['plantilla']]];
+/* Mis cursos: cada curso con sus documentos; los documentos y su índice viven solo en el dispositivo */
+const CURSOS=[
+ {id:'farmacologia',t:'Farmacología',k:'#8668ff',idx:'indice',sub:'5 documentos · 544 páginas',ic:'<path d="M10.5 3.5a4.95 4.95 0 0 1 7 7l-7 7a4.95 4.95 0 0 1-7-7z"/><path d="M7 7l7 7"/>',
+  docs:[['350_mapas_de_farmacologia','350 mapas de farmacología',374,'#8668ff','350 mapas',['350']],['Flashcards_farmacologia_cardiovascular','Flashcards de farmacología cardiovascular',60,'#e5484d','Flash cards',['flashcard']],['60_mapas_dosificacion_dilucion_administracion','60 mapas de dosificación, dilución y administración',63,'#0071e3','60 mapas',['60_mapas','dosificacion']],['Casos_clinicos_farmacos','Casos clínicos de fármacos',26,'#03aa49','Casos',['casos']],['Plantillas_de_verificacion_clinica','Plantillas de verificación clínica',21,'#c76b00','Plantillas clínicas',['plantilla']]]},
+ {id:'madera',t:'Flashcards Madera',k:'#e5484d',idx:'indice-madera',sub:'4 partes · 1095 páginas · basadas en Guías de Práctica Clínica mexicanas',ic:'<rect x="4" y="6" width="14" height="14" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v11"/>',
+  docs:[['madera_1','Parte 1, páginas 1 a 276',276,'#e5484d','Parte 1',['madera_parte_1']],['madera_2','Parte 2, páginas 277 a 548',272,'#c2410c','Parte 2',['madera_parte_2']],['madera_3','Parte 3, páginas 549 a 821',273,'#b45309','Parte 3',['madera_parte_3']],['madera_4','Parte 4, páginas 822 a 1095',274,'#9f1239','Parte 4',['madera_parte_4']]]}];
 let dbp=null;const db=()=>dbp||(dbp=new Promise((ok,no)=>{try{const r=indexedDB.open('gche2-cursos',1);r.onupgradeneeded=()=>{r.result.createObjectStore('docs');r.result.createObjectStore('meta')};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
 const tx=(st,md,f)=>db().then(d=>new Promise((ok,no)=>{const t=d.transaction(st,md),q=f(t.objectStore(st));t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>no(t.error)}));
 const put=(st,k,v)=>tx(st,'readwrite',s=>s.put(v,k)),get=(st,k)=>tx(st,'readonly',s=>s.get(k)),keys=st=>tx(st,'readonly',s=>s.getAllKeys());
-let have={},IDX=null,listo=false,ult=store.get('gche2-curso-ult',{}),Q='';
-const carga=async()=>{try{have={};(await keys('docs')).forEach(k=>have[k]=1);IDX=await get('meta','indice')||null;if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}listo=true;if(EL&&owns(location.hash.slice(1)))show(location.hash.slice(1),EL)};
-const cuantos=()=>DOCS.filter(d=>have[d[0]]).length;
+let have={},IDX={},listo=false,ult=store.get('gche2-curso-ult',{}),Q={},CC=CURSOS[0];
+const docDe=id=>{for(const c of CURSOS){const d=c.docs.find(x=>x[0]===id);if(d)return [c,d]}return [null,null]};
+const carga=async()=>{try{have={};(await keys('docs')).forEach(k=>have[k]=1);for(const c of CURSOS)IDX[c.id]=await get('meta',c.idx)||null;if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}listo=true;if(EL&&owns(location.hash.slice(1)))show(location.hash.slice(1),EL)};
+const cuantos=c=>c.docs.filter(d=>have[d[0]]).length;
 const cursos=()=>{EL.innerHTML=`<div class="cx">${crumbs([['Mis cursos']])}${head('Mis cursos','Material de cursos que compraste. Se guarda solo en este dispositivo y no se mezcla con tus materias.')}
-<div class="sx-grid"><a class="sx-tile glass rise" style="--i:3;--k:#8668ff" href="#estudio-2-0"><span class="ic">${icon('<path d="M10.5 3.5a4.95 4.95 0 0 1 7 7l-7 7a4.95 4.95 0 0 1-7-7z"/><path d="M7 7l7 7"/>',22)}</span><b>Farmacología</b><small>5 documentos · 544 páginas</small><span class="sx-tag${cuantos()?' ok':''}">${listo?`${cuantos()} de 5 en este dispositivo`:'Revisando…'}</span></a>
-<button class="sx-tile glass rise" style="--i:4;--k:#6e6e73" data-pend="1"><span class="ic">${icon('<rect x="4" y="6" width="14" height="14" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v11"/>',22)}</span><b>Flashcards Madera</b><small>Llega cuando se divida el documento en dos partes</small><span class="sx-tag">Pendiente</span></button></div></div>`;
-  EL.querySelector('[data-pend]').onclick=()=>toast('Divide el documento de Madera en dos partes y súbelo a Claude')};
-const secDe=(d,p)=>{let s='';(d.secciones||[]).forEach(x=>{if(p>=x.p)s=x.t});return s};
-const resultados=q=>{const ws=norm(q).split(/\s+/).filter(w=>w.length>=3);if(!ws.length)return '';if(!IDX)return `<p class="sx-hint">Para buscar, agrega también el archivo indice_farmacologia.json.</p>`;
-  const r=[];IDX.docs.forEach(d=>d.paginas.forEach((p,i)=>{const pw=p.w.split(' ');if(ws.every(w=>pw.some(x=>x.startsWith(w))))r.push({d,i:i+1,t:p.t,s:secDe(d,i+1)})}));
-  if(!r.length)return `<div class="sx-empty glass">No encontré "${esc(q)}". Prueba con otra forma del nombre, por ejemplo noradrenalina o norepinefrina.</div>`;
-  return `<div class="sx-list sx-res glass">${r.slice(0,40).map(x=>`<button class="sx-row" data-doc="${x.d.id}" data-p="${x.i}"><span class="n">${x.i}</span><span class="tx"><b>${esc(x.t||x.s||'Página '+x.i)}</b><small>${esc((DOCS.find(d=>d[0]===x.d.id)||[0,x.d.titulo])[1])}${x.s?' · '+esc(x.s):''} · página ${x.i}</small></span></button>`).join('')}</div>${r.length>40?`<p class="sx-hint">Hay ${r.length} páginas; agrega otra palabra para afinar.</p>`:''}`};
-const curso=()=>{EL.innerHTML=`<div class="cx">${crumbs([['Mis cursos','estudio-2'],['Farmacología']])}${head('Farmacología','Toca un documento para abrirlo; retoma en la última página que viste.')}
-<div class="sx-bar rise" style="--i:3"><label class="sx-search">${icon('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',20)}<input id="sxQ" type="search" placeholder="Buscar un fármaco, por ejemplo amiodarona" value="${esc(Q)}" autocomplete="off" aria-label="Buscar en el curso"></label><button class="cxb" id="sxAdd">${icon('<path d="M12 5v14M5 12h14"/>',18)}Agregar documentos</button></div>
-<div id="sxRes">${resultados(Q)}</div>
-<div class="sx-grid rise" style="--i:4">${DOCS.map(([id,t,n,k,c])=>{const u=ult[id]||0;return `<button class="sx-doc glass" data-doc="${id}" style="--k:${k}"><span class="sx-cover">${c}</span><span class="tx"><b>${t}</b><small>${n} páginas · ${!listo?'Revisando…':have[id]?(u?`Vas en la página ${u}`:'Sin abrir'):'Falta agregarlo'}</small>${have[id]?`<span class="sx-prog"><i style="width:${Math.round(100*u/n)}%"></i></span>`:''}</span></button>`}).join('')}</div>
-<p class="sx-hint">${!listo?'':cuantos()<5||!IDX?'Toca Agregar documentos y elige los 5 documentos del curso junto con indice_farmacologia.json; puedes elegirlos todos a la vez. Abre la app desde el ícono instalado para que el dispositivo no los borre.':'Los 5 documentos y el buscador están listos en este dispositivo.'}</p></div>`;
-  const q=$('#sxQ');q.oninput=()=>{Q=q.value;$('#sxRes').innerHTML=resultados(Q)};
+<div class="sx-grid">${CURSOS.map((c,i)=>`<a class="sx-tile glass rise" style="--i:${i+3};--k:${c.k}" href="#estudio-2-${i}"><span class="ic">${icon(c.ic,22)}</span><b>${c.t}</b><small>${c.sub}</small><span class="sx-tag${cuantos(c)?' ok':''}">${listo?`${cuantos(c)} de ${c.docs.length} en este dispositivo`:'Revisando…'}</span></a>`).join('')}</div></div>`};
+const secDe=(S,p)=>{let s='';(S||[]).forEach(x=>{if(p>=x.p)s=x.t});return s};
+const resultados=(c,q)=>{const I=IDX[c.id],ws=norm(q).split(/\s+/).filter(w=>w.length>=3);if(!ws.length)return '';if(!I)return `<p class="sx-hint">Para buscar, agrega también el archivo del índice de este curso.</p>`;
+  const r=[];I.docs.forEach(d=>d.paginas.forEach((p,i)=>{const pw=p.w.split(' ');if(ws.every(w=>pw.some(x=>x.startsWith(w)))){const g=(d.inicio||1)+i;r.push({d,i:i+1,g,t:p.t,s:d.inicio?'':secDe(d.secciones||I.secciones,i+1)})}}));
+  if(!r.length)return `<div class="sx-empty glass">No encontré "${esc(q)}". Prueba con otra forma del nombre o con menos palabras.</div>`;
+  return `<div class="sx-list sx-res glass">${r.slice(0,40).map(x=>`<button class="sx-row" data-doc="${x.d.id}" data-p="${x.i}"><span class="n">${x.g}</span><span class="tx"><b>${esc(x.t||x.s||'Página '+x.g)}</b><small>${esc((docDe(x.d.id)[1]||[0,x.d.titulo])[1])}${x.s?' · '+esc(x.s):''} · página ${x.g}</small></span></button>`).join('')}</div>${r.length>40?`<p class="sx-hint">Hay ${r.length} páginas; agrega otra palabra para afinar.</p>`:''}`};
+const temasDe=c=>{const I=IDX[c.id];if(!I||!I.temas)return '';const S=I.secciones||[];
+  return `<h2 class="rise" style="--i:4;margin:26px 0 12px;font-size:22px;font-weight:600;letter-spacing:-.02em">Temas</h2>${S.map((s,k)=>{const fin=k+1<S.length?S[k+1].p:1e9,ts=I.temas.filter(t=>t.p>=s.p&&t.p<fin);if(!ts.length)return '';
+  return `<details class="sx-area glass"><summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px;padding:12px 0;min-height:44px;font-weight:600;font-size:17px">${esc(s.t)}<small style="color:var(--ink2);font-weight:400;font-size:14px">${ts.length} tema${ts.length>1?'s':''}</small></summary><div class="sx-list">${ts.map(t=>{const d=I.docs.find(d=>t.p>=d.inicio&&t.p<d.inicio+d.paginas.length);return d?`<button class="sx-row" data-doc="${d.id}" data-p="${t.p-d.inicio+1}"><span class="n">${t.p}</span><span class="tx">${esc(t.t)}</span></button>`:''}).join('')}</div></details>`}).join('')}`};
+const curso=n=>{const c=CURSOS[n]||CURSOS[0];CC=c;const q=Q[c.id]||'',falta=cuantos(c)<c.docs.length||!IDX[c.id];
+  EL.innerHTML=`<div class="cx">${crumbs([['Mis cursos','estudio-2'],[c.t]])}${head(c.t,'Toca un documento o un tema para abrirlo; retoma en la última página que viste.')}
+<div class="sx-bar rise" style="--i:3"><label class="sx-search">${icon('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',20)}<input id="sxQ" type="search" placeholder="${c.id==='madera'?'Buscar un tema, por ejemplo dislipidemias':'Buscar un fármaco, por ejemplo amiodarona'}" value="${esc(q)}" autocomplete="off" aria-label="Buscar en el curso"></label><button class="cxb" id="sxAdd">${icon('<path d="M12 5v14M5 12h14"/>',18)}Agregar documentos</button></div>
+<div id="sxRes">${resultados(c,q)}</div>
+<div class="sx-grid rise" style="--i:4">${c.docs.map(([id,t,n,k,cv])=>{const u=ult[id]||0;return `<button class="sx-doc glass" data-doc="${id}" style="--k:${k}"><span class="sx-cover">${cv}</span><span class="tx"><b>${t}</b><small>${n} páginas · ${!listo?'Revisando…':have[id]?(u?`Vas en la página ${u}`:'Sin abrir'):'Falta agregarlo'}</small>${have[id]?`<span class="sx-prog"><i style="width:${Math.round(100*u/n)}%"></i></span>`:''}</span></button>`}).join('')}</div>
+${temasDe(c)}
+<p class="sx-hint">${!listo?'':falta?`Toca Agregar documentos y elige los ${c.docs.length} documentos del curso junto con su índice (${c.id==='madera'?'indice_madera.json':'indice_farmacologia.json'}); puedes elegirlos todos a la vez. Abre la app desde el ícono instalado para que el dispositivo no los borre.`:'Los documentos y el buscador están listos en este dispositivo.'}</p></div>`;
+  const qi=$('#sxQ');qi.oninput=()=>{Q[c.id]=qi.value;$('#sxRes').innerHTML=resultados(c,qi.value)};
   $('#sxAdd').onclick=()=>fi.click();
   EL.querySelector('.cx').onclick=e=>{const d=e.target.closest('[data-doc]');if(d)abre(d.dataset.doc,+d.dataset.p||0)}};
 const fi=Object.assign(document.createElement('input'),{type:'file',multiple:true,accept:'application/pdf,.pdf,application/json,.json',hidden:true});document.body.appendChild(fi);
-const quien=n=>{const x=norm(n);return (DOCS.find(d=>x.includes(norm(d[0])))||DOCS.find(d=>d[5].some(w=>x.includes(w))))?.[0]};
-fi.onchange=async()=>{let ok=0;const no=[];for(const f of fi.files){try{if(/\.json$/i.test(f.name)){const j=JSON.parse(await f.text());if(!j.docs)throw 0;await put('meta','indice',j);IDX=j;ok++;continue}const id=quien(f.name);if(!id){no.push(f.name);continue}await put('docs',id,f);have[id]=1;ok++}catch(e){no.push(f.name)}}
+const quien=n=>{const x=norm(n),cs=x.includes('madera')?[CURSOS[1]]:[CURSOS[0]];for(const c of cs){const d=c.docs.find(d=>x.includes(norm(d[0])))||c.docs.find(d=>d[5].some(w=>x.includes(w)));if(d)return d[0]}return null};
+fi.onchange=async()=>{let ok=0;const no=[];for(const f of fi.files){try{if(/\.json$/i.test(f.name)){const j=JSON.parse(await f.text());if(!j.docs)throw 0;const c=/madera/i.test(j.curso||'')?CURSOS[1]:CURSOS[0];await put('meta',c.idx,j);IDX[c.id]=j;ok++;continue}const id=quien(f.name);if(!id){no.push(f.name);continue}await put('docs',id,f);have[id]=1;ok++}catch(e){no.push(f.name)}}
   fi.value='';vib();toast(ok?`Se guardaron ${ok} archivo${ok>1?'s':''} en este dispositivo`:'No se pudo guardar');if(no.length)setTimeout(()=>toast('No reconocí: '+no.join(', ')),2800);if(EL&&owns(location.hash.slice(1)))show(location.hash.slice(1),EL)};
+
+/* Guías de Práctica Clínica de las rotaciones del internado (documentos públicos) */
+let QG='';
+const guias=()=>{const R=window.SXGPC||[],nG=new Set(R.flatMap(r=>r[1].flatMap(t=>t[1].map(g=>g[2])))).size,nTm=R.reduce((s,r)=>s+r[1].length,0);
+  EL.innerHTML=`<div class="cx">${crumbs([['Guías de Práctica Clínica']])}${head('Guías de Práctica Clínica',`${nG} guías de ${nTm} temas, por rotación, del Programa de Internado Rotatorio de Pregrado del IESIT (diciembre de 2023).`)}
+  <div class="sx-bar rise" style="--i:3"><label class="sx-search">${icon('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',20)}<input id="sxQG" type="search" placeholder="Buscar, por ejemplo apendicitis" value="${esc(QG)}" autocomplete="off" aria-label="Buscar guía"></label></div>
+  <div id="sxG"></div><p class="sx-hint">Algunas guías son de 2008 a 2017. Antes de usar una en el consultorio, revisa en el catálogo del Centro Nacional de Excelencia Tecnológica en Salud que siga vigente.</p></div>`;
+  const pinta=()=>{const ws=norm(QG).split(/\s+/).filter(Boolean);
+    const html=R.map(([rot,ts],i)=>{const f=ts.filter(([t,gs])=>!ws.length||ws.every(w=>norm(t+' '+gs.map(g=>g[0]).join(' ')).includes(w)));if(!f.length)return '';
+      return `<section class="sx-area glass"><h3>${esc(rot)}<small>${f.length} tema${f.length>1?'s':''}</small></h3><div class="sx-list">${f.map(([t,gs])=>`<div class="sx-row" style="align-items:flex-start;flex-direction:column;gap:6px"><b style="font-weight:600">${esc(t)}</b>${gs.map(([g,a,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="display:flex;gap:10px;align-items:center;color:var(--blue);font-size:15px;min-height:40px">${icon('<path d="M14 3h7v7M10 14L21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>',16)}<span>${esc(g)}${a?` · actualización ${a}`:''}</span></a>`).join('')}</div>`).join('')}</div></section>`}).join('');
+    $('#sxG').innerHTML=html||`<div class="sx-empty glass">No encontré "${esc(QG)}".</div>`};
+  pinta();const qi=$('#sxQG');qi.oninput=()=>{QG=qi.value;pinta()}};
 
 /* visor con pdf.js (librería guardada en la propia app) */
 document.body.insertAdjacentHTML('beforeend',`<section class="sx-vw" id="sxVw" aria-label="Visor de documentos" style="--c:${COL}"><div class="sx-vh"><button class="sx-ib" id="sxB" aria-label="Cerrar visor">${icon('<path d="M15 6l-6 6 6 6"/>',22)}</button><div class="t" id="sxT"></div><button class="sx-ib" id="sxZo" aria-label="Alejar">${icon('<path d="M5 12h14"/>',20)}</button><button class="sx-ib" id="sxZi" aria-label="Acercar">${icon('<path d="M12 5v14M5 12h14"/>',20)}</button><button class="sx-ib" id="sxS" aria-label="Secciones">${icon('<path d="M4 6h16M4 12h16M4 18h10"/>',20)}</button></div><div class="sx-secs glass" id="sxSecs"></div><div class="sx-vs" id="sxVs"><canvas id="sxCv"></canvas></div><div class="sx-vf"><button class="sx-ib" id="sxP" aria-label="Página anterior">${icon('<path d="M15 6l-6 6 6 6"/>',20)}</button><input type="range" id="sxR" min="1" value="1" aria-label="Ir a página"><div class="sx-pg" id="sxPg"></div><button class="sx-ib" id="sxN" aria-label="Página siguiente">${icon('<path d="M9 6l6 6-6 6"/>',20)}</button></div></section>`);
 let libp=null;const pdfjs=()=>libp||(libp=new Promise((ok,no)=>{if(window.pdfjsLib)return ok(pdfjsLib);const s=document.createElement('script');s.src='lib/pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js';ok(pdfjsLib)};s.onerror=()=>{libp=null;no()};document.head.appendChild(s)}));
 let P=null,pg=1,zoom=1,cur=null,rend=null;const vw=$('#sxVw');
 const abre=async(id,p)=>{if(!have[id]){toast('Primero agrega este documento con Agregar documentos');return}
-  try{const lib=await pdfjs(),f=await get('docs',id);cur=id;$('#sxT').textContent=DOCS.find(d=>d[0]===id)[1];vw.classList.add('on');document.documentElement.style.overflow='hidden';
+  try{const lib=await pdfjs(),f=await get('docs',id);cur=id;const [cc,dd]=docDe(id);$('#sxT').textContent=cc.id==='madera'?'Madera, '+dd[1].toLowerCase():dd[1];vw.classList.add('on');document.documentElement.style.overflow='hidden';
     P=await lib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise;pg=p||ult[id]||1;zoom=1;$('#sxR').max=P.numPages;
-    const S=IDX&&IDX.docs.find(d=>d.id===id)?.secciones||[];$('#sxS').style.display=S.length?'':'none';$('#sxSecs').innerHTML=S.map(s=>`<button data-sp="${s.p}">${esc(s.t)}<small>${s.p}</small></button>`).join('');render()}
+    const [c]=docDe(id),I=IDX[c.id],d=I&&I.docs.find(x=>x.id===id);let S=[];
+    if(d&&d.inicio)S=(I.temas||[]).filter(t=>t.p>=d.inicio&&t.p<d.inicio+d.paginas.length).map(t=>({t:t.t,p:t.p-d.inicio+1,g:t.p}));else if(d)S=(I.secciones||d.secciones||[]).map(x=>({t:x.t,p:x.p,g:x.p}));
+    $('#sxS').style.display=S.length?'':'none';$('#sxSecs').innerHTML=S.map(s=>`<button data-sp="${s.p}">${esc(s.t)}<small>${s.g}</small></button>`).join('');render()}
   catch(e){cierra();toast('No se pudo abrir el documento')}};
 const render=async()=>{if(!P)return;pg=Math.max(1,Math.min(P.numPages,pg));$('#sxR').value=pg;$('#sxPg').textContent=`${pg} de ${P.numPages}`;ult[cur]=pg;store.set('gche2-curso-ult',ult);
   const page=await P.getPage(pg),vs=$('#sxVs'),b=page.getViewport({scale:1}),fit=Math.min((vs.clientWidth-16)/b.width,(vs.clientHeight-16)/b.height),dpr=Math.min(devicePixelRatio||1,2.5),vp=page.getViewport({scale:fit*zoom*dpr}),cv=$('#sxCv');
   if(rend)try{rend.cancel()}catch(e){}cv.width=vp.width;cv.height=vp.height;cv.style.width=vp.width/dpr+'px';cv.style.height=vp.height/dpr+'px';rend=page.render({canvasContext:cv.getContext('2d'),viewport:vp});try{await rend.promise}catch(e){}};
-const cierra=()=>{vw.classList.remove('on');$('#sxSecs').classList.remove('on');document.documentElement.style.overflow='';if(P)P.destroy();P=null;if(EL&&location.hash==='#estudio-2-0')curso()};
+const cierra=()=>{vw.classList.remove('on');$('#sxSecs').classList.remove('on');document.documentElement.style.overflow='';if(P)P.destroy();P=null;if(EL&&/^#estudio-2-\d$/.test(location.hash))curso(+location.hash.slice(-1))};
 $('#sxB').onclick=cierra;$('#sxP').onclick=()=>{pg--;render()};$('#sxN').onclick=()=>{pg++;render()};$('#sxR').oninput=e=>{pg=+e.target.value;render()};
 $('#sxZi').onclick=()=>{zoom=Math.min(4,zoom*1.4);render()};$('#sxZo').onclick=()=>{zoom=Math.max(1,zoom/1.4);render()};
 $('#sxS').onclick=()=>$('#sxSecs').classList.toggle('on');$('#sxSecs').onclick=e=>{const b=e.target.closest('[data-sp]');if(b){pg=+b.dataset.sp;$('#sxSecs').classList.remove('on');render()}};

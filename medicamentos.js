@@ -94,10 +94,25 @@ const vCmp=(el,ids)=>{ids=ids.filter(i=>BY[i]).slice(0,3);
     SX.cmp=b=>{const nx=ids.slice();nx[i]=b.dataset.id;closeSheet();G.go('medicamentos-cmp-'+nx.filter(Boolean).join('-'))}};
   el.querySelectorAll('[data-p],[data-q]').forEach(b=>b.onclick=()=>elegir(+(b.dataset.p??b.dataset.q)))};
 
+
+/* ficha breve para la calculadora */
+const arr=x=>Array.isArray(x)?x:x?[x]:[];
+const breve=(m,f)=>{const li=a=>arr(a).map(x=>`<li>${esc(x)}</li>`).join(''),txt=a=>arr(a).map(esc).join('. ').replace(/\.\./g,'.');
+  const facts=[['Contraindicaciones',txt(f.ci)],['Ajuste renal y hepático',txt(f.renal)],['Embarazo',esc(f.emb||'')],['Lactancia',esc(f.lac||'')],['Interacciones importantes',txt(arr(f.int).slice(0,3))],['Presentaciones',txt(f.pres)]].filter(x=>x[1]);
+  return `<article class="cx-card glass mx-b"><span class="mx-ok">Ficha verificada${f.rev?' · revisión '+esc(f.rev):''}</span>
+  <p class="mx-q">${esc(f.clase||'')}${f.comercial?` · nombres comerciales: ${esc(f.comercial)}`:''}${f.via?` · vía ${esc(f.via)}`:''}</p>
+  <span class="lab">Para qué se usa</span><div class="mx-pills">${arr(f.indic).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+  ${f.alerta?`<div class="mx-al">${esc(f.alerta)}</div>`:''}
+  <div class="mx-doses"><div><h3>Adultos</h3><ul>${li(f.adulto)||'<li>Sin dosis de adulto en la ficha</li>'}</ul></div><div><h3>Pediátrico</h3><ul>${li(f.ped)||'<li>Sin dosis pediátrica en la ficha</li>'}</ul></div></div>
+  <div class="mx-facts">${facts.map(([k,v])=>`<div><b>${k}</b>${v}</div>`).join('')}</div>
+  <p class="hint mx-src">Fuente: ${arr(f.fuente).map(esc).join(' ')} <a href="#medicamentos-f-${m.id}">Ver la ficha completa</a></p></article>`};
 /* calculadora de dosis */
 const vCalc=(el,id)=>{const m=BY[id],f=m&&fichaDe(m.id),c=f&&f.calc,pac=window.CX&&CX.pacienteActual&&CX.pacienteActual();
-  const opciones=M.filter(x=>fichaDe(x.id)&&fichaDe(x.id).calc);
-  el.innerHTML=`<div class="cx">${head([['Medicamentos','medicamentos'],['Calculadora de dosis']],'Calculadora de dosis','Dosis por kilo con tope de dosis máxima. Revisa siempre la ficha del producto.')}
+  const opciones=M.filter(x=>fichaDe(x.id));
+  el.innerHTML=`<div class="cx">${head([['Medicamentos','medicamentos'],['Calculadora de dosis']],m?m.n:'Calculadora de dosis',m?'Ficha breve y calculadora de dosis':'Elige un medicamento con ficha verificada. Dosis por kilo con tope de dosis máxima.')}
+  ${f?breve(m,f):`<div class="cx-card glass"><p class="cx-empty" style="margin:0">Solo aparecen los ${opciones.length} medicamentos con ficha verificada. Elige uno para ver su ficha breve, o usa la calculadora en modo manual.</p></div>`}
+  ${f&&!(c&&c.esquemas)?`<p class="hint" style="margin-top:12px">Esta ficha no trae dosis por kilo: la dosis es fija, como dice arriba. La calculadora queda en modo manual.</p>`:''}
+  <h2 class="mx-h2">Calculadora</h2>
   <div class="hx-lay"><div class="cx-sec glass"><div class="fx">
    <div class="fw full"><label for="kMed">Medicamento</label><select id="kMed"><option value="">Manual (sin medicamento)</option>${opciones.map(x=>`<option value="${x.id}"${x.id===id?' selected':''}>${esc(x.n)}</option>`).join('')}</select></div>
    ${c&&c.esquemas?`<div class="fw full"><span class="lab">Esquema de la ficha</span><div class="opts">${c.esquemas.map((e,i)=>`<button type="button" class="chip${i===0?' on':''}" data-es="${i}">${esc(e.t)}</button>`).join('')}</div></div>`:''}
@@ -109,7 +124,7 @@ const vCalc=(el,id)=>{const m=BY[id],f=m&&fichaDe(m.id),c=f&&f.calc,pac=window.C
    <div class="fw"><label for="kMaxD">Dosis máxima al día (miligramos)</label><input id="kMaxD" inputmode="decimal"></div>
    <div class="fw full"><label for="kConc">Concentración del producto (miligramos por mililitro, opcional)</label><input id="kConc" inputmode="decimal" placeholder="Por ejemplo 250 mg en 5 ml = 50">${c&&c.conc?`<div class="fr">${c.conc.map(x=>`<button type="button" data-conc="${x[1]}">${esc(x[0])}</button>`).join('')}</div>`:''}</div>
   </div>${pac&&pac.peso?`<p class="hint">Peso tomado del expediente de ${esc(pac.nombre)}.</p>`:''}</div><div class="hx-res glass" id="kRes"></div></div>
-  ${f?`<div class="cx-card glass" style="margin-top:14px"><h3>Fuente del esquema</h3><ol class="hx-ref">${f.fuente.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${c&&c.nota?`<p class="hint">${esc(c.nota)}</p>`:''}</div>`:''}</div>`;
+  ${c&&c.nota?`<p class="hint" style="margin-top:12px">${esc(c.nota)}</p>`:''}</div>`;
   let por='dia';
   const set=e=>{$('#kDosis').value=e.mgkg;por=e.por;el.querySelectorAll('[data-por]').forEach(b=>b.classList.toggle('on',b.dataset.por===por));$('#kInt').value=e.h;$('#kMax').value=e.max||'';$('#kMaxD').value=e.maxd||'';calcK()};
   const calcK=()=>{const n=x=>{const v=parseFloat(($('#'+x).value||'').replace(',','.'));return isFinite(v)?v:null};const p=n('kPeso'),d=n('kDosis'),h=n('kInt'),mx=n('kMax'),md=n('kMaxD'),cc=n('kConc'),box=$('#kRes');

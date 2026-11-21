@@ -64,10 +64,11 @@ const vTool=(el,x)=>{if(!x){el.innerHTML=`<div class="cx">${head([['Herramientas
     else if(b.dataset.hc){v[b.dataset.hc]=!v[b.dataset.hc];vib();pintaForm();calc()}})};
 const visF=(f,v)=>!f.if||f.if(v);
 const valores=x=>{const raw=VALS[x.id]||{},v={};x.f.forEach(f=>{if(!f.k)return;const r=raw[f.k];if(f.t==='n'){if(f.tipo==='date')v[f.k]=r||null;else{const n=parseFloat(String(r??'').replace(',','.'));v[f.k]=isFinite(n)?n:null}}else if(f.t==='s')v[f.k]=r===undefined?null:r;else if(f.t==='c')v[f.k]=!!r});return v};
-const pintaForm=()=>{const x=CUR,raw=VALS[x.id],v=valores(x),y=scrollY;
+const pintaForm=()=>{const x=CUR,raw=VALS[x.id],v=valores(x),y=scrollY,IL=window.HXI&&HXI[x.id];
   $('#hForm').innerHTML=`<div class="fx">${x.f.map(f=>{if(!visF(f,v))return'';
     if(f.t==='h')return `<div class="fw hd">${esc(f.l)}</div>`;if(f.t==='t')return `<div class="fw nt">${esc(f.l)}</div>`;
     if(f.t==='n')return `<div class="fw"><label for="hk_${f.k}">${esc(f.l)}${f.u?` <span style="font-weight:500">(${esc(f.u)})</span>`:''}</label><input id="hk_${f.k}" data-hk="${f.k}" ${f.tipo==='date'?'type="date"':'type="text" inputmode="decimal"'} value="${esc(raw[f.k]??'')}" placeholder="${esc(f.ph||'')}" autocomplete="off"></div>`;
+    if(f.t==='s'&&IL&&IL[f.k])return `<div class="fw full hx-ilr"><div class="hx-ill">${IL[f.k](raw[f.k])}</div><div><span class="lab">${esc(f.l)}</span><div class="opts">${f.op.map((o,i)=>`<button type="button" class="chip${raw[f.k]===o[1]?' on':''}" data-hs="${f.k}" data-i="${i}">${esc(o[0])}${typeof o[1]==='number'?` <span style="opacity:.7;font-weight:500">+${o[1]}</span>`:''}</button>`).join('')}</div></div></div>`;
     if(f.t==='s'){const full=f.op.length>3||f.op.some(o=>o[0].length>22);return `<div class="fw${full?' full':''}"><span class="lab">${esc(f.l)}</span><div class="opts">${f.op.map((o,i)=>`<button type="button" class="chip${raw[f.k]===o[1]?' on':''}" data-hs="${f.k}" data-i="${i}">${esc(o[0])}${x.pts&&typeof o[1]==='number'?` <span style="opacity:.7;font-weight:500">${o[1]>0?'+':''}${o[1]}</span>`:''}</button>`).join('')}</div></div>`}
     if(f.t==='c')return `<div class="fw full"><div class="opts"><button type="button" class="chip${raw[f.k]?' on':''}" data-hc="${f.k}">${raw[f.k]?'✓ ':''}${esc(f.l)}${x.pts&&f.p?` <span style="opacity:.7;font-weight:500">${f.p>0?'+':''}${f.p}</span>`:''}</button></div></div>`;return''}).join('')}</div>`;
   scrollTo({top:y,behavior:'auto'})};
@@ -78,7 +79,23 @@ const calc=()=>{const x=CUR,v=valores(x),falta=x.f.filter(f=>f.k&&(f.t==='n'||f.
   if(!r){box.className='hx-res glass';box.innerHTML='<p class="hint" style="margin:0">Completa los datos</p>';return}
   box.className='hx-res glass '+(r.c||'');mini(`<b>${esc(r.n)}</b> <span>${esc((r.i||'').split(':')[0].slice(0,48))}</span>`,r.c);
   box.innerHTML=`<p class="hint" style="margin:0">Resultado</p><b class="hx-n">${esc(r.n)}</b>${r.u?`<p class="hx-u">${esc(r.u)}</p>`:''}${r.i?`<p class="hx-i">${esc(r.i)}</p>`:''}${r.d?`<p class="hint">${esc(r.d)}</p>`:''}<div class="cx-row" style="margin-top:12px"><button class="cxb sm" id="hCopy">${icon('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',16)}Copiar para la nota</button></div>`;
-  $('#hCopy').onclick=async()=>{const txt=`${x.t}: ${r.n}${r.u?' '+r.u:''}. ${r.i||''}`.replace(/\s+/g,' ').trim();try{await navigator.clipboard.writeText(txt);toast('Copiado: pégalo en la nota')}catch(e){toast(txt)}}};
+  const sig=JSON.stringify(v),ed=ED[x.id]&&ED[x.id].sig===sig?ED[x.id].t:null,base=textoNota(x,v,r);
+  box.insertAdjacentHTML('beforeend',`<div class="hx-nota"><label class="lab" for="hTx">Texto para la nota</label><p class="hint" style="margin:2px 0 8px">Puedes editarlo antes de copiar.</p><textarea id="hTx" rows="7">${esc(ed||base)}</textarea><div class="cx-row" style="margin-top:10px"><button class="cxb sm" id="hCopy2">Copiar para la nota</button><button class="cxb gris sm" id="hRst"${ed?'':' style="display:none"'}>Restablecer</button></div></div>`);
+  const hc=$('#hCopy');if(hc)hc.remove();
+  $('#hTx').oninput=e=>{ED[x.id]={sig,t:e.target.value};$('#hRst').style.display=''};
+  $('#hRst').onclick=()=>{delete ED[x.id];$('#hTx').value=base;$('#hRst').style.display='none'};
+  $('#hCopy2').onclick=async()=>{const txt=$('#hTx').value.trim();try{await navigator.clipboard.writeText(txt);toast('Copiado: pégalo en la nota')}catch(e){toast('No se pudo copiar; selecciona el texto y cópialo')}}};
+
+/* texto para la nota */
+const ED={};
+const ART=t=>{const w=t.split(/\s+/)[0];if(/[A-Z0-9]/.test(w.slice(1)))return t;const l=w.toLowerCase();const a=/s$/.test(l)?(/as$/.test(l)?'las':'los'):/(a|ión|dad|tud|ez|ie)$/.test(l)?'la':'el';return a+' '+t.charAt(0).toLowerCase()+t.slice(1)};
+const min1=t=>String(t).charAt(0).toLowerCase()+String(t).slice(1);
+const textoNota=(x,v,r)=>{if(x.nota)return x.nota(v,r);
+  const m=String(r.n).match(/^(\d+(?:\.\d+)?)\/(\d+)$/);
+  let t=`De acuerdo con ${ART(x.t)}, `+(m?`el paciente obtiene ${m[1]} de ${m[2]} puntos${r.u?` (${min1(r.u)})`:''}`:x.pts?`el paciente obtiene ${r.n} ${r.u||'puntos'}`:`el resultado es ${r.n}${r.u?' '+r.u:''}`)+'.';
+  if(r.i)t+=` Interpretación: ${String(r.i).replace(/\.$/,'')}.`;
+  const cd=x.cd&&x.cd(v,r);if(cd)t+=' '+cd;
+  t+=` Fuente: ${x.ref.join(' ')}`;return t.replace(/\s+/g,' ').trim()};
 
 /* búsqueda global */
 const buscar=q=>{const r=buscarT(q).slice(0,5);return r.length?`<p class="slabel" style="margin:14px 0 0">Herramientas</p><div class="nlist">${r.map(x=>`<button data-cxh="${hTool(x)}" style="--c:${COL}"><i></i><span><b style="font-size:15px">${esc(x.t)}</b><small>${esc(x.c)}</small></span>${icon('gauge',18)}</button>`).join('')}</div>`:''};

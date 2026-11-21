@@ -22,7 +22,7 @@ document.getElementById('sBody').addEventListener('click',e=>{
 });
 
 /* datos */
-const COLS=['pacientes','consultas','citas','referencias','perfil'];
+const COLS=['pacientes','consultas','citas','referencias','perfil','estudio'];
 const S={};COLS.forEach(c=>S[c]={});
 let MODO=window.GCHE2_FIREBASE?'cargando':'local',PEND=false,NERR='';
 const cargados=new Set();
@@ -55,7 +55,7 @@ addEventListener('nube',()=>{
     MODO='nube';cargados.clear();
     N.watch(COLS,(col,m,p,cache,err)=>{
       if(err){NERR=errTxt(err);toast(NERR);return}
-      S[col]=m;cargados.add(col);PEND=p;saveInd();suave(false);
+      S[col]=m;cargados.add(col);PEND=p;saveInd();if(col==='estudio')dispatchEvent(new Event('cx-estudio'));else suave(false);
     });
   }else if(N.error==='sin-conexion'){MODO='error';NERR='Sin conexión. Abre la app con internet una vez para conectar con tu cuenta.'}
   else if(N.ready){MODO='login';COLS.forEach(c=>S[c]={});if(N.error){toast(errTxt({code:N.error}));N.error=null}}
@@ -235,7 +235,7 @@ const montarForm=(el,M,paso,cur)=>{
 const cierreHTML=M=>{const d=M.doc,fz=d[M.firmaK],ac=d[M.aclK]||[];
   const docs=M.kind==='hc'?[['Ver documento','consultas-doc-hc-'+M.P.id+'-x']]:M.kind==='nota'?[['Nota','consultas-doc-nota-'+M.P.id+'-'+d.id],['Receta','consultas-doc-receta-'+M.P.id+'-'+d.id],['Indicaciones','consultas-doc-ind-'+M.P.id+'-'+d.id]]:[['Hoja de referencia','consultas-doc-ref-'+M.P.id+'-'+d.id]];
   return `<section class="cx-sec glass" id="sec_cierre"><h2>Cierre y firma</h2><p class="hint">${fz?'Documento firmado: ya no se edita. Las correcciones se agregan como nota aclaratoria con su fecha y hora.':'Antes de firmar, revisa lo que falta. Una vez firmado ya no se puede editar.'}</p>
-  <div class="cx-row">${fz?'':`<button type="button" class="cxb gris" data-rev>Revisar lo que falta</button><button type="button" class="cxb gris" data-mej>Mejorar nota</button><button type="button" class="cxb" data-firmar>Firmar</button>`}${docs.map(([t,h])=>`<button type="button" class="cxb gris" data-doc="${h}">${icon('doc',16)}${t}</button>`).join('')}</div>
+  <div class="cx-row">${fz?'':`<button type="button" class="cxb gris" data-rev>Revisar lo que falta</button><button type="button" class="cxb gris" data-mej>Mejorar con ChatGPT</button><button type="button" class="cxb" data-firmar>Firmar</button>`}${docs.map(([t,h])=>`<button type="button" class="cxb gris" data-doc="${h}">${icon('doc',16)}${t}</button>`).join('')}</div>
   <div id="cxRev"></div>
   ${fz?`<div class="cx-sign">Firmado por ${esc(fz.nombre)}${fz.cedula?`, cédula profesional ${esc(fz.cedula)}`:''}, el ${esc(fHora(fz.ts))}</div>`:''}
   ${ac.map(a=>`<div class="acl"><b>Nota aclaratoria, ${esc(fHora(a.ts))}:</b> ${esc(a.t)}</div>`).join('')}
@@ -250,7 +250,42 @@ const firmar=()=>{flush();const r=revisar(F.M);const m=med();
   const hacer=()=>{F.M.doc[F.M.firmaK]={ts:Date.now(),nombre:`${m.titulo} ${m.nombre}`.trim(),cedula:m.cedula||''};F.M.save();closeSheet();toast('Firmado');vib();F.keep=true;pintar()};
   SX.firmar=hacer;SX.rev=()=>{closeSheet();mostrarRevision();setTimeout(()=>F.el.querySelector('#cxRev')?.scrollIntoView({behavior:'smooth',block:'center'}),80)};
   openSheet('Firmar',r.length?`<p>Faltan ${r.length} apartados que pide la Norma Oficial Mexicana del expediente clínico. Una vez firmado ya no se puede editar.</p><div class="cx-row cx"><button class="cxb gris" data-x="rev">Ver lo que falta</button><button class="cxb" data-x="firmar">Firmar así</button></div>`:`<p>Se firmará a nombre de ${esc(`${m.titulo} ${m.nombre}`)}${m.cedula?`, cédula profesional ${esc(m.cedula)}`:''}. Una vez firmado ya no se puede editar; las correcciones se hacen como nota aclaratoria.</p>${m.cedula?'':'<p>Tu cédula profesional todavía no está registrada. Agrégala en Perfil y ajustes, Datos del médico.</p>'}<div class="cx-row cx"><button class="cxb" data-x="firmar">Firmar</button></div>`)};
-const mejorar=()=>openSheet('Mejorar nota',`<p>Esta función reescribirá tus textos en lenguaje técnico-médico y sin abreviaturas, quitando antes el nombre y los datos que identifican al paciente. Verás tu versión y la mejorada lado a lado, y solo se guardará si tocas Aceptar.</p><p>Se conectará en una actualización, cuando elijamos el servicio gratuito de inteligencia artificial.</p>`);
+/* mejorar con ChatGPT: copiar y pegar, sin datos que identifiquen al paciente */
+const GPT_FIELDS=M=>{const c=M.ctx(),out=[];M.schema.forEach(s=>{if(!s.f||s.cierre||!vis(s,c)||s.id==='ficha'||s.id==='consulta'&&M.kind==='hc')return;s.f.forEach(f=>{if(!f.id||!vis(f,c)||PROPIO.test(f.id))return;const v=M.src(f)[f.id];if((f.t==='tx'||f.t==='ln')&&typeof v==='string'&&v.trim().length>=12)out.push({f,id:f.id,l:etq(f.l),v:v.trim(),sec:s.t})})});return out};
+const anonimiza=(t,P)=>{const h=P.hc||{};let x=String(t);const tok=new Set([...nombreP(P).split(/\s+/),...String(h.nombre||'').split(/\s+/)].filter(w=>w.length>=3));
+  tok.forEach(w=>{x=x.replace(new RegExp(`\\b${w.normalize('NFC').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi'),'[paciente]')});
+  [h.curp,h.tel,h.domic,h.emerg,h.cuid].filter(v=>v&&String(v).length>4).forEach(v=>{x=x.split(String(v)).join('[dato]')});
+  return x.replace(/\b\d{10}\b/g,'[teléfono]')};
+const PROMPT_GPT=(M,campos)=>{const P=M.P,ed=edadP(P),sx=sexoP(P);
+  return `Actúa como médico redactor de notas clínicas en México. Reescribe cada apartado de la siguiente ${M.kind==='hc'?'historia clínica':'nota de consulta'} en lenguaje técnico-médico formal, en español y sin abreviaturas ni siglas; si una es indispensable, escribe su significado entre paréntesis.
+
+Reglas:
+1. No inventes datos. Si falta información, escribe [falta: lo que falta].
+2. No cambies cifras, dosis ni diagnósticos.
+3. Conserva exactamente las marcas entre dobles corchetes, como [[motivo]], una por apartado y en el mismo orden.
+4. Al final agrega [[OBSERVACIONES]] con las inconsistencias clínicas que encuentres y lo que pide la NOM-004-SSA3-2012 que no está, en frases cortas.
+
+Paciente: ${[sx,ed].filter(Boolean).join(', ')||'sin datos de edad y sexo'}.
+
+${campos.map(c=>`[[${c.id}]] ${c.l}\n${anonimiza(c.v,P)}`).join('\n\n')}`};
+const parseGPT=t=>{const o={},re=/\[\[\s*([a-z0-9_]+|OBSERVACIONES)\s*\]\]/gi,m=[...String(t).matchAll(re)];m.forEach((x,i)=>{const k=/^observaciones$/i.test(x[1])?'OBS':x[1];o[k]=String(t).slice(x.index+x[0].length,i+1<m.length?m[i+1].index:undefined).trim()});return o};
+const mejorar=()=>{if(!F||!F.M)return;flush();const M=F.M,campos=GPT_FIELDS(M);
+  if(!campos.length){openSheet('Mejorar con ChatGPT','<p>Todavía no hay textos que mejorar. Escribe la nota y vuelve a intentarlo.</p>');return}
+  const prompt=PROMPT_GPT(M,campos);
+  SX.gptCopy=async()=>{try{await navigator.clipboard.writeText(prompt);toast('Copiado. Pégalo en ChatGPT')}catch(e){toast('No se pudo copiar; selecciona el texto y cópialo')}window.open('https://chatgpt.com/','_blank','noopener')};
+  SX.gptCmp=()=>{const r=parseGPT(document.getElementById('gptIn').value);campos.forEach(c=>{if(!r[c.id])return;const L=r[c.id].split('\n');if(norm(L[0]).replace(/[^a-z0-9 ]/g,'').trim()===norm(c.l).replace(/[^a-z0-9 ]/g,'').trim())r[c.id]=L.slice(1).join('\n').trim()});const hay=campos.filter(c=>r[c.id]);
+    if(!hay.length){toast('No encontré los apartados. Pega la respuesta completa de ChatGPT');return}
+    const hl=x=>esc(x).replace(/\[falta:[^\]]*\]/g,m=>`<mark>${m}</mark>`);
+    document.getElementById('gptRes').innerHTML=`<h3 style="margin:18px 0 6px">Compara y acepta</h3>${hay.map(c=>`<div class="gpt-c"><b>${esc(c.l)}</b><div class="gpt-o">${esc(c.v)}</div><div class="gpt-m">${hl(r[c.id])}</div><button type="button" class="cxb sm" data-x="gptOk" data-k="${c.id}">Aceptar</button></div>`).join('')}
+    ${r.OBS?`<div class="gpt-obs"><b>Observaciones para ti</b><ul>${r.OBS.split(/\n+|(?<=\.)\s+(?=\p{Lu})/u).map(x=>x.replace(/^[-•*\d.)\s]+/,'').trim()).filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+    <div class="cx-row"><button type="button" class="cxb" data-x="gptAll">Aceptar todo</button></div>`;
+    const put1=k=>{const c=campos.find(z=>z.id===k);if(!c||!r[k])return;M.src(c.f)[k]=r[k].replace(/\[paciente\]/g,'el paciente').replace(/(^|[.!?]\s+)el paciente/g,(m,a)=>a+'El paciente')};
+    SX.gptOk=b=>{put1(b.dataset.k);M.save();b.textContent='Aceptado';b.disabled=true;F.keep=true;pintar()};
+    SX.gptAll=()=>{hay.forEach(c=>put1(c.id));M.save();closeSheet();F.keep=true;pintar();toast('Nota actualizada')};
+    document.getElementById('gptRes').scrollIntoView({behavior:'smooth',block:'start'})};
+  openSheet('Mejorar con ChatGPT',`<div class="cx"><p class="hint" style="margin-top:0">Gratis, con tu propia cuenta. Se quitan el nombre y los datos que identifican al paciente; solo van edad y sexo. El texto sí pasa por OpenAI. Nada se guarda sin tu Aceptar.</p>
+  <p style="font-weight:600;margin:14px 0 6px">1. Copia y abre ChatGPT</p><div class="gpt-p">${esc(prompt)}</div><div class="cx-row"><button type="button" class="cxb" data-x="gptCopy">Copiar y abrir ChatGPT</button></div>
+  <p style="font-weight:600;margin:18px 0 6px">2. Pega aquí la respuesta</p><textarea id="gptIn" rows="7" placeholder="Pega la respuesta completa de ChatGPT"></textarea><div class="cx-row"><button type="button" class="cxb gris" data-x="gptCmp">Comparar</button></div><div id="gptRes"></div></div>`)};
 const aclarar=()=>{SX.acl=()=>{const t=document.getElementById('aclT').value.trim();if(!t)return;const d=F.M.doc;d[F.M.aclK]=[...(d[F.M.aclK]||[]),{ts:Date.now(),t}];F.M.save();closeSheet();F.keep=true;pintar();toast('Nota aclaratoria agregada')};
   openSheet('Nota aclaratoria',`<div class="cx"><p>Queda con su fecha y hora, y el texto original no se modifica.</p><textarea id="aclT" rows="5" style="margin-top:12px" placeholder="Escribe la aclaración"></textarea><div class="cx-row"><button class="cxb" data-x="acl">Agregar</button></div></div>`)};
 
@@ -282,7 +317,7 @@ const wrap=html=>`<div class="cx">${html}</div>`;
 /* vistas */
 let CUR=null;
 const owns=h=>h==='consultas'||h.startsWith('consultas-');
-const show=(h,el)=>{
+const show=(h,el)=>{pagina(false);
   flush();F=null;CUR={h,ed:false};el.style.cssText='--c:'+COL;
   if(MODO==='cargando'){el.innerHTML=wrap(head([['Consultas']],'Consultas','Conectando con tu cuenta…'));return}
   if(MODO==='login'){el.innerHTML=wrap(vLogin());return}
@@ -422,8 +457,21 @@ const vNota=(el,P,cid)=>{CUR.ed=true;let C=S.consultas[cid];
   if(S.consultas[cid])saveInd();
   montarForm(el,modeloNota(P,C,false),false)};
 
+const prellenaRef=(P,C)=>{const d=C.datos||{},dx=(d.dx||[]).filter(r=>r&&r.n).map(r=>r.n),rx=(d.rx||[]).filter(r=>r&&r.n).map(r=>[r.n,r.pr,r.d,r.v?'vía '+r.v.toLowerCase():'',r.f,r.t?'durante '+r.t:''].filter(Boolean).join(' ')),ex=d.expl&&(d.expl.t||(d.expl.n?'Sin alteraciones':'')),sv=svTxt(d),o={};
+  const sinp=x=>String(x).trim().replace(/\.+$/,'');if(dx.length)o.ref_motivo=`Para valoración y manejo de ${dx.map(x=>sinp(x.charAt(0).toLowerCase()+x.slice(1))).join('; ')}.`;
+  const res=[[sexoP(P),edadP(P)].filter(Boolean).join(' de '),d.motivo,d.evol,sv,ex?'Exploración física: '+ex:'',d.analisis].filter(Boolean).map(x=>String(x).trim().replace(/\.$/,'')).join('. ');if(res)o.ref_resumen=res+'.';
+  if(dx.length)o.ref_dx=dx.map(sinp).join('. ')+'.';
+  const tr=[...rx,d.medidas].filter(Boolean).map(sinp);if(tr.length)o.ref_trat=tr.join('. ')+'.';
+  const es=[d.resultados,d.est_sol?'Solicitados: '+d.est_sol:''].filter(Boolean).map(sinp);if(es.length)o.ref_est=es.join('. ')+'.';
+  if(sv)o.ref_estado=sv+'.';return o};
+const referir=()=>{const h=location.hash.slice(1).split('-');let pid=null,cid=null;if(h[0]==='consultas'&&h[1]==='p'){pid=h[2];if(h[3]==='n')cid=h[4]}
+  pid=pid||store.get('gche2-ultp','');const P=S.pacientes[pid];
+  if(MODO==='login'){toast('Inicia sesión para referir pacientes');return}
+  if(!P){toast('Abre primero el expediente del paciente que quieres referir');G.go('consultas-2');return}
+  flush();if(cid)store.set('gche2-refsrc',{pid,cid});G.go(`consultas-p-${pid}-r-${nid()}`);setTimeout(()=>toast('Hoja de referencia llenada con la nota; revisa y elige el destino'),400)};
 const vRef=(el,P,rid)=>{CUR.ed=true;let R=S.referencias[rid];
-  if(!R){const m=med();R={id:rid,pid:P.id,fecha:Date.now(),datos:{ref_tipo:'Referencia',ref_urg:'Ordinaria',cr_estado:'Pendiente'}};const env=[m.consultorio,m.domicilio].filter(Boolean).join(', ');if(env)R.datos.ref_envia=env}
+  if(!R){const m=med();R={id:rid,pid:P.id,fecha:Date.now(),datos:{ref_tipo:'Referencia',ref_urg:'Ordinaria',cr_estado:'Pendiente'}};const env=[m.consultorio,m.domicilio].filter(Boolean).join(', ');if(env)R.datos.ref_envia=env;
+    const src=store.get('gche2-refsrc',null);store.set('gche2-refsrc',null);const C=(src&&src.pid===P.id&&S.consultas[src.cid])||ultimaConsulta(P.id);if(C)Object.assign(R.datos,prellenaRef(P,C))}
   el.innerHTML=wrap(head([['Consultas','consultas'],[nombreP(P),'consultas-p-'+P.id],['Referencia']],'Hoja de referencia',esc(`${nombreP(P)} · ${fHora(R.fecha)}`))+formTop(S.referencias[rid]?'':'Se guarda al escribir')+`<div id="cxForm"></div>`);
   if(S.referencias[rid])saveInd();
   montarForm(el,modeloRef(P,R),false)};
@@ -471,36 +519,69 @@ const valTxt=(f,v,c)=>{switch(f.t){
   case 'tm':return !v?'':[fLarga(v.f),v.r].filter(Boolean).join(': ');
   case 'rw':return '';default:return v===undefined||v===null?'':String(v)}};
 const rowsTxt=(f,v)=>(v||[]).filter(r=>r&&r.n).map(r=>f.cols.map(([k,l])=>r[k]?(k==='n'?`<b>${esc(r[k])}</b>`:esc(r[k])):'').filter(Boolean).join(', '));
+/* acomodo de mayúsculas sostenidas y agrupación de negados */
+const PEQ=new Set(['de','del','la','las','los','y','e','en','con','por','a','el','al','o','u','para','sin']);
+const PROPIO=/lugar|resid|domic|origen|contacto|cuid|nombre|nom$|emerg|ciudad|calle|recibe|unidad|hospital/i;
+const acomoda=(t,propio)=>{t=String(t);const le=t.replace(/[^A-Za-zÁÉÍÓÚÑÜáéíóúñü]/g,'');if(le.length<4)return t;
+  const up=le.replace(/[^A-ZÁÉÍÓÚÑÜ]/g,'').length;if(up/le.length<.8)return t;const w=t.trim().split(/\s+/);if(w.length===1&&le.length<=4)return t;
+  const lo=t.toLocaleLowerCase('es-MX'),U=x=>x.charAt(0).toLocaleUpperCase('es-MX')+x.slice(1);
+  if(propio)return lo.split(/(\s+)/).map((x,i)=>/^\s+$/.test(x)||(i>0&&PEQ.has(x))?x:U(x)).join('');
+  return lo.replace(/(^\s*|[.!?]\s+)(\p{Ll})/gu,(m,a,b)=>a+b.toLocaleUpperCase('es-MX'))};
+const etq=l=>String(l).split(/[:(]/)[0].trim();
+const esNeg=t=>/^(negad[oa]s?|ningun[oa]|no|sin datos)\.?$/i.test(String(t).trim());
+const esNorm=t=>/^(sin alteraciones|normal|sin lesiones)\.?$/i.test(String(t).trim());
+const lista=a=>{const x=a.map(v=>esc(v.charAt(0).toLowerCase()+v.slice(1)));return x.length<2?x.join(''):x.slice(0,-1).join(', ')+' y '+x[x.length-1]};
+const VIT=[['Presión arterial',d=>d.ta_s&&d.ta_d?`${d.ta_s}/${d.ta_d}`:'','milímetros de mercurio'],['Frecuencia cardiaca',d=>d.fc,'latidos por minuto'],['Frecuencia respiratoria',d=>d.fr,'respiraciones por minuto'],['Temperatura',d=>d.temp,'grados Celsius'],['Saturación de oxígeno',d=>d.sat,'por ciento'],['Glucosa capilar',d=>d.gluc,'miligramos por decilitro']];
+const vitHTML=(d,extra=[])=>{const v=[...extra,...VIT].map(([k,f,u])=>[k,f(d),u]).filter(x=>x[1]!==undefined&&x[1]!==null&&x[1]!=='');
+  return v.length?`<div class="pv">${v.map(([k,x,u])=>`<div><span class="k">${k}</span><b>${esc(x)}</b><span class="u">${u}</span></div>`).join('')}</div>`:''};
 const cuerpo=M=>{const c=M.ctx();let html='';
-  M.schema.forEach(s=>{if(!s.f||s.cierre||!vis(s,c))return;let sv=false,b='';
-    s.f.forEach(f=>{if(!f.id||!vis(f,c)||f.t==='bt')return;const v=M.src(f)[f.id];
-      if(f.sv){if(!sv){sv=true;const t=svTxt(M.src(f));if(t)b+=`<p><b>Signos vitales:</b> ${esc(t)}.</p>`}return}
-      if(f.t==='rw'){const r=rowsTxt(f,v);if(r.length)b+=`<p><b>${esc(f.l)}:</b></p><ol>${r.map(x=>`<li>${x}</li>`).join('')}</ol>`;return}
-      if(f.t!=='au'&&!filled(f,v))return;const t=valTxt(f,v,c);if(!t)return;
-      b+=f.t==='bo'?`<p>${esc(f.l)}.</p>`:`<p><b>${esc(f.l)}:</b> ${esc(t)}</p>`});
-    if(b)html+=`<h3>${esc(s.t)}</h3>`+b});return html};
-const encabezado=()=>{const m=med();return `<header><div><b>${esc(`${m.titulo} ${m.nombre}`)}</b><br>${m.especialidad?esc(m.especialidad)+'<br>':''}Cédula profesional: ${esc(m.cedula||'pendiente')}${m.titulo_inst?'<br>'+esc(m.titulo_inst):''}</div><div>${m.consultorio?esc(m.consultorio)+'<br>':''}${m.domicilio?esc(m.domicilio)+'<br>':''}${m.telefono?'Teléfono: '+esc(m.telefono):''}</div></header>`};
-const pidHTML=(P,ts,extra=[])=>{const h=P.hc||{},a=alergias(P);return `<div class="pid"><span><b>Paciente:</b> ${esc(nombreP(P))}</span><span><b>Edad:</b> ${esc(edadP(P)||'sin registro')}</span><span><b>Sexo:</b> ${esc(sexoP(P)||'sin registro')}</span>${h.fnac?`<span><b>Fecha de nacimiento:</b> ${esc(fLarga(h.fnac))}</span>`:''}<span><b>Expediente:</b> ${esc(P.id.slice(-6).toUpperCase())}</span><span><b>Fecha y hora:</b> ${esc(fHora(ts))}</span>${extra.join('')}<span class="${a.neg?'':'alg'}"><b>${a.neg?'':'Alergias: '}</b>${esc(a.txt)}</span></div>`};
-const firmaHTML=fz=>{const m=med();return `<div class="firma"><i></i><b>${esc(fz?fz.nombre:`${m.titulo} ${m.nombre}`)}</b><span>Cédula profesional: ${esc((fz&&fz.cedula)||m.cedula||'pendiente')}</span>${fz?`<span class="small">Firmado electrónicamente el ${esc(fHora(fz.ts))}</span>`:'<span class="small">Documento sin firmar</span>'}</div>`};
-const aclHTML=a=>(a||[]).length?`<h3>Notas aclaratorias</h3>${a.map(x=>`<p><b>${esc(fHora(x.ts))}:</b> ${esc(x.t)}</p>`).join('')}`:'';
+  M.schema.forEach(s=>{if(!s.f||s.cierre||!vis(s,c))return;let sv=null,cells=[],largos=[],negs=[],nor=[],listas='';
+    s.f.forEach(f=>{if(!f.id||!vis(f,c)||f.t==='bt')return;const src=M.src(f),v=src[f.id];
+      if(f.sv){if(!sv)sv=src;return}
+      if(f.t==='rw'){const r=rowsTxt(f,v);if(r.length)listas+=`<div class="pl"><span class="k">${esc(etq(f.l))}</span><ol>${r.map(x=>`<li>${x}</li>`).join('')}</ol></div>`;return}
+      if(f.t!=='au'&&!filled(f,v))return;let t=valTxt(f,v,c);if(!t)return;const L=etq(f.l);
+      if(f.t==='bo'){largos.push(`<p class="pl">${esc(f.l)}.</p>`);return}
+      if((f.t==='sy'&&v&&v.n)||((f.t==='se'||f.t==='ln')&&esNeg(t))){negs.push(L);return}
+      if(f.t==='rg'&&esNorm(t)){nor.push(L);return}
+      t=acomoda(t,PROPIO.test(f.id));
+      if(f.t==='tx'||t.length>90)largos.push(`<p class="pl"><span class="k">${esc(L)}</span>${esc(t)}</p>`);
+      else cells.push(`<div><span class="k">${esc(L)}</span>${esc(t)}</div>`)});
+    let b=sv?vitHTML(sv):'';
+    if(cells.length)b+=`<div class="pg">${cells.join('')}</div>`;b+=largos.join('')+listas;
+    if(nor.length)b+=`<p class="neg">Sin alteraciones en ${lista(nor)}.</p>`;
+    if(negs.length)b+=`<p class="neg">${negs.length===1?esc(negs[0])+': negado':'Negado en '+lista(negs)}.</p>`;
+    if(b)html+=`<section class="ps${cells.length+largos.length*2+(sv?3:0)<=9?' keep':''}"><h3>${esc(s.t)}</h3>${b}</section>`});return html};
+const mono=n=>String(n).split(/\s+/).filter(w=>/^\p{Lu}/u.test(w)).slice(0,2).map(w=>w[0]).join('')||'G';
+const encabezado=(titulo,P,ts)=>{const m=med(),sub=[m.especialidad,`Cédula profesional: ${m.cedula||'pendiente'}`,m.titulo_inst].filter(Boolean).map(esc).join(' · '),dir=[m.consultorio,m.domicilio,m.telefono?'Teléfono '+m.telefono:''].filter(Boolean).map(esc).join(' · ');
+  return `<div class="dhe"><div class="dhl"><span class="mono">${esc(mono(m.nombre))}</span><div><b>${esc(`${m.titulo} ${m.nombre}`)}</b><small>${sub}</small>${dir?`<small>${dir}</small>`:''}</div></div><div class="dhr"><b>${esc(titulo)}</b>${P?`<small>${esc(nombreP(P))} · Expediente ${esc(P.id.slice(-6).toUpperCase())}</small>`:''}${ts?`<small>${esc(fHora(ts))}</small>`:''}</div></div>`};
+const pidHTML=(P,extra=[])=>{const h=P.hc||{},a=alergias(P);
+  return `<div class="pb"><div class="w2"><span class="k">Paciente</span><b>${esc(nombreP(P))}</b></div><div><span class="k">Edad</span>${esc(edadP(P)||'Sin registro')}</div><div><span class="k">Sexo</span>${esc(sexoP(P)||'Sin registro')}</div>${h.fnac?`<div><span class="k">Nacimiento</span>${esc(fLarga(h.fnac))}</div>`:''}${extra.join('')}<div class="${a.neg?'':'alg'}"><span class="k">Alergias</span>${esc(a.neg?'Negadas':a.txt)}</div></div>`};
+const firmaHTML=fz=>{const m=med();return `<div class="pf"><div><b>${esc(fz?fz.nombre:`${m.titulo} ${m.nombre}`)}</b><span>Cédula profesional: ${esc((fz&&fz.cedula)||m.cedula||'pendiente')}</span><span class="small">${fz?`Firmado electrónicamente el ${esc(fHora(fz.ts))}`:'Documento sin firmar'}</span></div></div>`};
+const aclHTML=a=>(a||[]).length?`<section class="ps"><h3>Notas aclaratorias</h3>${a.map(x=>`<p class="pl"><span class="k">${esc(fHora(x.ts))}</span>${esc(x.t)}</p>`).join('')}</section>`:'';
+const hoja=(cab,cuerpoH)=>`<table class="pt"><thead><tr><td>${cab}</td></tr></thead><tbody><tr><td>${cuerpoH}</td></tr></tbody></table>`;
 const vDoc=(el,kind,pid,id)=>{const P=S.pacientes[pid];if(!P){el.innerHTML=wrap(head([['Consultas','consultas']],'Documento no encontrado',''));return}
-  let titulo='',doc='',vuelta='consultas-p-'+pid,big=false;
-  if(kind==='hc'){const M=modeloHC(P);titulo='Historia clínica';vuelta+='-hc';doc=encabezado()+`<h2>Historia clínica</h2>`+pidHTML(P,P.creado)+cuerpo(M)+aclHTML(P.hcAcl)+firmaHTML(P.hcFirma)}
-  else if(kind==='ref'){const R=S.referencias[id];if(!R)return vNoDoc(el,vuelta);const M=modeloRef(P,R);const d=R.datos;titulo=d.ref_tipo==='Interconsulta'?'Solicitud de interconsulta':'Hoja de referencia';vuelta+='-r-'+id;doc=encabezado()+`<h2>${titulo}</h2>`+pidHTML(P,R.fecha)+cuerpo(M)+aclHTML(R.acl)+firmaHTML(R.firma)}
+  let titulo='',doc='',vuelta='consultas-p-'+pid,cls='';
+  if(kind==='hc'){const M=modeloHC(P);titulo='Historia clínica';vuelta+='-hc';doc=hoja(encabezado(titulo,P,P.creado),pidHTML(P)+cuerpo(M)+aclHTML(P.hcAcl)+firmaHTML(P.hcFirma))}
+  else if(kind==='ref'){const R=S.referencias[id];if(!R)return vNoDoc(el,vuelta);const M=modeloRef(P,R);const d=R.datos;titulo=d.ref_tipo==='Interconsulta'?'Solicitud de interconsulta':'Hoja de referencia';vuelta+='-r-'+id;doc=hoja(encabezado(titulo,P,R.fecha),pidHTML(P)+cuerpo(M)+aclHTML(R.acl)+firmaHTML(R.firma))}
   else{const C=S.consultas[id];if(!C)return vNoDoc(el,vuelta);const d=C.datos||{};vuelta+='-n-'+id;
-    if(kind==='nota'){const M=modeloNota(P,C,false);titulo=C.tipo==='rapida'?'Nota de consulta rápida':'Nota de evolución';doc=encabezado()+`<h2>${titulo}</h2>`+pidHTML(P,C.fecha)+cuerpo(M)+aclHTML(C.acl)+firmaHTML(C.firma)}
-    else if(kind==='receta'){titulo='Receta';const rx=(d.rx||[]).filter(r=>r&&r.n),dx=(d.dx||[]).filter(r=>r&&r.n).map(r=>r.n).join('; ');
-      doc=encabezado()+`<h2>Receta médica</h2>`+pidHTML(P,C.fecha,[d.peso?`<span><b>Peso:</b> ${esc(d.peso)} kilogramos</span>`:'',d.talla?`<span><b>Talla:</b> ${esc(d.talla)} centímetros</span>`:''])+(dx?`<p style="margin-top:10px"><b>Diagnóstico:</b> ${esc(dx)}</p>`:'')+
-      (rx.length?`<ol>${rx.map(r=>`<li><b>${esc(r.n)}</b>${r.pr?` (${esc(r.pr)})`:''}<br>${esc([r.d,r.v?'vía '+r.v:'',r.f,r.t?'durante '+r.t:''].filter(Boolean).join(', '))}</li>`).join('')}</ol>`:'<p style="margin-top:12px">Sin medicamentos en esta consulta.</p>')+
-      (d.medidas?`<h3>Indicaciones</h3><p>${esc(d.medidas)}</p>`:'')+(d.prox_f?`<p><b>Próxima cita:</b> ${esc(fLarga(d.prox_f))}${d.prox_h?' a las '+esc(d.prox_h):''}</p>`:'')+firmaHTML(C.firma)}
-    else{titulo='Indicaciones para el paciente';big=true;const rx=(d.rx||[]).filter(r=>r&&r.n);
-      doc=encabezado()+`<h2>Indicaciones para ${esc(nombreP(P))}</h2><p style="text-align:center">${esc(fLarga(fISO(new Date(C.fecha))))}</p>`+
-      (rx.length?`<h3>Sus medicamentos</h3><ol>${rx.map(r=>`<li><b>${esc(r.n)}</b>: ${esc([r.d,r.v?'por vía '+r.v:'',r.f,r.t?'durante '+r.t:''].filter(Boolean).join(', '))}.</li>`).join('')}</ol>`:'')+
-      (d.ind_pac||d.medidas?`<h3>Cuidados en casa</h3>${d.ind_pac?`<p>${esc(d.ind_pac)}</p>`:''}${d.medidas?`<p>${esc(d.medidas)}</p>`:''}`:'')+
-      (d.alarma?`<h3>Acuda a urgencias si</h3><p>${esc(d.alarma)}</p>`:'')+(d.prox_f?`<h3>Su próxima cita</h3><p>${esc(fLarga(d.prox_f))}${d.prox_h?' a las '+esc(d.prox_h):''}</p>`:'')+firmaHTML(C.firma)}}
-  el.innerHTML=wrap(head([['Consultas','consultas'],[nombreP(P),'consultas-p-'+pid],[titulo]],titulo,'Revisa el documento y guárdalo como PDF o imprímelo.')+
-  `<div class="cx-doctools"><button class="cxb" id="dPrint">${icon('<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>',18)}Imprimir o guardar como PDF</button><a class="cxb gris" href="#${vuelta}">Regresar</a></div><p class="hint">En la ventana de impresión elige Guardar como PDF para tener el archivo.</p><div class="doc${big?' big':''}">${doc}</div>`);
-  $('#dPrint').onclick=()=>window.print()};
+    if(kind==='nota'){const M=modeloNota(P,C,false);titulo=C.tipo==='rapida'?'Nota de consulta rápida':'Nota de evolución';doc=hoja(encabezado(titulo,P,C.fecha),pidHTML(P)+cuerpo(M)+aclHTML(C.acl)+firmaHTML(C.firma))}
+    else if(kind==='receta'){titulo='Receta';cls=' rx';const rx=(d.rx||[]).filter(r=>r&&r.n),dx=(d.dx||[]).filter(r=>r&&r.n).map(r=>acomoda(r.n)).join('; '),A=x=>esc(acomoda(x||''));
+      const ext=[['Peso',x=>x.peso,'kilogramos'],['Talla',x=>x.talla,'centímetros']];
+      doc=hoja(encabezado('Receta',null,C.fecha),`<div class="pb rxp"><div class="w2"><span class="k">Paciente</span><b>${esc(nombreP(P))}</b></div><div><span class="k">Edad</span>${esc(edadP(P)||'Sin registro')}</div><div><span class="k">Expediente</span>${esc(P.id.slice(-6).toUpperCase())}</div></div>`+vitHTML(d,ext)+
+      (dx?`<p class="pl"><span class="k">Diagnóstico</span>${esc(dx)}</p>`:'')+`<div class="rxs">Rx</div>`+
+      (rx.length?`<ol class="rxl">${rx.map(r=>`<li><b>${A(r.n)}${r.pr?`, ${A(r.pr)}`:''}</b><span>${esc([r.d,r.v?'por vía '+r.v.toLowerCase():'',r.f,r.t?'durante '+r.t:''].filter(Boolean).map(x=>acomoda(x)).join(', '))}.</span></li>`).join('')}</ol>`:'<p class="pl">Sin medicamentos en esta consulta.</p>')+
+      (d.medidas||d.ind_pac?`<section class="ps"><h3>Indicaciones generales</h3><p class="pl">${A([d.ind_pac,d.medidas].filter(Boolean).join(' '))}</p></section>`:'')+
+      (d.alarma?`<section class="ps"><h3>Acuda a urgencias si</h3><p class="pl">${A(d.alarma)}</p></section>`:'')+
+      (d.prox_f?`<p class="pl"><span class="k">Próxima cita</span><b>${esc(fLarga(d.prox_f))}${d.prox_h?', '+esc(d.prox_h):''}</b></p>`:'')+firmaHTML(C.firma))}
+    else{titulo='Indicaciones para el paciente';cls=' big';const rx=(d.rx||[]).filter(r=>r&&r.n),A=x=>esc(acomoda(x||''));
+      doc=hoja(encabezado('Indicaciones',P,C.fecha),`<h2 class="pt2">Indicaciones para ${esc(nombreP(P))}</h2>`+
+      (rx.length?`<section class="ps"><h3>Sus medicamentos</h3><ol class="rxl">${rx.map(r=>`<li><b>${A(r.n)}</b><span>${esc([r.d,r.v?'por vía '+r.v.toLowerCase():'',r.f,r.t?'durante '+r.t:''].filter(Boolean).map(x=>acomoda(x)).join(', '))}.</span></li>`).join('')}</ol></section>`:'')+
+      (d.ind_pac||d.medidas?`<section class="ps"><h3>Cuidados en casa</h3>${d.ind_pac?`<p class="pl">${A(d.ind_pac)}</p>`:''}${d.medidas?`<p class="pl">${A(d.medidas)}</p>`:''}</section>`:'')+
+      (d.alarma?`<section class="ps"><h3>Acuda a urgencias si</h3><p class="pl">${A(d.alarma)}</p></section>`:'')+(d.prox_f?`<section class="ps"><h3>Su próxima cita</h3><p class="pl">${esc(fLarga(d.prox_f))}${d.prox_h?' a las '+esc(d.prox_h):''}</p></section>`:'')+firmaHTML(C.firma))}}
+  el.innerHTML=wrap(head([['Consultas','consultas'],[nombreP(P),'consultas-p-'+pid],[titulo]],titulo,cls===' rx'?'Media carta. Revisa el documento y guárdalo como PDF o imprímelo.':'Revisa el documento y guárdalo como PDF o imprímelo.')+
+  `<div class="cx-doctools"><button class="cxb" id="dPrint">${icon('<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/>',18)}Imprimir o guardar como PDF</button><a class="cxb gris" href="#${vuelta}">Regresar</a></div><p class="hint">En la ventana de impresión elige Guardar como PDF para tener el archivo.${cls===' rx'?' Si tu impresora pide tamaño, elige media carta.':''}</p><div class="doc${cls}">${doc}</div>`);
+  $('#dPrint').onclick=()=>window.print();pagina(cls===' rx')};
+const pagina=media=>{let st=document.getElementById('cxPage');if(!st){st=document.createElement('style');st.id='cxPage';document.head.appendChild(st)}st.textContent=media?'@media print{@page{size:5.5in 8.5in;margin:8mm 9mm 8mm;@bottom-right{content:none}@bottom-left{content:none}}}':''};
 const vNoDoc=(el,vuelta)=>{el.innerHTML=wrap(head([['Consultas','consultas']],'Documento no encontrado','Guarda primero la nota.')+`<div class="cx-row"><a class="cxb" href="#${vuelta}">Regresar</a></div>`)};
 
 /* datos del médico y cuenta */
@@ -525,7 +606,7 @@ const cifrar=async(txt,pw)=>{const salt=crypto.getRandomValues(new Uint8Array(16
 const descifrar=async(o,pw)=>{const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},await llave(pw,unb64(o.salt)),unb64(o.datos));return JSON.parse(new TextDecoder().decode(pt))};
 const bajar=(nombre,txt,tipo)=>{const u=URL.createObjectURL(new Blob([txt],{type:tipo}));const a=document.createElement('a');a.href=u;a.download=nombre;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)};
 const pl=(n,a,b)=>n+' '+(n===1?a:b);
-const conteo=d=>`${pl(L2(d,'pacientes'),'paciente','pacientes')}, ${pl(L2(d,'consultas'),'nota','notas')}, ${pl(L2(d,'citas'),'cita','citas')} y ${pl(L2(d,'referencias'),'referencia','referencias')}`;
+const conteo=d=>`${pl(L2(d,'pacientes'),'paciente','pacientes')}, ${pl(L2(d,'consultas'),'nota','notas')}, ${pl(L2(d,'citas'),'cita','citas')}, ${pl(L2(d,'referencias'),'referencia','referencias')} y ${pl(L2(d,'estudio'),'bloque de estudio','bloques de estudio')}`;
 const L2=(d,c)=>Object.keys((d&&d[c])||{}).length;
 const respaldo=()=>{
   if(MODO==='login'){toast('Inicia sesión para respaldar tus pacientes');return}
@@ -640,7 +721,7 @@ const pacPorNombre=n=>{n=norm(n).trim();return n?L('pacientes').find(p=>norm(nom
 const alergiaDe=n=>{const P=pacPorNombre(n);return P?alergias(P):null};
 const choque=(n,med)=>{const P=pacPorNombre(n);return P?choqueAlergia(P,med):''};
 const nombres=()=>L('pacientes').map(nombreP);
-window.CX={owns,show,flush,perfil,respaldo,alarmasConfig,avisos,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
+window.CX={owns,show,flush,perfil,respaldo,referir,col:L,guarda:put,borra:del,alarmasConfig,avisos,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
 const h0=location.hash.slice(1);if(owns(h0))G.route();
 if(MODO==='local')G.renderPanel&&G.renderPanel();
 })();

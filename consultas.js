@@ -522,7 +522,9 @@ const panelAct=id=>{if(id==='paciente'){const p=store.get('gche2-ultp','');retur
 /* búsqueda global */
 const buscar=q=>{if(!q||MODO==='login')return'';const r=L('pacientes').filter(p=>indiceP(p).includes(q)).slice(0,5);return r.length?`<p class="slabel" style="margin:14px 0 0">Pacientes</p><div class="nlist">${r.map(p=>`<button data-cxh="consultas-p-${p.id}" style="--c:${COL}"><i></i><span><b style="font-size:15px">${esc(nombreP(p))}</b><small>${esc([edadP(p),TIPOS[p.tipo][0]].filter(Boolean).join(' · '))}</small></span>${icon('person',18)}</button>`).join('')}</div>`:''};
 
-window.CX={owns,show,flush,perfil,cuentaRow,cuenta,panel,panelAct,buscar,get modo(){return MODO}};
+const pacienteActual=()=>{const P=S.pacientes[store.get('gche2-ultp','')];if(!P)return null;const h=P.hc||{},u=ultimaConsulta(P.id),ud=(u&&u.datos)||{};const a=aniosP(P),sx=sexoP(P);
+  return{nombre:nombreP(P),edad:a!=null?Math.floor(a):null,sexo:sx==='Hombre'?'H':sx==='Mujer'?'M':null,peso:num(ud.peso)||num(h.peso),talla:num(ud.talla)||num(h.talla),fum:ud.fum||h.fum||null}};
+window.CX={owns,show,flush,perfil,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,get modo(){return MODO}};
 const h0=location.hash.slice(1);if(owns(h0))G.route();
 if(MODO==='local')G.renderPanel&&G.renderPanel();
 })();

@@ -396,7 +396,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
         <div class="pins rise" style="--i:3" id="pins"></div>
         <div class="mods" id="mods"></div>
         <div class="tilesec"><div class="sec rise" style="--i:9"><h3>Resumen del día</h3><small>Se llenará con tus datos</small></div><div class="tiles" id="tiles"></div></div>
-        <div class="foot rise" style="--i:14"><span>Versión 1.1.0 · Consultas ya funciona. Los demás módulos llegan en las siguientes actualizaciones.</span><span class="netst" id="netst">Guardado · En línea</span></div>
+        <div class="foot rise" style="--i:14"><span>Versión 1.2.0 · Consultas y Herramientas ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
       </section>
       <section class="view" id="v-page"></section>
     </div>
@@ -666,7 +666,7 @@ const closeSheet=()=>$('#scrim').classList.remove('on');
 const chips=a=>`<div class="chips">${a.map(c=>Array.isArray(c)?`<button class="chip" data-h="${c[1]}">${c[0]}</button>`:`<button class="chip">${c}</button>`).join('')}</div>`;
 let hist=store.get('gche2-hist',[]);
 const SUG=['consultas-3','medicamentos-1','herramientas-1-0','estudio-1'];
-const sres=q=>{const n=norm(q.trim());if(!n)return `${hist.length?`<p class="slabel" style="margin:14px 0 0">Búsquedas recientes</p>${chips(hist.map(h=>{const r=resolve(h);return r?[r.node.t,h]:null}).filter(Boolean))}`:''}<p class="slabel" style="margin:14px 0 0">Sugerencias</p><div class="nlist">${SUG.map(row).join('')}</div>`;const px=window.CX?CX.buscar(n):'';const r=INDEX.filter(x=>norm(x.t).includes(n)).slice(0,8);return r.length||px?px+(r.length?`<div class="nlist">${r.map(x=>row(x.h)).join('')}</div>`:''):`<p>Sin resultados en la estructura. Aquí también buscaría medicamentos, escalas, temas y pacientes. ${PEND}.</p>`};
+const sres=q=>{const n=norm(q.trim());if(!n)return `${hist.length?`<p class="slabel" style="margin:14px 0 0">Búsquedas recientes</p>${chips(hist.map(h=>{const r=resolve(h);return r?[r.node.t,h]:null}).filter(Boolean))}`:''}<p class="slabel" style="margin:14px 0 0">Sugerencias</p><div class="nlist">${SUG.map(row).join('')}</div>`;const px=(window.CX?CX.buscar(n):'')+(window.HX?HX.buscar(n):'');const r=INDEX.filter(x=>norm(x.t).includes(n)).slice(0,8);return r.length||px?px+(r.length?`<div class="nlist">${r.map(x=>row(x.h)).join('')}</div>`:''):`<p>Sin resultados en la estructura. Aquí también buscaría medicamentos, escalas, temas y pacientes. ${PEND}.</p>`};
 const row=h=>{const r=resolve(h);if(!r)return'';return `<button data-h="${h}" style="--c:${r.m.c}"><i></i><span><b style="font-size:15px">${r.node.t}</b><small>${r.trail.slice(0,-1).map(x=>x[0]).join(' › ')||'Módulo'}</small></span>${icon(pickIcon(r.node.t,r.id),18)}</button>`};
 const SHEETS={
   search:()=>{openSheet('Buscar',`<label class="sinput">${icon('search',18)}<input id="sq" type="search" placeholder="Consulta rápida, omeprazol, Glasgow" autocomplete="off" aria-label="Buscar"></label><div id="sres">${sres('')}</div>`);$('#sq').addEventListener('input',e=>{$('#sres').innerHTML=sres(e.target.value)})},
@@ -684,17 +684,17 @@ const SHEETS={
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
     ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.1.0</p>`);syncSw();syncSet()},
+    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.2.0</p>`);syncSw();syncSet()},
   help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
 const setTab=n=>{
   const tb=$('#tabs');if(!tb)return;tb.classList.toggle('r',n===1);
-  $('#tabBody').innerHTML=n===0?`<div class="calcd">0</div><div class="keys">${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(k=>`<button class="${'÷×−+%±'.includes(k)?'op':k==='='?'eq':''}">${k}</button>`).join('')}</div><p>${PEND}.</p>`:`<p>Aquí irían las calculadoras clínicas con datos del expediente. ${PEND}.</p>${chips(['Índice de masa corporal','Filtración glomerular','Depuración de creatinina','Superficie corporal','Peso ideal','Semanas de gestación','Líquidos pediátricos',['Ver todas','herramientas']])}`;
+  $('#tabBody').innerHTML=n===0?`<div class="calcd">0</div><div class="keys">${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(k=>`<button class="${'÷×−+%±'.includes(k)?'op':k==='='?'eq':''}">${k}</button>`).join('')}</div>`:window.HX?`<p>Las más usadas. Toca una para abrirla.</p>${HX.chipsCalc()}`:`<p>${PEND}.</p>`;
 };
 $('#sBody').addEventListener('click',e=>{
   const t=e.target.closest('[data-tab]');if(t){setTab(+t.dataset.tab);vib();return}
-  if(e.target.closest('.keys button')){vib();pmsg('Calculadora');return}
+  if(e.target.closest('.keys button')){window.HX?HX.tecla(e.target.closest('.keys button')):pmsg('Calculadora');return}
   const s=e.target.closest('[data-sw]');if(s){vib();({dark:()=>toggleTheme(),night:toggleNight,hc:toggleHc,full,install,cuenta:()=>window.CX&&CX.cuenta()})[s.dataset.sw]();setTimeout(syncSw,60);return}
   const a=e.target.closest('[data-acc]');if(a){setAcc(a.dataset.acc);syncSet();vib();return}
   const f=e.target.closest('[data-fs]');if(f){setFs(+f.dataset.fs);syncSet();vib();return}
@@ -738,9 +738,9 @@ const route=()=>{
   const h=location.hash.slice(1),r=resolve(h),pr=$('#prog');
   pr.classList.remove('go');pr.offsetHeight;if(!reduced)pr.classList.add('go');
   $$('.view').forEach(v=>v.classList.remove('on'));
-  window.CX&&CX.flush();const cxo=!!(window.CX&&CX.owns(h));
-  if(cxo){CX.show(h,$('#v-page'));$('#v-page').classList.add('on')}else if(r){render(r);$('#v-page').classList.add('on')}else{renderPins();const v=$('#v-home');v.classList.add('on');restart(v)}
-  const ctx=cxo?'consultas':r?r.id:'inicio';
+  window.CX&&CX.flush();const cxo=!!(window.CX&&CX.owns(h)),hxo=!cxo&&!!(window.HX&&HX.owns(h));
+  if(cxo){CX.show(h,$('#v-page'));$('#v-page').classList.add('on')}else if(hxo){HX.show(h,$('#v-page'));$('#v-page').classList.add('on')}else if(r){render(r);$('#v-page').classList.add('on')}else{renderPins();const v=$('#v-home');v.classList.add('on');restart(v)}
+  const ctx=cxo?'consultas':hxo?'herramientas':r?r.id:'inicio';
   $$('.nav a,.tabbar a').forEach(a=>a.classList.toggle('on',a.dataset.n===ctx));moveInd();moveTab();
   const nc=LAYOUT[ctx]?ctx:'otro';if(nc!==pctx){pctx=nc;ptab=Object.keys(LAYOUT[nc])[0];editing=false}renderPanel();
   scrollTo({top:0,behavior:'auto'});
@@ -934,6 +934,8 @@ fontsReady.then(startIntro);
 <script src="firebase-config.js"></script>
 <script src="consultas-esquema.js"></script>
 <script src="consultas.js"></script>
+<script src="herramientas-datos.js"></script>
+<script src="herramientas.js"></script>
 <script type="module" src="nube.js"></script>
 </body>
 </html>

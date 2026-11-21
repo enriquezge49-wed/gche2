@@ -186,3 +186,10 @@
 .hx-mini b{font-size:17px;white-space:nowrap}.hx-mini span{color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hx-mini.ok{border-left-color:var(--ok)}.hx-mini.warn{border-left-color:#ff9f0a}.hx-mini.bad{border-left-color:#ff3b30}
 @media(min-width:720px){.hx-mini{display:none!important}}
+
+/* medicamentos */
+.mx-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;margin-top:16px;padding:16px;border-radius:22px}
+.mx-sum div{padding:10px 12px;border-radius:14px;background:var(--ctrl)}.mx-sum span{display:block;font-size:12px;font-weight:600;color:var(--ink2)}.mx-sum b{font-size:15px;font-weight:600}
+.mx-sec{margin-top:12px;padding:16px 18px;border-radius:22px}.mx-sec h3{margin:0 0 6px;font-size:17px;font-weight:600}.mx-sec p{margin:4px 0 0;font-size:15px;line-height:1.5}
+.mx-ul{margin:4px 0 0;padding-left:20px;display:grid;gap:5px;font-size:15px;line-height:1.45}
+.mx-cell{font-size:13.5px;line-height:1.45;padding:10px!important}

@@ -524,7 +524,11 @@ const buscar=q=>{if(!q||MODO==='login')return'';const r=L('pacientes').filter(p=
 
 const pacienteActual=()=>{const P=S.pacientes[store.get('gche2-ultp','')];if(!P)return null;const h=P.hc||{},u=ultimaConsulta(P.id),ud=(u&&u.datos)||{};const a=aniosP(P),sx=sexoP(P);
   return{nombre:nombreP(P),edad:a!=null?Math.floor(a):null,sexo:sx==='Hombre'?'H':sx==='Mujer'?'M':null,peso:num(ud.peso)||num(h.peso),talla:num(ud.talla)||num(h.talla),fum:ud.fum||h.fum||null}};
-window.CX={owns,show,flush,perfil,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,get modo(){return MODO}};
+const pacPorNombre=n=>{n=norm(n).trim();return n?L('pacientes').find(p=>norm(nombreP(p))===n):null};
+const alergiaDe=n=>{const P=pacPorNombre(n);return P?alergias(P):null};
+const choque=(n,med)=>{const P=pacPorNombre(n);return P?choqueAlergia(P,med):''};
+const nombres=()=>L('pacientes').map(nombreP);
+window.CX={owns,show,flush,perfil,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
 const h0=location.hash.slice(1);if(owns(h0))G.route();
 if(MODO==='local')G.renderPanel&&G.renderPanel();
 })();

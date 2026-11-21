@@ -54,6 +54,12 @@ svg{display:block}
 #pc{position:absolute;inset:0;width:100%;height:100%}
 .wtext{position:absolute;left:0;right:0;top:62%;padding:0 20px;text-align:center;opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
 .wtext.on{opacity:1;transform:none}
+.wver{border:0;background:none;color:var(--ink3,#86868b);font:500 13px/1 inherit;padding:8px 12px;border-radius:980px;margin:0 auto 10px;display:block;cursor:pointer;transition:color .2s,background .2s}
+.wver:hover,.wver[aria-expanded=true]{color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,transparent)}
+.wnew{position:absolute;left:50%;bottom:calc(100% - 4px);transform:translateX(-50%);width:min(420px,calc(100vw - 32px));z-index:3;text-align:left;background:var(--solid);border-radius:18px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.12);font-size:14px;max-height:34vh;overflow:auto;animation:wnIn .35s var(--ease)}
+.wnew b{display:block;font-size:13px;color:var(--ink2);font-weight:600;margin:6px 0 4px}.wnew ul{margin:0 0 6px;padding-left:18px}.wnew li{margin:3px 0}
+@keyframes wnIn{from{opacity:0;margin-bottom:-6px}to{opacity:1;margin-bottom:0}}
+#pc{touch-action:none}
 .hello{margin:0 0 22px;font-weight:600;font-size:clamp(26px,4.6vw,48px);line-height:1.08;letter-spacing:-.025em;text-wrap:balance}
 .hello span,h1 span{color:var(--blue)}
 .pill{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:11px 24px;border-radius:980px;background:var(--blue);color:#fff;font-weight:600;position:relative;overflow:hidden;transition:transform .25s var(--spring),filter .2s}
@@ -353,6 +359,8 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
 <section id="welcome" aria-label="Bienvenida">
   <canvas id="pc" aria-hidden="true"></canvas>
   <div class="wtext" id="wtext">
+    <button class="wver" id="wver" aria-expanded="false" aria-controls="wnew">Versión <span id="wverN"></span> · Qué hay de nuevo</button>
+    <div class="wnew" id="wnew" hidden></div>
     <p class="hello" id="hello">Hola, <span>Dr. Genaro</span></p>
     <button class="pill" id="start">Comenzar <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
   </div>
@@ -396,7 +404,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
         <div class="pins rise" style="--i:3" id="pins"></div>
         <div class="mods" id="mods"></div>
         <div class="tilesec"><div class="sec rise" style="--i:9"><h3>Resumen del día</h3><small>Se llenará con tus datos</small></div><div class="tiles" id="tiles"></div></div>
-        <div class="foot rise" style="--i:14"><span>Versión 1.7.0 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
+        <div class="foot rise" style="--i:14"><span>Versión 1.7.1 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
       </section>
       <section class="view" id="v-page"></section>
     </div>
@@ -677,7 +685,7 @@ const SHEETS={
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
     ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.7.0</p>`);syncSw();syncSet()},
+    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.7.1</p>`);syncSw();syncSet()},
   help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
@@ -807,6 +815,8 @@ if(hoverable&&!reduced){
 /* bienvenida: latido que estalla en partículas y forma GCHE2 */
 const cv=$('#pc'),cx=cv.getContext('2d');
 let W=0,H=0,P=[],T0=0,running=false,burst=false,peak=[0,0],ecg=[],peakI=0,done=false,last=0,BT=.31;
+const MP={on:false,x:0,y:0},GLOW={l:'#2997ff',d:'#6cb8ff'};
+const VER='1.7.1',NOVEDADES=[['1.7.1',['Las ilustraciones de las escalas ya no se enciman sobre las opciones','Las letras GCHE2 de la bienvenida responden al mouse y al dedo: se apartan, brillan y, al tocar, estallan y se vuelven a armar','La versión aparece en la bienvenida con sus novedades']],['1.7.0',['Tarjetas de repaso en Mis cursos y Guías de Práctica Clínica en Estudio']],['1.6.0',['Mis materias con 421 temas y Mis cursos con visor y buscador']],['1.5.0',['Impresión profesional en blanco y negro, con la receta en media carta','Calculadora con ficha breve de cada medicamento verificado','Escala de Glasgow ilustrada y texto editable para la nota en todas las herramientas','Mejorar con ChatGPT por copiar y pegar, sin datos del paciente','Referir paciente desde el botón +','Calendario semanal de Estudio','Reloj y animación de entrada corregidos']]];
 const NP=innerWidth<640?420:760,DRAW=.62;
 const size=()=>{const d=Math.min(1.5,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};
 const buildEcg=()=>{
@@ -853,17 +863,34 @@ const frame=now=>{
   for(const p of P){
     if(p.a<=0)continue;
     if(p.out){p.vx*=.985;p.vy*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;p.a=Math.max(0,p.a-dt*1.3)}
-    else if(burst){const fly=t-BT;if(fly<.14+p.d){p.vx*=.9;p.vy*=.9;p.x+=p.vx*dt;p.y+=p.vy*dt}else{p.x+=(p.tx+Math.sin(tm*1.3+p.r*9)*1.1-p.x)*ks;p.y+=(p.ty+Math.cos(tm*1.1+p.r*7)*1.1-p.y)*ks}}
+    else if(burst){const fly=t-BT;if(fly<.14+p.d){p.vx*=.9;p.vy*=.9;p.x+=p.vx*dt;p.y+=p.vy*dt}
+      else if(p.ex>0){const fr=Math.pow(.04,dt);p.vx*=fr;p.vy*=fr;p.x+=p.vx*dt;p.y+=p.vy*dt;p.ex-=dt*1.5;if(p.ex<.55){const k2=ks*.35;p.x+=(p.tx-p.x)*k2;p.y+=(p.ty-p.y)*k2}}
+      else{p.x+=(p.tx+Math.sin(tm*1.3+p.r*9)*1.1-p.x)*ks;p.y+=(p.ty+Math.cos(tm*1.1+p.r*7)*1.1-p.y)*ks;
+        if(MP.on&&!reduced){const dx=p.x-MP.x,dy=p.y-MP.y,d2=dx*dx+dy*dy,R=W<640?70:105;if(d2<R*R){const d=Math.sqrt(d2)||1,f=1-d/R;p.x+=dx/d*f*f*R*.42;p.y+=dy/d*f*f*R*.42;p.gl=Math.max(p.gl||0,f*1.25)}}}}
+    if(p.gl){p.gl*=Math.pow(.18,dt);if(p.gl<.05)p.gl=0}
     p.r+=p.vr*(burst?.5:1);
-    const inS=Math.abs(p.x-shine)<W*.06,k=p.c+(inS?'f':'s')+(p.a>.66?3:p.a>.33?2:1);
+    const inS=Math.abs(p.x-shine)<W*.06,gw=p.gl>.22,k=(gw?GLOW[dark?'d':'l']:p.c)+(inS||gw?'f':'s')+(gw?(p.gl>.7?3:p.gl>.45?2:1):p.a>.66?3:p.a>.33?2:1);
     let g=grp.get(k);if(!g){g=[];grp.set(k,g)}g.push(p);
   }
   for(const [k,g] of grp){const fill=k.slice(-2,-1)==='f',lv=+k.slice(-1);cx.globalAlpha=(lv/3)*(fill?1:.88);cx.beginPath();
     for(const p of g){const s2=fill?p.s*1.6:p.s;for(let q=0;q<3;q++){const a=p.r+q*2.094,px=p.x+Math.cos(a)*s2,py=p.y+Math.sin(a)*s2;q?cx.lineTo(px,py):cx.moveTo(px,py)}cx.closePath()}
-    if(fill){cx.fillStyle=g[0].c;cx.fill()}else{cx.strokeStyle=g[0].c;cx.stroke()}}
+    const col=k.slice(0,-2);if(fill){cx.fillStyle=col;cx.fill()}else{cx.strokeStyle=col;cx.stroke()}}
   cx.globalAlpha=1;
   requestAnimationFrame(frame);
 };
+/* letras interactivas: se apartan, brillan y estallan al tocar */
+{const wl=$('#welcome');
+  const pos=e=>{MP.x=e.clientX;MP.y=e.clientY};
+  wl.addEventListener('pointermove',e=>{pos(e);MP.on=true},{passive:true});
+  wl.addEventListener('pointerleave',()=>{MP.on=false});
+  wl.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')MP.on=false});
+  wl.addEventListener('pointerdown',e=>{if(!e.target.closest('.wnew,#wver')&&!$('#wnew').hidden){$('#wnew').hidden=true;$('#wver').setAttribute('aria-expanded','false')}if(e.target.closest('button,.wnew')||!burst||reduced)return;pos(e);MP.on=e.pointerType==='mouse';
+    const now=(performance.now()-T0)/1000;if(now<BT+.7)return;
+    for(const p of P){if(p.out||p.a<=0)continue;const dx=p.x-MP.x,dy=p.y-MP.y,d=Math.hypot(dx,dy)||1,v=(900+Math.random()*500)/(d/90+1)+120+Math.random()*160,a=Math.atan2(dy,dx)+(Math.random()-.5)*.6;p.vx=Math.cos(a)*v;p.vy=Math.sin(a)*v;p.ex=1;p.gl=Math.min(1,1.4-d/600)}
+    vib(8)});
+  $('#wverN').textContent=VER;
+  $('#wver').onclick=e=>{const b=e.currentTarget,n=$('#wnew'),o=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',!o);
+    if(!o)n.innerHTML=NOVEDADES.map(([v,l])=>`<b>Versión ${v}</b><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul>`).join('');n.hidden=o}}
 const showWelcome=()=>{const w=$('#welcome'),wt=$('#wtext');closeSheet();closeSides();fab(false);w.style.transition=wt.style.transition='none';w.hidden=false;w.classList.remove('out');wt.classList.remove('on');cx.clearRect(0,0,W,H);w.offsetHeight;w.style.transition=wt.style.transition='';netOn=false;startIntro()};
 $('#logo').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();showWelcome()},true);
 $('#start').addEventListener('click',()=>{

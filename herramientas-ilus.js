@@ -27,6 +27,6 @@ const motor=n=>{const [E,W]=POSE[n],S=[64,50];
   ${n===6?'<path class="ac" d="M114 20 l6 6 12 -13" style="stroke-width:3;opacity:1"/>':''}
   ${n===3?'<path class="ac" d="M88 68 a14 14 0 0 0 -10 -14 m0 0 l1 6 m-1 -6 l6 1"/>':''}
   ${n===2?'<path class="ac" d="M94 88 a16 16 0 0 1 -4 18 m0 0 l6 -1 m-6 1 l0 -6"/>':''}</g>`};
-const svg=(body,label,dim)=>`<svg viewBox="0 0 160 112" role="img" aria-label="${label}" class="${dim?'dim':''}">${body}</svg>`;
+const svg=(body,label,dim)=>`<svg viewBox="0 0 160 112" role="img" aria-label="${label}" class="${dim?'hx-dim':''}">${body}</svg>`;
 window.HXI={glasgow:{o:v=>svg(eye(v||4),'Apertura ocular',!v),v:v=>svg(voice(v||5),'Respuesta verbal',!v),m:v=>svg(motor(v||6),'Respuesta motora',!v)}};
 })();

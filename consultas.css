@@ -241,7 +241,7 @@
 @media(max-width:560px){.hx-ilr{grid-template-columns:minmax(0,1fr)}.hx-ill{max-width:220px}}
 .hx-ill{background:var(--ctrl);border-radius:18px;aspect-ratio:16/11;overflow:hidden}
 .hx-ill svg{display:block;width:100%;height:100%;animation:hxPop .4s cubic-bezier(.2,.9,.3,1.2)}
-.hx-ill svg.dim{opacity:.35;animation:none}
+.hx-ill svg.hx-dim{opacity:.35;animation:none}
 @keyframes hxPop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 .hx-ill .sk,.hx-ill .lid,.hx-ill .scl,.hx-ill .bub,.hx-ill .hd{fill:var(--solid,#fff);stroke:var(--blue);stroke-width:2.2;stroke-linejoin:round}
 .hx-ill .ir{fill:none;stroke:var(--blue);stroke-width:2}.hx-ill .pu,.hx-ill .tx,.hx-ill .acf{fill:var(--blue)}.hx-ill .acf{opacity:.75}

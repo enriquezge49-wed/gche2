@@ -1,5 +1,5 @@
 /* GCHE2: funcionamiento sin internet y actualizaciones */
-const VERSION = 'gche2-1.7.0';
+const VERSION = 'gche2-1.7.1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './consultas.css', './consultas.js', './consultas-esquema.js', './nube.js', './firebase-config.js', './herramientas-datos.js', './herramientas-ilus.js', './herramientas.js', './medicamentos-datos.js', './medicamentos-fichas.js', './medicamentos.js', './estudio.js', './estudio-materias.js', './estudio-guias.js', './estudio-libros.js', './lib/pdf.min.js', './lib/pdf.worker.min.js', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-48.png'];
 const FONTS = 'gche2-fuentes';
 const LIBS = 'gche2-librerias';

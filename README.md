@@ -10,3 +10,8 @@ App personal de consultas, medicamentos, estudio y herramientas clínicas del Dr
 - Inicio de sesión con Google y base de datos en Firebase (proyecto gche2-f0012). Cada médico solo ve sus propios pacientes.
 - Funciona sin internet: lo capturado se guarda en el dispositivo y se sube al conectar.
 - Pacientes, expediente con resumen fijo, historia clínica en 5 versiones, nota SOAP, consulta rápida, referencia, agenda y documentos para imprimir o guardar en PDF.
+
+## Versión 1.6.0: Estudio con materias y cursos
+
+- Mis materias: 7 áreas, 34 materias y 421 temas del Manual CTO de Medicina y Cirugía, 14.ª edición, con fuente por tema y notas privadas. Los resúmenes y las preguntas se agregan conforme se estudia cada tema.
+- Mis cursos: el curso de Farmacología se abre en un visor dentro de la app (pdf.js, en `lib/`). Los documentos y su índice de búsqueda se guardan solo en el dispositivo; nunca van a este repositorio.

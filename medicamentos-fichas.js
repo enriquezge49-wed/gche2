@@ -275,4 +275,33 @@ add('enalapril',{clase:'Inhibidor de la enzima convertidora de angiotensina',com
   calc:{esquemas:[{t:'Inicio pediátrico: 0.08 mg por kilo una vez al día',mgkg:0.08,por:'dosis',h:24,max:5}],nota:'Hasta 5 mg de inicio. No en recién nacidos ni con filtración menor de 30.'},
   fuente:['Administración de Alimentos y Medicamentos de Estados Unidos. VASOTEC (enalapril maleate) tablets. Información para prescribir.','Drugs.com. Enalapril dosage, revisión 06/2023.']});
 
+add('oseltamivir',{clase:'Antiviral inhibidor de la neuraminidasa',comercial:'Tamiflu',via:'oral',
+  indic:['Tratamiento de influenza A y B; iniciar lo antes posible, idealmente en las primeras 48 horas de síntomas (en pacientes graves u hospitalizados se inicia aunque hayan pasado más de 48 horas)','Profilaxis después de exposición'],
+  adulto:['Tratamiento: 75 mg cada 12 horas por 5 días','Profilaxis: 75 mg una vez al día por 7 días (Centros para el Control y la Prevención de Enfermedades); la etiqueta indica 10 días tras contacto en casa'],
+  ped:['Tratamiento, 1 año o más, por peso, cada 12 horas por 5 días: 15 kg o menos, 30 mg; más de 15 a 23 kg, 45 mg; más de 23 a 40 kg, 60 mg; más de 40 kg, 75 mg','Menores de 1 año: 3 mg por kilo por dosis cada 12 horas','Profilaxis: misma dosis por peso pero una vez al día; de 3 meses a menos de 1 año, 3 mg por kilo una vez al día; en menores de 3 meses no se recomienda salvo situación crítica'],
+  renal:['Depuración de 31 a 60: 30 mg cada 12 horas (profilaxis 30 mg una vez al día)','Depuración de 11 a 30: 30 mg una vez al día (profilaxis 30 mg cada tercer día)','Hemodiálisis: 30 mg después de cada sesión, sin pasar de 5 días','Diálisis peritoneal: una sola dosis de 30 mg después de un recambio','Enfermedad renal terminal sin diálisis: no se recomienda'],
+  emb:'Se recomienda en embarazadas con influenza; el embarazo es un factor de riesgo de complicaciones.',
+  lac:'Compatible con la lactancia.',
+  ci:'Hipersensibilidad grave a oseltamivir.',
+  prec:['Reacciones cutáneas graves y anafilaxia','Eventos neuropsiquiátricos (delirio, conducta anormal), sobre todo en niños: vigilar','No sustituye a la vacuna; evitar la vacuna intranasal de virus vivo 2 semanas antes y 48 horas después'],
+  ea:['Náusea y vómito (menos si se toma con alimentos)','Cefalea','Dolor abdominal'],
+  int:['Vacuna de influenza de virus vivo atenuado: el antiviral reduce su eficacia'],
+  pres:['Cápsulas de 30, 45 y 75 mg','Suspensión de 6 mg por mililitro'],
+  calc:{esquemas:[{t:'Menores de 1 año: 3 mg por kilo por dosis cada 12 horas',mgkg:3,por:'dosis',h:12}],conc:[['Suspensión 6 mg por mililitro',6]],nota:'De 1 año en adelante la dosis va por peso fijo (30, 45, 60 o 75 mg cada 12 horas).'},
+  fuente:['Centros para el Control y la Prevención de Enfermedades de Estados Unidos. Influenza Antiviral Medications: tablas 2 y 3 de dosis y ajuste renal.','Genentech. TAMIFLU (oseltamivir phosphate). Información para prescribir, Administración de Alimentos y Medicamentos de Estados Unidos.']});
+
+add('ondansetron',{clase:'Antiemético antagonista del receptor de serotonina 5-HT3',comercial:'Zofran',via:'oral',
+  indic:['Prevención de náusea y vómito por quimioterapia emetógena','Prevención de náusea y vómito por radioterapia','Prevención de náusea y vómito posoperatorios'],
+  adulto:['Quimioterapia moderadamente emetógena: 8 mg 30 minutos antes, 8 mg a las 8 horas, y después 8 mg cada 12 horas por 1 a 2 días','Quimioterapia altamente emetógena: 24 mg en una sola dosis 30 minutos antes','Radioterapia: 8 mg 1 a 2 horas antes de cada sesión','Posoperatorio: 16 mg 1 hora antes de la inducción anestésica'],
+  ped:['12 años o más: igual que el adulto','De 4 a 11 años (quimioterapia moderadamente emetógena): 4 mg 30 minutos antes, repetir a las 4 y 8 horas, y después 4 mg cada 8 horas por 1 a 2 días','El uso en vómito por gastroenteritis aguda es fuera de etiqueta; se usa según guías pediátricas y no se incluye dosis aquí'],
+  renal:['Sin ajuste en insuficiencia renal','Insuficiencia hepática grave: no pasar de 8 mg al día'],
+  emb:'Los estudios grandes no muestran aumento consistente de malformaciones; algunos reportan un aumento pequeño de hendiduras orales. Valorar beneficio contra riesgo, sobre todo en el primer trimestre.',
+  lac:'No se sabe si pasa a la leche humana.',
+  ci:['Hipersensibilidad a ondansetrón','Uso con apomorfina: hipotensión profunda y pérdida del estado de alerta'],
+  prec:['Prolongación del intervalo QT y torsades de pointes: evitar en síndrome de QT largo congénito; electrocardiograma si hay alteraciones de electrolitos, insuficiencia cardiaca, arritmias u otros fármacos que prolongan el QT','Síndrome serotoninérgico, sobre todo con otros fármacos serotoninérgicos','Puede ocultar íleo progresivo o distensión gástrica','Las tabletas de disolución oral contienen fenilalanina'],
+  ea:['Cefalea','Estreñimiento','Fatiga y malestar','Diarrea'],
+  int:['Apomorfina: contraindicada','Inhibidores selectivos de la recaptura de serotonina, de serotonina y noradrenalina, triptanos, fentanilo, tramadol y litio: síndrome serotoninérgico','Otros fármacos que prolongan el QT','Inductores potentes del citocromo CYP3A4 (fenitoína, carbamazepina, rifampicina): menos efecto'],
+  pres:['Tabletas de 4 y 8 mg','Tabletas de disolución oral de 4 y 8 mg','Solución oral de 4 mg en 5 mililitros','Solución inyectable de 2 mg por mililitro'],
+  fuente:['Administración de Alimentos y Medicamentos de Estados Unidos. ZOFRAN (ondansetron) tablets, ODT y oral solution. Información para prescribir, revisión 2025.']});
+
 })();

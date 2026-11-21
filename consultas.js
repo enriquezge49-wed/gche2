@@ -440,8 +440,8 @@ const vAgenda=el=>{const {y,m,sel}=CAL,first=(new Date(y,m,1).getDay()+6)%7,days
   el.innerHTML=wrap(head([['Consultas','consultas'],['Calendario y agenda']],'Calendario y agenda','Pacientes atendidos y citas por día',pinBtn('consultas-0'))+modoHTML()+
   `<div class="cx-grid2"><div class="cx-card glass rise" style="--i:3"><div class="cx-calh"><button class="cxb gris sm" data-mes="-1" aria-label="Mes anterior">‹</button><b>${(t=>t.charAt(0).toUpperCase()+t.slice(1))(new Date(y,m,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'}))}</b><button class="cxb gris sm" data-mes="1" aria-label="Mes siguiente">›</button></div><div class="cx-cal">${g}</div><p class="hint"><span style="color:var(--blue)">●</span> atendidos <span style="color:#ff9f0a;margin-left:10px">●</span> citas</p></div>
   <div class="cx-card glass rise" style="--i:4"><h3>${esc(fLarga(sel))}</h3>
-   <p class="hint" style="font-weight:600;margin-top:12px">Citas</p>${ci.length?`<div class="cx-list">${ci.map(c=>`<div class="cx-item" style="flex-wrap:wrap"><span><b>${esc(c.hora||'Sin hora')} · ${esc(c.nombre)}</b><small>${esc(c.motivo||'')}</small></span><div class="opts" style="width:100%">${['pendiente','atendida','cancelada'].map(e=>`<button class="chip${c.estado===e?' on':''}" style="min-height:30px;padding:0 10px;font-size:12px" data-est="${c.id}" data-v="${e}">${e.charAt(0).toUpperCase()+e.slice(1)}</button>`).join('')}${c.pid&&S.pacientes[c.pid]?`<a class="chip" style="min-height:30px;padding:0 10px;font-size:12px" href="#consultas-p-${c.pid}">Abrir</a>`:''}<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-edc="${c.id}">Editar</button></div></div>`).join('')}</div>`:'<p class="cx-empty">Sin citas.</p>'}
-   <div class="cx-row"><button class="cxb sm" id="aNueva">+ Agregar cita</button></div>
+   <p class="hint" style="font-weight:600;margin-top:12px">Citas</p>${ci.length?`<div class="cx-list">${ci.map(c=>`<div class="cx-item" style="flex-wrap:wrap"><span><b>${esc(c.hora||'Sin hora')} · ${esc(c.nombre)}</b><small>${esc(c.motivo||'')}</small></span><div class="opts" style="width:100%">${['pendiente','atendida','cancelada'].map(e=>`<button class="chip${c.estado===e?' on':''}" style="min-height:30px;padding:0 10px;font-size:12px" data-est="${c.id}" data-v="${e}">${e.charAt(0).toUpperCase()+e.slice(1)}</button>`).join('')}${c.pid&&S.pacientes[c.pid]?`<a class="chip" style="min-height:30px;padding:0 10px;font-size:12px" href="#consultas-p-${c.pid}">Abrir</a>`:''}<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-edc="${c.id}">Editar</button>${c.estado==='pendiente'?`<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-alc="${c.id}">Alarma</button>`:''}</div></div>`).join('')}</div>`:'<p class="cx-empty">Sin citas.</p>'}
+   <div class="cx-row"><button class="cxb sm" id="aNueva">+ Agregar cita</button><button class="cxb gris sm" id="aAlarmas">Alarmas y avisos</button></div>
    <p class="hint" style="font-weight:600;margin-top:18px">Atendidos</p>${at.length?`<div class="cx-list">${at.map(c=>{const P=S.pacientes[c.pid];return P?`<a class="cx-item" href="#consultas-p-${P.id}-n-${c.id}">${avatar(P)}<span><b>${esc(nombreP(P))}</b><small>${esc(new Date(c.fecha).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}))} · ${esc(((c.datos||{}).dx||[]).filter(r=>r&&r.n).map(r=>r.n).join(', ')||'Sin diagnóstico')}</small></span></a>`:''}).join('')}</div>`:'<p class="cx-empty">Nadie atendido este día.</p>'}</div></div>
   <div class="cx-card glass rise" style="--i:5;margin-top:14px"><h3>Próximas citas</h3>${prox.length?`<div class="cx-list">${prox.map(c=>`<button class="cx-item" data-day="${c.fecha}"><span><b>${esc(fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="cx-empty">No hay citas pendientes.</p>'}</div>`);
   el.querySelector('.cx').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
@@ -449,15 +449,18 @@ const vAgenda=el=>{const {y,m,sel}=CAL,first=(new Date(y,m,1).getDay()+6)%7,days
     if(b.dataset.day){CAL.sel=b.dataset.day;const d=pDate(CAL.sel);CAL.y=d.getFullYear();CAL.m=d.getMonth();vib();vAgenda(el);return}
     if(b.dataset.est){const c=S.citas[b.dataset.est];if(c){c.estado=b.dataset.v;put('citas',c);vAgenda(el)}return}
     if(b.dataset.edc){citaSheet(S.citas[b.dataset.edc]);return}
+    if(b.dataset.alc){alarmaSheet(S.citas[b.dataset.alc]);return}
+    if(b.id==='aAlarmas'){alarmasConfig();return}
     if(b.id==='aNueva')citaSheet({fecha:CAL.sel})})};
 const citaSheet=c=>{const ed=!!c.id;
   SX.cita=()=>{const f=$('#ciF').value,h=$('#ciH').value,n=$('#ciN').value.trim(),mo=$('#ciM').value.trim();if(!f||!n){toast('Falta la fecha o el nombre');return}
     const P=L('pacientes').find(p=>norm(nombreP(p))===norm(n));const o=Object.assign({},c,{id:c.id||nid(),fecha:f,hora:h,nombre:n,motivo:mo,pid:P?P.id:(c.pid||null),estado:c.estado||'pendiente'});put('citas',o);closeSheet();toast(ed?'Cita actualizada':'Cita agregada');CAL.sel=f;const d=pDate(f);CAL.y=d.getFullYear();CAL.m=d.getMonth();suave(true)};
+  SX.citaAlm=()=>alarmaSheet(S.citas[c.id]||c);
   SX.citaDel=()=>{del('citas',c.id);closeSheet();toast('Cita eliminada');suave(true)};
   openSheet(ed?'Editar cita':'Nueva cita',`<div class="cx"><div class="fx"><div class="fw"><label for="ciF">Fecha</label><input id="ciF" type="date" value="${esc(c.fecha||hoy())}"></div><div class="fw"><label for="ciH">Hora</label><input id="ciH" type="time" value="${esc(c.hora||'')}"></div>
   <div class="fw full"><label for="ciN">Paciente</label><input id="ciN" list="ciL" value="${esc(c.nombre||'')}" autocomplete="off" placeholder="Nombre del paciente"><datalist id="ciL">${L('pacientes').map(p=>`<option value="${esc(nombreP(p))}">`).join('')}</datalist></div>
   <div class="fw full"><label for="ciM">Motivo</label><input id="ciM" value="${esc(c.motivo||'')}" autocomplete="off"></div></div>
-  <div class="cx-row"><button class="cxb" data-x="cita">${ed?'Guardar':'Agregar'}</button>${ed?'<button class="cxb gris" data-x="citaDel">Eliminar</button>':''}</div></div>`)};
+  <div class="cx-row"><button class="cxb" data-x="cita">${ed?'Guardar':'Agregar'}</button>${ed&&c.estado==='pendiente'?'<button class="cxb gris" data-x="citaAlm">Alarma en el celular</button>':''}${ed?'<button class="cxb gris" data-x="citaDel">Eliminar</button>':''}</div></div>`)};
 
 /* documentos para imprimir */
 const valTxt=(f,v,c)=>{switch(f.t){
@@ -510,6 +513,115 @@ const cuenta=()=>{if(MODO==='login'){closeSheet();entrar();return}
   if(MODO==='nube'){SX.salir=async()=>{flush();try{await window.NUBE.signOut();closeSheet();toast('Sesión cerrada')}catch(e){toast(errTxt(e))}};openSheet('Cuenta',`<div class="cx"><p>Sesión iniciada como ${esc(window.NUBE.user.correo)}. Si cierras la sesión, los pacientes dejan de verse en este dispositivo hasta que vuelvas a entrar.</p><div class="cx-row"><button class="cxb red" data-x="salir">Cerrar sesión</button></div></div>`);return}
   toast(MODO==='local'?'Firebase no está configurado: modo de prueba':'Conectando con Firebase')};
 
+
+/* respaldo de pacientes: descargar y restaurar un archivo */
+const b64=u=>{let t='';for(let i=0;i<u.length;i+=32768)t+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(t)};
+const unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+const llave=async(pw,salt)=>{const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])};
+const cifrar=async(txt,pw)=>{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await llave(pw,salt),new TextEncoder().encode(txt));
+  return{app:'GCHE2',tipo:'respaldo-cifrado',v:1,fecha:new Date().toISOString(),salt:b64(salt),iv:b64(iv),datos:b64(new Uint8Array(ct))}};
+const descifrar=async(o,pw)=>{const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(o.iv)},await llave(pw,unb64(o.salt)),unb64(o.datos));return JSON.parse(new TextDecoder().decode(pt))};
+const bajar=(nombre,txt,tipo)=>{const u=URL.createObjectURL(new Blob([txt],{type:tipo}));const a=document.createElement('a');a.href=u;a.download=nombre;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)};
+const pl=(n,a,b)=>n+' '+(n===1?a:b);
+const conteo=d=>`${pl(L2(d,'pacientes'),'paciente','pacientes')}, ${pl(L2(d,'consultas'),'nota','notas')}, ${pl(L2(d,'citas'),'cita','citas')} y ${pl(L2(d,'referencias'),'referencia','referencias')}`;
+const L2=(d,c)=>Object.keys((d&&d[c])||{}).length;
+const respaldo=()=>{
+  if(MODO==='login'){toast('Inicia sesión para respaldar tus pacientes');return}
+  if(MODO==='cargando'){toast('Espera a que terminen de cargar tus pacientes');return}
+  const u=store.get('gche2-ultresp',0),dias=u?Math.floor((Date.now()-u)/864e5):null;
+  SX.rpBaj=async b=>{const pw=$('#rpPw').value,pw2=$('#rpPw2').value;if(pw&&pw!==pw2){toast('Las contraseñas no coinciden');return}
+    b.disabled=true;try{const o={app:'GCHE2',tipo:'respaldo',v:1,fecha:new Date().toISOString(),medico:medTxt(),datos:S,extras:{esquemas:store.get('gche2-esq',null),favoritos:store.get('gche2-hfav',null)}};
+      const txt=JSON.stringify(pw?await cifrar(JSON.stringify(o),pw):o);
+      bajar(`gche2-respaldo-${hoy()}${pw?'-protegido':''}.json`,txt,'application/json');store.set('gche2-ultresp',Date.now());toast('Respaldo descargado');closeSheet()}
+    catch(e){toast('No se pudo crear el respaldo')}finally{b.disabled=false}};
+  openSheet('Respaldo de pacientes',`<div class="cx"><p>Descarga un archivo con ${conteo(S)}, además de los datos del médico. Guárdalo en tu computadora o en tu Drive.</p>
+  <p class="hint">${u?`Último respaldo: ${esc(fCorta(u))}${dias>=7?' · ya pasó más de una semana':''}.`:'Todavía no has hecho ningún respaldo en este dispositivo.'}</p>
+  <div class="fx" style="margin-top:12px"><div class="fw"><label for="rpPw">Contraseña del archivo (recomendada)</label><input id="rpPw" type="password" autocomplete="new-password" placeholder="Opcional"></div><div class="fw"><label for="rpPw2">Repite la contraseña</label><input id="rpPw2" type="password" autocomplete="new-password"></div></div>
+  <p class="hint">El archivo tiene datos de pacientes. Con contraseña queda cifrado y nadie puede leerlo sin ella. Si la olvidas, no se puede recuperar.</p>
+  <div class="cx-row"><button class="cxb" data-x="rpBaj">Descargar respaldo</button></div>
+  <p class="hint" style="font-weight:600;margin-top:22px;color:var(--ink)">Restaurar desde un archivo</p>
+  <p class="hint">Agrega lo que no tengas y actualiza lo que sea más reciente en el archivo. No borra nada de lo que ya está en la app.</p>
+  <div class="cx-row"><label class="cxb gris" for="rpFile" style="cursor:pointer">Elegir archivo de respaldo</label><input id="rpFile" type="file" accept=".json,application/json" hidden></div><div id="rpRes"></div></div>`);
+  $('#rpFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;let o;try{o=JSON.parse(await f.text())}catch(_){$('#rpRes').innerHTML='<p class="hint" style="color:#ff3b30">El archivo no es un respaldo de GCHE2.</p>';return}
+    if(!o||o.app!=='GCHE2'){$('#rpRes').innerHTML='<p class="hint" style="color:#ff3b30">El archivo no es un respaldo de GCHE2.</p>';return}
+    if(o.tipo==='respaldo-cifrado'){$('#rpRes').innerHTML=`<div class="fx" style="margin-top:12px"><div class="fw full"><label for="rpPwR">Este respaldo está protegido. Escribe su contraseña</label><input id="rpPwR" type="password" autocomplete="current-password"></div></div><div class="cx-row"><button class="cxb" data-x="rpAbrir">Abrir respaldo</button></div>`;
+      SX.rpAbrir=async()=>{try{previa(await descifrar(o,$('#rpPwR').value))}catch(_){toast('Contraseña incorrecta')}};return}
+    previa(o)})};
+const previa=o=>{if(!o||!o.datos){toast('El respaldo está vacío');return}
+  $('#rpRes').innerHTML=`<div class="cx-card" style="margin-top:12px;padding:14px"><p style="margin:0"><b>Respaldo del ${esc(fCorta(Date.parse(o.fecha)))}</b></p><p class="hint">${conteo(o.datos)}${o.medico?' · '+esc(o.medico):''}</p><div class="cx-row"><button class="cxb" data-x="rpOk">Restaurar</button></div></div>`;
+  SX.rpOk=()=>{const r=restaurar(o);closeSheet();toast(`Listo: ${r.n} registros nuevos y ${r.a} actualizados`);suave(true);G.renderPanel&&G.renderPanel()}};
+const restaurar=o=>{let n=0,a=0;
+  COLS.forEach(col=>Object.values(o.datos[col]||{}).forEach(r=>{if(!r||!r.id)return;const ex=S[col][r.id];
+    if(ex&&(r.act||0)<=(ex.act||0))return;ex?a++:n++;S[col][r.id]=r;
+    if(MODO==='nube')window.NUBE.put(col,r).catch(e=>toast(errTxt(e)))}));
+  if(MODO==='local')persist();
+  const x=o.extras||{};if(x.esquemas&&!store.get('gche2-esq',null))store.set('gche2-esq',x.esquemas);if(x.favoritos&&!store.get('gche2-hfav',null))store.set('gche2-hfav',x.favoritos);
+  return{n,a}};
+
+/* alarmas de citas: calendario del celular y avisos dentro de la app */
+const ALM=()=>Object.assign({min:30,ini:true,avisar:false},store.get('gche2-alarma',{}));
+const almSet=o=>store.set('gche2-alarma',Object.assign(ALM(),o));
+const citaTs=c=>c&&c.fecha?new Date(c.fecha+'T'+(c.hora||'09:00')).getTime():0;
+const inic=n=>String(n||'').trim().split(/\s+/).filter(Boolean).map(w=>w[0].toUpperCase()+'.').join(' ');
+const tituloCita=(c,a)=>'Consulta: '+(a.ini?inic(c.nombre):c.nombre)+(c.motivo&&!a.ini?' · '+c.motivo:'');
+const icsTxt=t=>String(t||'').replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+const utc=ts=>new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+const lugar=()=>{const m=med();return [m.consultorio,m.domicilio].filter(Boolean).join(', ')};
+const evento=(c,a)=>{const t=citaTs(c),L1=['BEGIN:VEVENT','UID:'+c.id+'@gche2','DTSTAMP:'+utc(Date.now())];
+  if(c.hora)L1.push('DTSTART:'+utc(t),'DTEND:'+utc(t+30*60000));else L1.push('DTSTART;VALUE=DATE:'+c.fecha.replace(/-/g,''));
+  L1.push('SUMMARY:'+icsTxt(tituloCita(c,a)));if(lugar())L1.push('LOCATION:'+icsTxt(lugar()));L1.push('DESCRIPTION:'+icsTxt('Cita registrada en GCHE2'));
+  L1.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsTxt(tituloCita(c,a)),'TRIGGER:'+(c.hora?'-PT'+a.min+'M':'PT8H'),'END:VALARM','END:VEVENT');return L1};
+const ics=(cs,a)=>['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//GCHE2//Consultas//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH'].concat(...cs.map(c=>evento(c,a)),['END:VCALENDAR']).join('\r\n');
+const esIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const alCalendario=(cs,nombre)=>{const t=ics(cs,ALM());
+  if(esIOS()){location.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(t);return}
+  bajar(nombre,t,'text/calendar');toast('Abre el archivo descargado para agregarlo a tu calendario')};
+const gcal=(c,a)=>{const t=citaTs(c);const d=c.hora?utc(t)+'/'+utc(t+30*60000):c.fecha.replace(/-/g,'')+'/'+fISO(new Date(t+864e5)).replace(/-/g,'');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(tituloCita(c,a))+'&dates='+d+'&details='+encodeURIComponent('Cita registrada en GCHE2')+(lugar()?'&location='+encodeURIComponent(lugar()):'')};
+const MINS=[[10,'10 minutos'],[30,'30 minutos'],[60,'1 hora'],[120,'2 horas'],[1440,'1 día']];
+const almOpts=()=>{const a=ALM();return `<div class="fw full"><label>Avisar antes de la cita</label><div class="opts">${MINS.map(([m,t])=>`<button class="chip${a.min===m?' on':''}" data-x="almMin" data-m="${m}">${t}</button>`).join('')}</div></div>
+  <div class="fw full"><label class="cx-ck"><input type="checkbox" id="almIni" ${a.ini?'checked':''}> En el calendario, mostrar solo las iniciales del paciente</label></div>`};
+const almBind=()=>{SX.almMin=b=>{almSet({min:+b.dataset.m});b.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b))};
+  const k=$('#almIni');if(k)k.addEventListener('change',()=>almSet({ini:k.checked}))};
+const alarmaSheet=c=>{if(!c)return;
+  SX.almIcs=()=>alCalendario([c],'cita-'+c.fecha+'.ics');
+  SX.almG=()=>window.open(gcal(c,ALM()),'_blank','noopener');
+  openSheet('Alarma de la cita',`<div class="cx"><p><b>${esc(fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):' · sin hora'}</b><br>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</p>
+  <div class="fx">${almOpts()}</div>
+  <div class="cx-row"><button class="cxb" data-x="almIcs">Agregar al calendario del celular</button><button class="cxb gris" data-x="almG">Abrir en Google Calendar</button></div>
+  <p class="hint">La alarma del calendario suena aunque la app esté cerrada. Con el archivo, la alarma queda con el tiempo que elegiste. En Google Calendar se usa el aviso que tengas configurado en ese calendario.${c.hora?'':' Como la cita no tiene hora, el aviso sale a las 8 de la mañana de ese día.'}</p></div>`);almBind()};
+const alarmasConfig=()=>{const a=ALM(),soporte='Notification' in window,perm=soporte?Notification.permission:'no';
+  const prox=L('citas').filter(c=>c.estado==='pendiente'&&citaTs(c)>=Date.now()-36e5).sort((x,y)=>citaTs(x)-citaTs(y));
+  SX.almTodas=()=>{if(!prox.length){toast('No hay citas pendientes');return}alCalendario(prox,'citas-gche2-'+hoy()+'.ics')};
+  SX.almApp=async b=>{if(!soporte){toast('Este navegador no permite avisos');return}
+    if(ALM().avisar){almSet({avisar:false});toast('Avisos de la app apagados');alarmasConfig();return}
+    const r=Notification.permission==='granted'?'granted':await Notification.requestPermission();
+    if(r==='granted'){almSet({avisar:true});toast('Avisos de la app encendidos');revisarCitas()}else toast('No diste permiso de notificaciones');alarmasConfig()};
+  openSheet('Alarmas y avisos de citas',`<div class="cx"><div class="fx">${almOpts()}</div>
+  <p class="hint" style="font-weight:600;margin-top:18px;color:var(--ink)">Calendario del celular (la opción más segura)</p>
+  <p class="hint">Agrega de una vez tus ${prox.length} citas pendientes al calendario, cada una con su alarma. Si después cambias una cita, vuelve a agregarla: se actualiza la misma en lugar de duplicarse en la mayoría de los calendarios.</p>
+  <div class="cx-row"><button class="cxb" data-x="almTodas">Agregar todas las citas pendientes</button></div>
+  <p class="hint" style="font-weight:600;margin-top:18px;color:var(--ink)">Avisos dentro de la app</p>
+  <p class="hint">Una notificación antes de cada cita mientras la app esté abierta o en segundo plano. Si cierras la app por completo, no llegan; para eso usa el calendario.${perm==='denied'?' Bloqueaste las notificaciones: actívalas en los ajustes del navegador para esta página.':''}</p>
+  <div class="cx-row"><button class="cxb ${a.avisar?'red':'gris'}" data-x="almApp">${a.avisar?'Apagar avisos de la app':'Encender avisos de la app'}</button></div></div>`);almBind()};
+const avisar=async(t,body,tag)=>{try{const r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+  const o={body,tag,icon:'icons/icon-192.png',badge:'icons/favicon-48.png',data:{url:'#consultas-0'},vibrate:[200,100,200]};
+  if(r&&r.showNotification)await r.showNotification(t,o);else new Notification(t,o)}catch(_){}};
+const revisarCitas=()=>{const a=ALM();if(!a.avisar||MODO==='login'||!('Notification' in window)||Notification.permission!=='granted')return;
+  const ya=store.get('gche2-avisadas',{}),now=Date.now();let cambio=false;
+  L('citas').forEach(c=>{if(c.estado!=='pendiente'||!c.hora)return;const t=citaTs(c),k=c.id+'@'+t;if(ya[k])return;const d=t-now;
+    if(d<=a.min*60000&&d>-10*60000){ya[k]=now;cambio=true;const m=Math.round(d/60000);avisar('Cita '+(m>0?'en '+(m>=60?Math.round(m/60)+' h':m+' min'):'ahora'),`${c.hora} · ${a.ini?inic(c.nombre):c.nombre}${c.motivo&&!a.ini?' · '+c.motivo:''}`,'cita-'+c.id);if(!document.hidden){toast('Cita a las '+c.hora+' con '+c.nombre);vib&&vib()}}});
+  if(cambio){Object.keys(ya).forEach(k=>{if(now-ya[k]>3*864e5)delete ya[k]});store.set('gche2-avisadas',ya)}};
+setInterval(revisarCitas,30000);setTimeout(revisarCitas,4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)revisarCitas()});
+const avisos=()=>{if(MODO==='login')return '<p>Inicia sesión para ver los avisos de tus citas.</p>';
+  const now=Date.now(),cs=L('citas').filter(c=>c.estado==='pendiente'&&citaTs(c)>=now-36e5&&citaTs(c)<=now+48*36e5).sort((x,y)=>citaTs(x)-citaTs(y));
+  const u=store.get('gche2-ultresp',0),np=L('pacientes').length,viejo=np&&(!u||now-u>7*864e5);
+  return `<p class="slabel" style="margin:4px 0 0">Citas de las próximas 48 horas</p>${cs.length?`<div class="nlist">${cs.map(c=>`<button data-cxh="consultas-0"><i></i><span><b style="font-size:15px">${esc(c.fecha===hoy()?'Hoy':fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="hint">Sin citas pendientes.</p>'}
+  ${viejo?`<p class="slabel" style="margin:16px 0 0">Respaldo</p><div class="nlist"><button data-cxr="1"><i style="background:#ff9f0a"></i><span><b style="font-size:15px">${u?'Tu último respaldo tiene más de una semana':'Aún no respaldas tus pacientes'}</b><small>Toca para descargar el archivo</small></span></button></div>`:''}`};
+document.getElementById('sBody').addEventListener('click',e=>{if(e.target.closest('[data-cxr]')){e.stopPropagation();respaldo()}});
+
 /* panel derecho */
 const panel=id=>{
   if(MODO==='login')return '<p class="cx-ph">Inicia sesión para ver tus pacientes.</p>';
@@ -528,7 +640,7 @@ const pacPorNombre=n=>{n=norm(n).trim();return n?L('pacientes').find(p=>norm(nom
 const alergiaDe=n=>{const P=pacPorNombre(n);return P?alergias(P):null};
 const choque=(n,med)=>{const P=pacPorNombre(n);return P?choqueAlergia(P,med):''};
 const nombres=()=>L('pacientes').map(nombreP);
-window.CX={owns,show,flush,perfil,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
+window.CX={owns,show,flush,perfil,respaldo,alarmasConfig,avisos,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
 const h0=location.hash.slice(1);if(owns(h0))G.route();
 if(MODO==='local')G.renderPanel&&G.renderPanel();
 })();

@@ -1,5 +1,5 @@
 /* GCHE2: funcionamiento sin internet y actualizaciones */
-const VERSION = 'gche2-1.3.1';
+const VERSION = 'gche2-1.4.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './consultas.css', './consultas.js', './consultas-esquema.js', './nube.js', './firebase-config.js', './herramientas-datos.js', './herramientas.js', './medicamentos-datos.js', './medicamentos-fichas.js', './medicamentos.js', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-48.png'];
 const FONTS = 'gche2-fuentes';
 const LIBS = 'gche2-librerias';
@@ -10,6 +10,17 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== FONTS && k !== LIBS).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+
+/* al tocar el aviso de una cita, abrir la app en la agenda */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const destino = (e.notification.data && e.notification.data.url) || '#consultas-0';
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+    const c = cs.find(x => x.url.startsWith(self.registration.scope));
+    if (c) { c.focus(); return c.navigate ? c.navigate(self.registration.scope + destino) : null; }
+    return self.clients.openWindow(self.registration.scope + destino);
+  }));
 });
 
 self.addEventListener('message', e => {

@@ -28,7 +28,7 @@ const show=(h,el)=>{el.style.cssText='--c:'+COL;const p=h.split('-');
   try{
     if(p[1]==='f')return vFicha(el,BY[p[2]]);
     if(p[1]==='g')return vGrupo(el,+p[2]);
-    if(p[1]==='calc')return vCalc(el,p[2]);
+    if(p[1]==='calc')return vCalc(el,p[2],p[3]);
     if(p[1]==='cmp')return vCmp(el,p.slice(2));
     if(p[1]==='rx')return vRx(el);
     if(p[1]==='rxdoc')return vRxDoc(el);
@@ -45,7 +45,7 @@ const show=(h,el)=>{el.style.cssText='--c:'+COL;const p=h.split('-');
 const vHome=(el,foco)=>{const nf=Object.keys(F).length,favs=fav.map(i=>BY[i]).filter(Boolean),recs=rec.map(i=>BY[i]).filter(Boolean).slice(0,6);
   el.innerHTML=`<div class="cx">${head([['Medicamentos']],'Medicamentos',`${M.length} medicamentos de primer nivel; ${nf} con ficha verificada en fuente oficial`,(G.ILL?G.ILL.medicamentos:'')+pinBtn('medicamentos'))}
   <label class="sinput cx-search glass">${icon('search',18)}<input id="mq" type="search" placeholder="Nombre, grupo o uso: amoxicilina, otitis, reflujo…" autocomplete="off" aria-label="Buscar medicamento"></label><div id="mres" class="cx-list"></div>
-  <div class="kids">${kid('Comparar medicamentos','Dos o tres lado a lado','swap','medicamentos-cmp',0)}${kid('Calculadora de dosis','Por kilo, con tope de dosis máxima','calc','medicamentos-calc',1)}${kid('Receta','Armar, revisar alergias e imprimir','doc','medicamentos-rx',2)}${kid('Mis esquemas','Combinaciones que usas seguido','star','medicamentos-5',3)}</div>
+  <div class="kids">${kid('Comparar medicamentos','Dos o tres lado a lado','swap','medicamentos-cmp',0)}${kid('Calculadora de dosis','Paso a paso: medicamento, peso y presentación','calc','medicamentos-calc',1)}${kid('Receta','Armar, revisar alergias e imprimir','doc','medicamentos-rx',2)}${kid('Mis esquemas','Combinaciones que usas seguido','star','medicamentos-5',3)}</div>
   ${favs.length?`<div class="cx-card glass rise" style="--i:7;margin-top:16px"><h3>Favoritos</h3><div class="cx-list">${favs.map(m=>fila(m)).join('')}</div></div>`:''}
   ${recs.length?`<div class="cx-card glass rise" style="--i:8;margin-top:14px"><h3>Recientes</h3><div class="cx-list">${recs.map(m=>fila(m)).join('')}</div></div>`:''}
   <p class="lbl rise" style="--i:9">Grupos terapéuticos</p><div class="kids" style="margin-top:12px">${GRUPOS.map((g,i)=>{const n=M.filter(m=>m.g===g).length,v=M.filter(m=>m.g===g&&fichaDe(m.id)).length;return kid(g,`${n} medicamentos${v?`, ${v} con ficha`:''}`,'medicamentos','medicamentos-g-'+i,i)}).join('')}</div></div>`;
@@ -106,38 +106,93 @@ const breve=(m,f)=>{const li=a=>arr(a).map(x=>`<li>${esc(x)}</li>`).join(''),txt
   <div class="mx-doses"><div><h3>Adultos</h3><ul>${li(f.adulto)||'<li>Sin dosis de adulto en la ficha</li>'}</ul></div><div><h3>Pediátrico</h3><ul>${li(f.ped)||'<li>Sin dosis pediátrica en la ficha</li>'}</ul></div></div>
   <div class="mx-facts">${facts.map(([k,v])=>`<div><b>${k}</b>${v}</div>`).join('')}</div>
   <p class="hint mx-src">Fuente: ${arr(f.fuente).map(esc).join(' ')} <a href="#medicamentos-f-${m.id}">Ver la ficha completa</a></p></article>`};
-/* calculadora de dosis */
-const vCalc=(el,id)=>{const m=BY[id],f=m&&fichaDe(m.id),c=f&&f.calc,pac=window.CX&&CX.pacienteActual&&CX.pacienteActual();
-  const opciones=M.filter(x=>fichaDe(x.id));
-  el.innerHTML=`<div class="cx">${head([['Medicamentos','medicamentos'],['Calculadora de dosis']],m?m.n:'Calculadora de dosis',m?'Ficha breve y calculadora de dosis':'Elige un medicamento con ficha verificada. Dosis por kilo con tope de dosis máxima.')}
-  ${f?breve(m,f):`<div class="cx-card glass"><p class="cx-empty" style="margin:0">Solo aparecen los ${opciones.length} medicamentos con ficha verificada. Elige uno para ver su ficha breve, o usa la calculadora en modo manual.</p></div>`}
-  ${f&&!(c&&c.esquemas)?`<p class="hint" style="margin-top:12px">Esta ficha no trae dosis por kilo: la dosis es fija, como dice arriba. La calculadora queda en modo manual.</p>`:''}
-  <h2 class="mx-h2">Calculadora</h2>
-  <div class="hx-lay"><div class="cx-sec glass"><div class="fx">
-   <div class="fw full"><label for="kMed">Medicamento</label><select id="kMed"><option value="">Manual (sin medicamento)</option>${opciones.map(x=>`<option value="${x.id}"${x.id===id?' selected':''}>${esc(x.n)}</option>`).join('')}</select></div>
-   ${c&&c.esquemas?`<div class="fw full"><span class="lab">Esquema de la ficha</span><div class="opts">${c.esquemas.map((e,i)=>`<button type="button" class="chip${i===0?' on':''}" data-es="${i}">${esc(e.t)}</button>`).join('')}</div></div>`:''}
-   <div class="fw"><label for="kPeso">Peso (kilogramos)</label><input id="kPeso" inputmode="decimal" value="${pac&&pac.peso?esc(pac.peso):''}"></div>
-   <div class="fw"><label for="kDosis">Dosis (miligramos por kilo)</label><input id="kDosis" inputmode="decimal"></div>
-   <div class="fw"><span class="lab">La dosis es</span><div class="opts"><button type="button" class="chip on" data-por="dia">Por día</button><button type="button" class="chip" data-por="dosis">Por toma</button></div></div>
-   <div class="fw"><label for="kInt">Cada cuántas horas</label><input id="kInt" inputmode="decimal"></div>
-   <div class="fw"><label for="kMax">Dosis máxima por toma (miligramos)</label><input id="kMax" inputmode="decimal"></div>
-   <div class="fw"><label for="kMaxD">Dosis máxima al día (miligramos)</label><input id="kMaxD" inputmode="decimal"></div>
-   <div class="fw full"><label for="kConc">Concentración del producto (miligramos por mililitro, opcional)</label><input id="kConc" inputmode="decimal" placeholder="Por ejemplo 250 mg en 5 ml = 50">${c&&c.conc?`<div class="fr">${c.conc.map(x=>`<button type="button" data-conc="${x[1]}">${esc(x[0])}</button>`).join('')}</div>`:''}</div>
-  </div>${pac&&pac.peso?`<p class="hint">Peso tomado del expediente de ${esc(pac.nombre)}.</p>`:''}</div><div class="hx-res glass" id="kRes"></div></div>
-  ${c&&c.nota?`<p class="hint" style="margin-top:12px">${esc(c.nota)}</p>`:''}</div>`;
-  let por='dia',unica=false;
-  const set=e=>{unica=!!e.u1;$('#kDosis').value=e.mgkg;por=e.por;el.querySelectorAll('[data-por]').forEach(b=>b.classList.toggle('on',b.dataset.por===por));$('#kInt').value=e.h;$('#kMax').value=e.max||'';$('#kMaxD').value=e.maxd||'';calcK()};
-  const calcK=()=>{const n=x=>{const v=parseFloat(($('#'+x).value||'').replace(',','.'));return isFinite(v)?v:null};const p=n('kPeso'),d=n('kDosis'),h=n('kInt'),mx=n('kMax'),md=n('kMaxD'),cc=n('kConc'),box=$('#kRes');
-    if(!p||!d||!h){box.className='hx-res glass';box.innerHTML='<p class="hint" style="margin:0">Resultado</p><b class="hx-n" style="font-size:22px;color:var(--ink2)">Escribe peso, dosis e intervalo</b>';return}
-    const tomas=24/h;let toma=por==='dia'?p*d/tomas:p*d,tope='';if(mx&&toma>mx){toma=mx;tope='Se aplicó el tope de dosis máxima por toma.'}let dia=toma*tomas;if(md&&dia>md){toma=md/tomas;dia=md;tope='Se aplicó el tope de dosis máxima al día.'}
-    const r=x=>{const a=Math.abs(x),k=a<1?100:a<10?10:1;return Math.round(x*k)/k},U=(c&&c.u)||'miligramos';box.className='hx-res glass '+(tope?'warn':'ok');
-    box.innerHTML=`<p class="hint" style="margin:0">${unica?'Dosis única':`Cada ${r(h)} horas (${r(tomas)} tomas al día)`}</p><b class="hx-n">${r(toma)} ${U}</b>${cc&&U==='miligramos'?`<p class="hx-u">${r(toma/cc)} mililitros por toma</p>`:''}${unica?'':`<p class="hx-i">${r(dia)} ${U} al día${p?` (${r(dia/p)} ${U} por kilo al día)`:''}</p>`}${tope?`<p class="hint" style="color:#c27c00;font-weight:600">${tope}</p>`:''}<p class="hint">Confirma la dosis con la ficha y el producto antes de indicarla.</p>`};
-  el.querySelector('.cx').addEventListener('input',e=>{if(['kInt','kDosis'].includes(e.target.id))unica=false;calcK()});
-  $('#kMed').onchange=e=>G.go('medicamentos-calc'+(e.target.value?'-'+e.target.value:''));
-  el.querySelectorAll('[data-por]').forEach(b=>b.onclick=()=>{por=b.dataset.por;el.querySelectorAll('[data-por]').forEach(x=>x.classList.toggle('on',x===b));calcK()});
-  el.querySelectorAll('[data-es]').forEach(b=>b.onclick=()=>{el.querySelectorAll('[data-es]').forEach(x=>x.classList.toggle('on',x===b));set(c.esquemas[+b.dataset.es])});
-  el.querySelectorAll('[data-conc]').forEach(b=>b.onclick=()=>{$('#kConc').value=b.dataset.conc;calcK()});
-  if(c&&c.esquemas)set(c.esquemas[0]);else calcK()};
+/* calculadora guiada: independiente del expediente; el peso se escribe cada vez */
+const KZ={id:null,e:0,peso:'',p:null,hora:null,ov:null};
+const kzF=x=>{const a=Math.abs(x);return(a<1?Math.round(x*100)/100:a<100?Math.round(x*10)/10:Math.round(x)).toLocaleString('es-MX')};
+const TABX={trimetoprimaconsulfametoxazol:[],sulfatoferroso:[],amoxicilinaconacidoclavulanico:[500,875],dexametasona:[0.5,4]};
+const tabsDe=(id,f)=>{if(TABX[id])return TABX[id];const t=new Set();for(const p of arr(f.pres)){if(!/^(Tabletas?|Cápsulas?|Comprimidos?)/i.test(p)||/liberación|prolongada|vaginal|sublingual/i.test(p))continue;const seg=p.split(/;|\(/)[0];
+  for(const x of seg.matchAll(/(\d[\d,]*(?:\.\d+)?)/g)){const v=parseFloat(x[1].replace(/,(?=\d{3})/g,''));const af=seg.slice(x.index),u=(af.match(/\b(mg|g)\b/)||[])[1];if(!u||/mililitro/.test(af.split(/\b(mg|g)\b/)[0]))continue;const mg=u==='g'?v*1000:v;if(mg>=1)t.add(mg)}}
+  return[...t].sort((a,b)=>a-b)};
+const kzPres=(m,f)=>{const c=f.calc;if(c.u)return[];const P=arr(c.conc).map(([l,v])=>({k:'ml',l,c:v}));tabsDe(m.id,f).forEach(T=>P.push({k:'tab',l:`Tableta o cápsula de ${kzF(T)} mg`,c:T}));return P};
+const kzPasos=(m,f)=>{const s=[];if(f.calc.esquemas.length>1)s.push('para');s.push('peso');if(kzPres(m,f).length)s.push('pres');s.push('res');return s};
+const kzSimple=(m,e,i)=>{if(m.id==='paracetamol')return['Fiebre o dolor, cada 6 horas','Fiebre o dolor, cada 4 horas','Dosis baja, cada 4 a 6 horas'][i]||e.t;const k=e.t.indexOf(':');return k>0?e.t.slice(0,k):e.t};
+const kzUni=c=>!c.u?'mg':c.u.startsWith('mililitros')?'mililitros':c.u;
+const kzDet=(c,e)=>`${e.mgkg.toLocaleString('es-MX')} ${kzUni(c)} por kilo ${e.u1?'en una sola dosis':e.por==='dia'?'al día':'por toma'}${e.u1?'':` · cada ${e.h} horas`}`;
+const kzCalc=(c,p,e)=>{const unica=!!e.u1,tomas=unica?1:24/e.h;let toma=e.por==='dia'?p*e.mgkg/tomas:p*e.mgkg,tope='';
+  if(e.max&&toma>e.max){toma=e.max;tope='Se usó la dosis máxima por toma de la ficha.'}let dia=toma*tomas;
+  if(!unica&&e.maxd&&dia>e.maxd){toma=e.maxd/tomas;dia=e.maxd;tope='Se usó la dosis máxima al día de la ficha.'}return{toma,dia,tomas,unica,tope}};
+const kzTab=(toma,T,max)=>{for(const n of[0.5,1,1.5,2])if(n*T>=toma*.9&&n*T<=toma*1.1&&(!max||n*T<=max*1.0001))return n;return null};
+const kzTabT=n=>n===0.5?'Media tableta':n===1?'1 tableta':n===1.5?'1 y media tabletas':n+' tabletas';
+const KZI={gotas:'<svg viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6h8v8h-8z"/><path d="M22 14h12l1 6H21z"/><rect x="17" y="20" width="22" height="30" rx="5"/><path d="M28 30c-3 4-4 6-4 8a4 4 0 0 0 8 0c0-2-1-4-4-8z"/></svg>',
+  frasco:'<svg viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="5" width="12" height="7" rx="1.5"/><path d="M23 12v5c-5 2-8 5-8 10v20a4 4 0 0 0 4 4h18a4 4 0 0 0 4-4V27c0-5-3-8-8-10v-5"/><path d="M15 30h26M15 42h26"/></svg>',
+  tableta:'<svg viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="28" cy="28" r="17"/><path d="M28 13v30"/></svg>'};
+const kzIco=l=>/gota/i.test(l)?KZI.gotas:/tableta|cápsula/i.test(l)?KZI.tableta:KZI.frasco;
+const kzJer=ml=>{const cap=[1,3,5,10,20,60].find(c=>ml<=c)||60,x0=40,L=200,f=Math.min(ml/cap,1)*L,n=cap<=1?10:cap<=5?cap*2:cap<=20?cap:12,tk=[];
+  for(let i=0;i<=n;i++){const x=x0+L*i/n;tk.push(`<line x1="${x}" y1="30" x2="${x}" y2="${i%(cap<=5?2:5)===0?40:36}" stroke="currentColor" stroke-width="1.2"/>`)}
+  return`<svg class="kz-draw" viewBox="0 0 300 92" role="img" aria-label="Jeringa de ${cap} mililitros llena hasta ${kzF(ml)}"><rect class="kz-fill" x="${x0}" y="31" width="${f}" height="28" rx="2"/><rect x="${x0}" y="30" width="${L}" height="30" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>${tk.join('')}<path d="M${x0} 38h-14v14h14M26 45H8M${x0+L} 36h10v18h-10M${x0+L+10} 45h36M${x0+L+46} 32v26" fill="none" stroke="currentColor" stroke-width="2"/><text x="${x0}" y="80" font-size="12" fill="currentColor" opacity=".6">0</text><text x="${x0+L}" y="80" font-size="12" fill="currentColor" opacity=".6" text-anchor="end">${cap} ml</text></svg><p class="kz-mg">Jeringa de ${cap} mililitros${ml>60?'; usa más de una jeringa o vaso dosificador':''}</p>`};
+const kzPast=n=>{const o=(x,h)=>h?`<path d="M${x} 14a26 26 0 0 0 0 52z" class="kz-pill" stroke="currentColor" stroke-width="2"/><path d="M${x} 14a26 26 0 0 1 0 52" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 5" opacity=".45"/>`:`<circle cx="${x}" cy="40" r="26" class="kz-pill" stroke="currentColor" stroke-width="2"/><line x1="${x}" y1="16" x2="${x}" y2="64" stroke="currentColor" stroke-width="1.5"/>`;
+  const p=n===0.5?[o(150,1)]:n===1?[o(150)]:n===1.5?[o(120),o(185,1)]:[o(115),o(185)];return`<svg class="kz-draw" viewBox="0 0 300 80" role="img" aria-label="${kzTabT(n)}">${p.join('')}</svg>`};
+const KZFAV=['paracetamol','ibuprofeno','amoxicilina','amoxicilinaconacidoclavulanico','cefalexina','azitromicina','trimetoprimaconsulfametoxazol','metamizol'];
+const vCalc=(el,id,paso)=>{const m=BY[id],f=m&&fichaDe(m.id);
+  if(m&&!(f&&f.calc&&f.calc.esquemas)){G.go(hF(m.id));return}
+  const con=M.filter(x=>{const y=fichaDe(x.id);return y&&y.calc&&y.calc.esquemas});
+  if(!m){KZ.id=null;
+    el.innerHTML=`<div class="cx kz">${head([['Medicamentos','medicamentos'],['Calculadora']],'Calculadora','Un paso a la vez. No usa datos del expediente: escribes el peso cada vez.')}
+    <p class="kz-q rise">¿Qué medicamento?</p><label class="sinput">${icon('search',18)}<input id="kzS" type="search" placeholder="Buscar, por ejemplo cefalexina" autocomplete="off" aria-label="Buscar medicamento"></label><div class="kz-grid" id="kzG"></div></div>`;
+    const draw=()=>{const w=norm($('#kzS').value.trim()).split(/\s+/).filter(Boolean),r=w.length?con.filter(x=>w.every(p=>norm(x.n+' '+x.u).includes(p))):KZFAV.map(i=>BY[i]).filter(Boolean);
+      $('#kzG').innerHTML=r.map(x=>`<a class="kz-tile" href="#medicamentos-calc-${x.id}"><b>${esc(x.n)}</b><small>${esc(x.u)}</small></a>`).join('')||`<p class="cx-empty">Sin resultados. La calculadora tiene los ${con.length} medicamentos con dosis por kilo en su ficha.</p>`};
+    $('#kzS').oninput=draw;draw();return}
+  if(KZ.id!==m.id)Object.assign(KZ,{id:m.id,e:0,p:null,ov:null});
+  const c=f.calc,P=kzPasos(m,f);let k=P.includes(paso)?paso:P[0];
+  const pesoOk=()=>{const v=parseFloat(String(KZ.peso).replace(',','.'));return v>0.3&&v<250?v:0};
+  if((k==='pres'||k==='res')&&!pesoOk())k='peso';
+  const ir=s=>G.go(`medicamentos-calc-${m.id}-${s}`),sig=()=>ir(P[P.indexOf(k)+1]);
+  const dots=`<div class="kz-dots" aria-label="Paso ${P.indexOf(k)+2} de ${P.length+1}"><a href="#medicamentos-calc" class="ok" aria-label="Elegir medicamento"></a>${P.map((s,i)=>`<a ${i<P.indexOf(k)?`href="#medicamentos-calc-${m.id}-${s}" class="ok"`:i===P.indexOf(k)?'class="on"':''} aria-label="Paso ${i+2}"></a>`).join('')}</div>`;
+  const top=`<div class="cx kz">${head([['Medicamentos','medicamentos'],['Calculadora','medicamentos-calc'],[m.n]],m.n,esc(f.clase||m.u))}${dots}`;
+  if(k==='para'){el.innerHTML=`${top}<p class="kz-q">¿Para qué es?</p><div class="kz-list">${c.esquemas.map((e,i)=>`<button class="kz-opt${i===KZ.e&&!KZ.ov?' on':''}" data-e="${i}"><span><b>${esc(kzSimple(m,e,i))}</b><small>${esc(kzDet(c,e))}</small></span>${i===0?'<em>Habitual</em>':''}</button>`).join('')}</div>
+    <details class="kz-more"><summary>Qué es, contraindicaciones y dosis de la ficha</summary>${breve(m,f)}</details></div>`;
+    el.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{KZ.e=+b.dataset.e;KZ.ov=null;sig()});return}
+  if(k==='peso'){el.innerHTML=`${top}<p class="kz-q">¿Cuánto pesa?</p><p class="hint">Escríbelo o usa los botones. No se toma del expediente.</p>
+    <div class="kz-kg"><button id="kzMn" aria-label="Medio kilo menos">−</button><div><input id="kzKv" inputmode="decimal" placeholder="0" value="${esc(KZ.peso)}" aria-label="Peso en kilos"><span>kilos</span></div><button id="kzMs" aria-label="Medio kilo más">+</button></div>
+    <input type="range" id="kzKr" class="kz-rng" min="1" max="100" step="0.5" value="${pesoOk()||15}" aria-label="Peso en kilos"><div class="kz-rl"><span>1 kilo</span><span>100 kilos</span></div>
+    <div class="kz-quick">${[5,10,15,20,30,40].map(v=>`<button data-k="${v}">${v} kilos</button>`).join('')}</div>
+    <button class="cxb kz-next" id="kzNx">Siguiente</button></div>`;
+    const nb=$('#kzNx'),upd=()=>{nb.disabled=!pesoOk()};
+    const set=v=>{v=Math.max(0.5,Math.min(250,Math.round(v*2)/2));KZ.peso=String(v);$('#kzKv').value=KZ.peso;$('#kzKr').value=v;upd()};
+    let tm;const hold=(b,d)=>{b.onpointerdown=()=>{set((pesoOk()||0)+d);tm=setTimeout(function r(){set((pesoOk()||0)+d);tm=setTimeout(r,90)},420)};b.onpointerup=b.onpointerleave=b.onpointercancel=()=>clearTimeout(tm)};
+    hold($('#kzMn'),-0.5);hold($('#kzMs'),0.5);$('#kzKr').oninput=e=>set(+e.target.value);
+    $('#kzKv').oninput=e=>{KZ.peso=e.target.value.replace(',','.');const v=pesoOk();if(v)$('#kzKr').value=v;upd()};
+    $('#kzKv').onkeydown=e=>{if(e.key==='Enter'&&pesoOk())sig()};
+    el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>set(+b.dataset.k));nb.onclick=sig;upd();return}
+  const ps=kzPres(m,f);
+  if(k==='pres'){el.innerHTML=`${top}<p class="kz-q">¿Qué tienes en la mano?</p><p class="hint">Elige la presentación del producto.</p><div class="kz-list">${ps.map((x,i)=>`<button class="kz-opt${i===KZ.p?' on':''}" data-p="${i}"><i class="kz-ico">${kzIco(x.l)}</i><span><b>${esc(x.l)}</b></span></button>`).join('')}</div></div>`;
+    el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{KZ.p=+b.dataset.p;sig()});return}
+  /* resultado */
+  const p=pesoOk(),e=Object.assign({},c.esquemas[KZ.e],KZ.ov||{}),r=kzCalc(c,p,e),x=ps[KZ.p],U=kzUni(c);let big,sub='',dib='';
+  if(c.u){big=`${kzF(r.toma)}<small> ${esc(U)}</small>`;if(c.u.startsWith('mililitros de'))sub='De '+esc(c.u.replace('mililitros de ',''));if(U==='mililitros'&&r.toma<=60)dib=kzJer(r.toma)}
+  else if(x&&x.k==='ml'){const ml=r.toma/x.c;big=`${kzF(ml)}<small> mililitros</small>`;sub=`${kzF(r.toma)} mg · ${esc(x.l)}`;dib=kzJer(ml)}
+  else if(x&&x.k==='tab'){const n=kzTab(r.toma,x.c,e.max);if(n){big=kzTabT(n);sub=`De ${kzF(x.c)} mg · ${kzF(n*x.c)} mg por toma`;dib=kzPast(n)}else{big='<span class="kz-na">No aplica en tableta</span>';sub=`Le tocan ${kzF(r.toma)} mg y la tableta es de ${kzF(x.c)} mg. Usa suspensión o gotas.`}}
+  else big=`${kzF(r.toma)}<small> mg</small>`;
+  if(KZ.hora===null)KZ.hora=(new Date().getHours()+1)%24;
+  const hh=h=>`${String(Math.floor(h)).padStart(2,'0')}:${h%1?'30':'00'}`,hs=r.unica?[]:Array.from({length:Math.round(r.tomas)},(_,i)=>(KZ.hora+i*24/r.tomas)%24);
+  const uD=c.u?U:'mg';
+  el.innerHTML=`${top}<div class="kz-sum">${P.includes('para')?`<a href="#medicamentos-calc-${m.id}-para">${esc(KZ.ov?'Ajustada a mano':kzSimple(m,c.esquemas[KZ.e],KZ.e))}<i>Cambiar</i></a>`:''}<a href="#medicamentos-calc-${m.id}-peso">${esc(kzF(p))} kilos<i>Cambiar</i></a>${x?`<a href="#medicamentos-calc-${m.id}-pres">${esc(x.l)}<i>Cambiar</i></a>`:''}<a href="#medicamentos-calc">Otro medicamento<i>Cambiar</i></a></div>
+  <div class="kz-res glass"><p class="kz-lb">Dar en cada toma</p><p class="kz-big">${big}</p>${dib}${sub?`<p class="kz-mg">${sub}</p>`:''}</div>
+  <div class="kz-freq glass">${r.unica?'<h3>Una sola dosis</h3><p>No se repite.</p>':`<h3>Cada ${kzF(24/r.tomas)} horas</h3><p>${Math.round(r.tomas)} ${Math.round(r.tomas)===1?'vez':'veces'} al día · ${kzF(r.dia)} ${esc(uD)} al día · ${kzF(r.dia/p)} ${esc(uD)} por kilo al día</p><div class="kz-times">${hs.map(h=>`<span>${hh(h)}</span>`).join('')}</div><label class="kz-hr">Primera toma a las <select id="kzHr">${Array.from({length:48},(_,i)=>i/2).map(h=>`<option value="${h}"${h===KZ.hora?' selected':''}>${hh(h)}</option>`).join('')}</select></label>`}</div>
+  ${r.tope?`<div class="kz-warn"><b>Se aplicó el máximo</b>${r.tope}</div>`:''}
+  ${p>=40?`<div class="kz-warn"><b>Pesa 40 kilos o más</b>Revisa la dosis de adulto de la ficha; la calculadora nunca pasa el máximo.<ul>${arr(f.adulto).slice(0,4).map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`:''}
+  ${c.nota?`<p class="hint">${esc(c.nota)}</p>`:''}<p class="hint">Confirma con la ficha y con el producto antes de indicarla. <a href="#${hF(m.id)}">Ver la ficha completa</a></p>
+  <details class="kz-more"${KZ.ov?' open':''}><summary>Ajustar dosis a mano</summary><div class="kz-adj">
+   <label>Dosis por kilo (${esc(uD)})<input id="kzA1" inputmode="decimal" value="${e.mgkg}"></label>
+   <label>Cada cuántas horas<input id="kzA2" inputmode="decimal" value="${e.u1?24:e.h}"></label>
+   <label>La dosis por kilo es<select id="kzA3"><option value="dosis"${e.por!=='dia'?' selected':''}>por toma</option><option value="dia"${e.por==='dia'?' selected':''}>al día</option></select></label>
+   <label>Máximo por toma (${esc(uD)})<input id="kzA4" inputmode="decimal" value="${e.max||''}"></label>
+   <label>Máximo al día (${esc(uD)})<input id="kzA5" inputmode="decimal" value="${e.maxd||''}"></label>
+   <button class="cxb gris" id="kzA0">Volver a la dosis de la ficha</button></div></details></div>`;
+  const hr=$('#kzHr');if(hr)hr.onchange=()=>{KZ.hora=+hr.value;vCalc(el,id,'res')};
+  const num=i=>{const v=parseFloat(($('#'+i).value||'').replace(',','.'));return isFinite(v)&&v>0?v:undefined};
+  const adj=()=>{const a=num('kzA1'),h=num('kzA2');if(!a||!h)return;KZ.ov={mgkg:a,h,u1:false,por:$('#kzA3').value,max:num('kzA4'),maxd:num('kzA5')};vCalc(el,id,'res')};
+  ['kzA1','kzA2','kzA3','kzA4','kzA5'].forEach(i=>$('#'+i).onchange=adj);$('#kzA0').onclick=()=>{KZ.ov=null;vCalc(el,id,'res')}};
 
 /* receta */
 const vRx=el=>{const pac=window.CX&&CX.pacienteActual&&CX.pacienteActual();if(!RX.pac&&pac)RX.pac=pac.nombre;

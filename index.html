@@ -285,6 +285,11 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
 .toast{bottom:calc(150px + env(safe-area-inset-bottom))!important}
 .wideonly{display:none!important}
 }
+.backb{position:fixed;left:max(20px,env(safe-area-inset-left));bottom:max(22px,env(safe-area-inset-bottom));z-index:50;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--solid);color:var(--blue);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:0 10px 30px -10px rgba(0,0,0,.35);transition:transform .45s var(--spring),opacity .25s;animation:bkin .35s var(--ease)}
+.backb[hidden]{display:none}.backb:active{transform:scale(.9)}
+@keyframes bkin{from{opacity:0;transform:scale(.6)}}
+@media(min-width:720px){.backb{left:calc(var(--sw) + 20px)}}
+@media(max-width:719px){.backb{bottom:calc(78px + env(safe-area-inset-bottom))}}
 .fab{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));z-index:50;display:grid;justify-items:end;gap:10px;pointer-events:none}
 .fabb{pointer-events:auto}
 .fabb{width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:0 10px 30px -8px color-mix(in srgb,var(--blue) 70%,transparent);transition:transform .45s var(--spring)}
@@ -404,7 +409,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
         <div class="pins rise" style="--i:3" id="pins"></div>
         <div class="mods" id="mods"></div>
         <div class="tilesec"><div class="sec rise" style="--i:9"><h3>Resumen del día</h3><small>Se llenará con tus datos</small></div><div class="tiles" id="tiles"></div></div>
-        <div class="foot rise" style="--i:14"><span>Versión 1.8.1 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
+        <div class="foot rise" style="--i:14"><span>Versión 1.9.0 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
       </section>
       <section class="view" id="v-page"></section>
     </div>
@@ -416,6 +421,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
 
 <nav class="tabbar" id="tabbar" aria-label="Módulos"><span class="tind" id="tind"></span></nav>
 
+<button class="backb" id="backb" aria-label="Regresar un paso" hidden><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
 <div class="fab" id="fab">
   <div id="facts"></div>
   <button class="fabb" id="fabb" aria-label="Acciones rápidas"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -685,7 +691,7 @@ const SHEETS={
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
     ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.8.1</p>`);syncSw();syncSet()},
+    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.9.0</p>`);syncSw();syncSet()},
   help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
@@ -747,6 +753,13 @@ const route=()=>{
   scrollTo({top:0,behavior:'auto'});
 };
 const go=h=>{if(location.hash.slice(1)===h)route();else location.hash=h};
+/* botón de regresar: un paso atrás; si no hay historial en la app, sube al nivel anterior de la ruta */
+let navDepth=0;addEventListener('hashchange',()=>{navDepth++});
+const syncBack=()=>{const h=location.hash.slice(1);$('#backb').hidden=!h||h==='inicio'};
+addEventListener('hashchange',syncBack);
+$('#backb').addEventListener('click',()=>{vib();if(navDepth>0&&history.length>1){navDepth-=2;history.back();return}
+  const cr=[...document.querySelectorAll('#v-page .crumbs a[href^="#"]')].map(a=>a.getAttribute('href').slice(1)).filter(x=>x!==location.hash.slice(1));go(cr.length?cr[cr.length-1]:'inicio')});
+syncBack();
 addEventListener('hashchange',route);
 addEventListener('scroll',()=>$('#bar').classList.toggle('scrolled',scrollY>8),{passive:true});
 
@@ -816,7 +829,7 @@ if(hoverable&&!reduced){
 const cv=$('#pc'),cx=cv.getContext('2d');
 let W=0,H=0,P=[],T0=0,running=false,burst=false,peak=[0,0],ecg=[],peakI=0,done=false,last=0,BT=.31;
 const MP={on:false,x:0,y:0},GLOW={l:'#2997ff',d:'#6cb8ff'};
-const VER='1.8.1',NOVEDADES=[['1.8.1',['Se quitaron los 32 enlaces de Guías de Práctica Clínica que llevaban a sitios no oficiales; esas guías muestran su clave para buscarlas','La app solo abre guías del Instituto Mexicano del Seguro Social y de gob.mx']],['1.8.0',['Las 118 fichas de medicamentos ya están completas, cada una con su fuente oficial','La calculadora muestra dosis únicas, mililitros y gramos cuando corresponde, y redondea con más precisión las dosis pequeñas']],['1.7.1',['Las ilustraciones de las escalas ya no se enciman sobre las opciones','Las letras GCHE2 de la bienvenida responden al mouse y al dedo: se apartan, brillan y, al tocar, estallan y se vuelven a armar','La versión aparece en la bienvenida con sus novedades']],['1.7.0',['Tarjetas de repaso en Mis cursos y Guías de Práctica Clínica en Estudio']],['1.6.0',['Mis materias con 421 temas y Mis cursos con visor y buscador']],['1.5.0',['Impresión profesional en blanco y negro, con la receta en media carta','Calculadora con ficha breve de cada medicamento verificado','Escala de Glasgow ilustrada y texto editable para la nota en todas las herramientas','Mejorar con ChatGPT por copiar y pegar, sin datos del paciente','Referir paciente desde el botón +','Calendario semanal de Estudio','Reloj y animación de entrada corregidos']]];
+const VER='1.9.0',NOVEDADES=[['1.9.0',['Calculadora de medicamentos paso a paso, con dibujo de jeringa o tableta y horario de tomas; ya no toma el peso del expediente','Vacunas: esquema 2026 con atrasados para niños, adolescentes, adultos, adultos mayores y embarazadas, y registro de dosis en el expediente','Botón para regresar un paso, abajo a la izquierda','Botón Guardar y lista Por terminar en Consultas','75 de 90 Guías de Práctica Clínica ya abren su sitio oficial']],['1.8.1',['Se quitaron los 32 enlaces de Guías de Práctica Clínica que llevaban a sitios no oficiales; esas guías muestran su clave para buscarlas','La app solo abre guías del Instituto Mexicano del Seguro Social y de gob.mx']],['1.8.0',['Las 118 fichas de medicamentos ya están completas, cada una con su fuente oficial','La calculadora muestra dosis únicas, mililitros y gramos cuando corresponde, y redondea con más precisión las dosis pequeñas']],['1.7.1',['Las ilustraciones de las escalas ya no se enciman sobre las opciones','Las letras GCHE2 de la bienvenida responden al mouse y al dedo: se apartan, brillan y, al tocar, estallan y se vuelven a armar','La versión aparece en la bienvenida con sus novedades']],['1.7.0',['Tarjetas de repaso en Mis cursos y Guías de Práctica Clínica en Estudio']],['1.6.0',['Mis materias con 421 temas y Mis cursos con visor y buscador']],['1.5.0',['Impresión profesional en blanco y negro, con la receta en media carta','Calculadora con ficha breve de cada medicamento verificado','Escala de Glasgow ilustrada y texto editable para la nota en todas las herramientas','Mejorar con ChatGPT por copiar y pegar, sin datos del paciente','Referir paciente desde el botón +','Calendario semanal de Estudio','Reloj y animación de entrada corregidos']]];
 const NP=innerWidth<640?420:760,DRAW=.62;
 const size=()=>{const d=Math.min(1.5,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};
 const buildEcg=()=>{
@@ -958,6 +971,7 @@ fontsReady.then(startIntro);
 <script src="consultas.js"></script>
 <script src="herramientas-datos.js"></script>
 <script src="herramientas-ilus.js"></script>
+<script src="vacunas.js"></script>
 <script src="herramientas.js"></script>
 <script src="medicamentos-datos.js"></script>
 <script src="medicamentos-fichas.js"></script>

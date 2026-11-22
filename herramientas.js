@@ -20,6 +20,7 @@ const pinBtn=h=>{const on=G.isPinned&&G.isPinned(h);return `<button class="pin g
 const kid=(t,s,ic,h,k)=>`<a class="card kid glass rise" style="--i:${Math.min(k,14)+3}" href="#${h}"><span class="glow"></span><span class="sheen"></span><span class="ic">${icon(ic,22)}</span><div><b>${esc(t)}</b><p>${esc(s)}</p></div><span class="go">${G.arrow}</span></a>`;
 const show=(h,el)=>{el.style.cssText='--c:'+COL;const p=h.split('-');
   try{
+    if(p[1]==='vacunas'&&window.VX)return VX.calc(el,p.slice(2));
     if(p[1]==='t')return vTool(el,BY[p.slice(2).join('-')]);
     if(p[1]===undefined)return vHome(el);
     const k=+p[1];if(k===0)return vHome(el,true);
@@ -36,8 +37,9 @@ const vHome=(el,foco)=>{
   <label class="sinput cx-search glass">${icon('search',18)}<input id="hq" type="search" placeholder="Glasgow, CURB-65, filtración, Apgar…" autocomplete="off" aria-label="Buscar herramienta"></label><div id="hres" class="cx-list"></div>
   ${favs.length?`<div class="cx-card glass rise" style="--i:3;margin-top:16px"><h3>Favoritas</h3><div class="cx-list">${favs.map(fila).join('')}</div></div>`:''}
   ${recs.length?`<div class="cx-card glass rise" style="--i:4;margin-top:14px"><h3>Recientes</h3><div class="cx-list">${recs.map(fila).join('')}</div></div>`:''}
+  <div class="kids" style="margin-top:16px">${kid('Vacunas','Esquema 2026, atrasados y embarazo','<path d="M18 2l4 4M15 5l4 4M10 9l5 5M4 15l5 5M7 12l5 5-3 3-5-5zM14 7l3 3-6 6"/>','herramientas-vacunas',4)}</div>
   <p class="lbl rise" style="--i:5">Categorías</p><div class="kids" style="margin-top:12px">${CATS.map((c,i)=>{const n=deCat(c).length;return kid(c,n?`${n} ${n===1?'herramienta':'herramientas'}`:'Pendiente',ICAT[i]||'gauge','herramientas-'+(i+1),i)}).join('')}</div></div>`;
-  const q=$('#hq'),res=$('#hres');q.addEventListener('input',()=>{const r=buscarT(q.value);res.innerHTML=q.value.trim()?(r.length?r.slice(0,12).map(fila).join(''):'<p class="cx-empty">Sin resultados.</p>'):''});
+  const q=$('#hq'),res=$('#hres');q.addEventListener('input',()=>{const r=buscarT(q.value),v=q.value.trim()&&esVac(q.value)?`<a class="cx-item" href="#herramientas-vacunas"><span class="av" style="background:linear-gradient(135deg,#ed6300,#ffb829)">${icon('gauge',16)}</span><span><b>Vacunas: esquema y atrasados</b><small>Programa de Vacunación Universal 2026</small></span></a>`:'';res.innerHTML=q.value.trim()?(v+(r.length?r.slice(0,12).map(fila).join(''):(v?'':'<p class="cx-empty">Sin resultados.</p>'))):''});
   if(foco||matchMedia('(min-width:720px)').matches)setTimeout(()=>q.focus({preventScroll:true}),300)};
 const buscarT=q=>{q=norm(q.trim());if(!q)return[];const w=q.split(/\s+/);return T.filter(x=>{const s=norm(x.t+' '+x.s+' '+x.c+' '+x.id);return w.every(p=>s.includes(p))})};
 
@@ -98,7 +100,9 @@ const textoNota=(x,v,r)=>{if(x.nota)return x.nota(v,r);
   t+=` Fuente: ${x.ref.join(' ')}`;return t.replace(/\s+/g,' ').trim()};
 
 /* búsqueda global */
-const buscar=q=>{const r=buscarT(q).slice(0,5);return r.length?`<p class="slabel" style="margin:14px 0 0">Herramientas</p><div class="nlist">${r.map(x=>`<button data-cxh="${hTool(x)}" style="--c:${COL}"><i></i><span><b style="font-size:15px">${esc(x.t)}</b><small>${esc(x.c)}</small></span>${icon('gauge',18)}</button>`).join('')}</div>`:''};
+const buscarOrig=r=>`<div class="nlist">${r.map(x=>`<button data-cxh="${hTool(x)}" style="--c:${COL}"><i></i><span><b style="font-size:15px">${esc(x.t)}</b><small>${esc(x.c)}</small></span>${icon('gauge',18)}</button>`).join('')}</div>`;
+const esVac=q=>/vacun|esquema|inmuniz|cartilla|tdpa|hexavalente|rotavirus|papiloma/.test(norm(q));
+const buscar=q=>{const r=buscarT(q).slice(0,5);if(esVac(q))return `<p class="slabel" style="margin:14px 0 0">Herramientas</p><div class="nlist"><button data-cxh="herramientas-vacunas" style="--c:${COL}"><i></i><span><b style="font-size:15px">Vacunas: esquema y atrasados</b><small>Programa de Vacunación Universal 2026</small></span>${icon('gauge',18)}</button></div>`+(r.length?buscarOrig(r):'');return r.length?`<p class="slabel" style="margin:14px 0 0">Herramientas</p><div class="nlist">${r.map(x=>`<button data-cxh="${hTool(x)}" style="--c:${COL}"><i></i><span><b style="font-size:15px">${esc(x.t)}</b><small>${esc(x.c)}</small></span>${icon('gauge',18)}</button>`).join('')}</div>`:''};
 
 /* calculadora de la barra superior */
 let EXP='';

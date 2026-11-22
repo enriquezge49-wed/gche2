@@ -192,6 +192,7 @@ addEventListener('pagehide',flush);
 const fieldBy=id=>{for(const s of F.M.schema)for(const f of (s.f||[]))if(f.id===id)return f;return null};
 const montarForm=(el,M,paso,cur)=>{
   F={el,M,paso,cur:cur??0,t:null};
+  {const g=el.querySelector('#cxGuardar');if(g)g.hidden=M.ro()}
   el.querySelector('#cxForm').addEventListener('input',e=>{const t=e.target;if(F.M.ro())return;
     if(t.dataset.f){const f=fieldBy(t.dataset.f);const o=F.M.src(f);o[t.dataset.f]=t.value;if(f.to==='p')F.M.tocoP=true;if(f.t==='sl'){const b=t.parentNode.querySelector('[data-slv]');if(b)b.textContent=t.value}}
     else if(t.dataset.rw){const id=t.dataset.rw,o=F.M.src(fieldBy(id));o[id]=Array.isArray(o[id])?o[id]:[];const i=+t.dataset.r;o[id][i]=o[id][i]||{};o[id][i][t.dataset.c]=t.value;
@@ -330,6 +331,7 @@ const show=(h,el)=>{pagina(false);
     if(p[1]==='1')return vNuevo(el,p[2]);
     if(p[1]==='2')return vBuscar(el);
     if(p[1]==='3')return p[2]!==undefined?vRapida(el,+p[2]):vRapidaElegir(el);
+    if(p[1]==='4')return vPend(el);
     if(p[1]==='doc')return vDoc(el,p[2],p[3],p[4]);
     if(p[1]==='p'){const P=S.pacientes[p[2]];if(!P){el.innerHTML=wrap(head([['Consultas','consultas']],'Expediente no encontrado','Puede que se haya eliminado o que pertenezca a otra cuenta.'));return}
       store.set('gche2-ultp',P.id);
@@ -352,7 +354,7 @@ const vHome=el=>{
   const cs=L('consultas'),t0=new Date();t0.setHours(0,0,0,0);const lun=new Date(t0);lun.setDate(lun.getDate()-((lun.getDay()+6)%7));const mes=new Date(t0.getFullYear(),t0.getMonth(),1);
   const n=a=>cs.filter(c=>c.fecha>=a.getTime()).length;
   el.innerHTML=wrap(head([['Consultas']],'Consultas','Pacientes, historia clínica, notas y agenda',(G.ILL?G.ILL.consultas:'')+`<a class="cal glass" href="#consultas-0" aria-label="Calendario">${icon('cal',22)}</a>`+pinBtn('consultas'))+modoHTML(true)+
-  `<div class="kids">${kid('Nuevo paciente','Elige el tipo de expediente','personplus','consultas-1',0)}${kid('Buscar paciente','Por nombre, teléfono o diagnóstico','search','consultas-2',1)}${kid('Consulta rápida','Solo nota en formato SOAP','bolt','consultas-3',2)}${kid('Calendario y agenda','Atendidos y citas por día','cal','consultas-0',3)}</div>
+  `${(()=>{if(MODO==='login')return'';const ps=pendientes();return ps.length?`<div class="cx-card glass rise cx-pend" style="--i:7;margin:14px 0"><h3>Por terminar <small>${ps.length}</small></h3><div class="cx-list">${ps.slice(0,4).map(itemPend).join('')}</div>${ps.length>4?`<div class="cx-row"><a class="cxb gris sm" href="#consultas-4">Ver todo (${ps.length})</a></div>`:''}</div>`:''})()}<div class="kids">${kid('Nuevo paciente','Elige el tipo de expediente','personplus','consultas-1',0)}${kid('Buscar paciente','Por nombre, teléfono o diagnóstico','search','consultas-2',1)}${kid('Consulta rápida','Solo nota en formato SOAP','bolt','consultas-3',2)}${kid('Calendario y agenda','Atendidos y citas por día','cal','consultas-0',3)}</div>
   <div class="cx-grid2"><div class="cx-card glass rise" style="--i:8"><h3>Citas de hoy <small>${citas.length}</small></h3>${citas.length?`<div class="cx-list">${citas.map(itemCita).join('')}</div>`:'<p class="cx-empty">Sin citas para hoy.</p>'}<div class="cx-row"><a class="cxb gris sm" href="#consultas-0">Abrir agenda</a></div></div>
   <div class="cx-card glass rise" style="--i:9"><h3>Pacientes recientes <small>${L('pacientes').length} en total</small></h3>${rec.length?`<div class="cx-list">${rec.map(p=>itemP(p)).join('')}</div>`:'<p class="cx-empty">Todavía no tienes pacientes. Empieza con Nuevo paciente o Consulta rápida.</p>'}</div></div>
   <div class="cx-card glass rise" style="--i:10;margin-top:14px"><h3>Resumen del consultorio</h3><div class="cx-row" style="gap:22px">${[['Hoy',n(t0)],['Esta semana',n(lun)],['Este mes',n(mes)]].map(([t,v])=>`<div><b style="font-size:30px;font-weight:700;letter-spacing:-.02em">${v}</b><div class="hint" style="margin:0">${t}</div></div>`).join('')}</div></div>`)};
@@ -407,7 +409,24 @@ const vRapida=(el,k)=>{const r=RAP[k]||RAP[0];CUR.ed=true;
   if(r[2]==='e')P.hc.sexo='Mujer';
   el.innerHTML=wrap(head([['Consultas','consultas'],['Consulta rápida','consultas-3'],[r[0]]],'Consulta rápida · '+r[0],'')+modoHTML()+formTop('Escribe el nombre para guardar')+`<div id="cxForm"></div>`);
   montarForm(el,modeloNota(P,C,true),false)};
-const formTop=(sv='')=>`<div class="cx-prog"><div class="tr"><i id="cxBar" style="width:0"></i></div><span id="cxPct">0% capturado</span></div><div style="margin-top:6px"><span class="cx-save${sv?' local':''}" id="cxSave">${sv}</span></div>`;
+const formTop=(sv='')=>`<div class="cx-prog"><div class="tr"><i id="cxBar" style="width:0"></i></div><span id="cxPct">0% capturado</span></div><div class="cx-savebar"><span class="cx-save${sv?' local':''}" id="cxSave">${sv}</span><button type="button" class="cxb sm" id="cxGuardar">Guardar</button></div>`;
+/* botón Guardar: guarda ya y avisa dónde continuar */
+document.addEventListener('click',e=>{if(!e.target.closest('#cxGuardar')||!F)return;if(F.M.ro()){toast('Documento firmado: ya no se edita');return}
+  if(F.M.rapida&&!F.M.guardadoP&&!((F.M.P.hc||{}).nombre||'').trim()){toast('Escribe el nombre del paciente para poder guardar');return}
+  guardar();const sv=document.getElementById('cxSave');
+  const h=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});if(sv)sv.textContent+=' a las '+h;
+  toast('Guardado. Si cierras la app, la encuentras en Consultas, Por terminar')});
+/* pendientes: lo que no se ha firmado */
+const IDS_ID=new Set((X.IDENT||[]).flatMap(sx=>(sx.f||[]).map(f=>f.id)));
+const hcEmpezada=P=>{const h=P.hc||{};return Object.keys(h).some(k=>!IDS_ID.has(k)&&h[k]!==''&&h[k]!=null&&!(Array.isArray(h[k])&&!h[k].length)&&!(typeof h[k]==='object'&&!Array.isArray(h[k])&&!Object.keys(h[k]).length))};
+const pendientes=()=>{const out=[];
+  L('pacientes').forEach(P=>{if(!P.hcFirma&&hcEmpezada(P))out.push({t:'Historia clínica',P,act:P.act||P.creado||0,h:`consultas-p-${P.id}-hc`})});
+  L('consultas').forEach(C=>{const P=S.pacientes[C.pid];if(P&&!C.firma&&C.tipo!=='respaldo')out.push({t:C.tipo==='rapida'?'Consulta rápida':'Nota de consulta',P,act:C.act||C.fecha||0,h:`consultas-p-${P.id}-n-${C.id}`})});
+  L('referencias').forEach(R=>{const P=S.pacientes[R.pid];if(P&&!R.firma)out.push({t:'Hoja de referencia',P,act:R.act||R.fecha||0,h:`consultas-p-${P.id}-r-${R.id}`})});
+  return out.sort((a,b)=>b.act-a.act)};
+const itemPend=x=>`<a class="cx-item" href="#${x.h}">${avatar(x.P)}<span><b>${esc(x.t)} · ${esc(nombreP(x.P))}</b><small>Sin firmar · ${esc(fHora(x.act))}</small></span><span class="cxb gris sm">Continuar</span></a>`;
+const vPend=el=>{const ps=pendientes();el.innerHTML=wrap(head([['Consultas','consultas'],['Por terminar']],'Por terminar','Historias clínicas, notas, consultas rápidas y referencias que todavía no firmas. Todo se guarda solo; aquí continúas donde te quedaste.')+modoHTML()+
+  `<div class="cx-card glass rise" style="--i:2">${ps.length?`<div class="cx-list">${ps.map(itemPend).join('')}</div>`:'<p class="cx-empty">No tienes nada por terminar.</p>'}</div>`)};
 
 const resumenHTML=P=>{const h=P.hc||{},a=alergias(P),meds=(h.meds||[]).filter(r=>r&&r.n),cron=(h.cron||[]).filter(x=>x!=='Otra');
   const items=[['Edad',edadP(P)||'Sin fecha de nacimiento'],['Sexo',sexoP(P)||'Sin registrar'],['Enfermedades crónicas',cron.length?cron.join(', '):'Sin registro'],['Medicamentos actuales',meds.length?meds.map(r=>r.n).join(', '):'Sin registro']];
@@ -432,8 +451,10 @@ const vExp=(el,P)=>{const cs=consultasDe(P.id),rs=refsDe(P.id),av=hcAvance(P),h=
     <button class="glass" id="eDocs"><span class="ic2">${icon('doc',20)}</span><span>Documentos<small>Para imprimir o guardar en PDF</small></span></button>
     <button class="glass" id="eMas"><span class="ic2">${icon('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',20)}</span><span>Más opciones<small>Tipo de expediente</small></span></button></div>
   ${graf?`<div class="cx-card glass" style="margin-top:14px"><h3>Evolución</h3><div class="cx-grid2" style="margin-top:6px">${graf}</div></div>`:''}
+  ${window.VX?VX.expHTML(P):''}
   <div class="cx-card glass" style="margin-top:14px"><h3>Línea del tiempo <small>${cs.length} ${cs.length===1?'consulta':'consultas'}</small></h3><div class="cx-tl">${tl.map(x=>x.html).join('')}</div></div>`);
   $('#eCita').onclick=()=>citaSheet({pid:P.id,nombre:nombreP(P),fecha:hoy()});
+  if(window.VX)VX.bindExp(P,el,put,()=>vExp(el,P),openSheet,closeSheet);
   $('#eDocs').onclick=()=>{const u=cs[0];openSheet('Documentos',`<div class="nlist">${[['Historia clínica',`consultas-doc-hc-${P.id}-x`],...(u?[['Última nota de consulta',`consultas-doc-nota-${P.id}-${u.id}`],['Receta de la última consulta',`consultas-doc-receta-${P.id}-${u.id}`],['Indicaciones para el paciente',`consultas-doc-ind-${P.id}-${u.id}`]]:[]),...rs.map(r=>['Hoja de referencia del '+fCorta(r.fecha),`consultas-doc-ref-${P.id}-${r.id}`])].map(([t,h])=>`<button data-cxh="${h}"><i></i><span><b style="font-size:15px">${esc(t)}</b></span>${icon('doc',18)}</button>`).join('')}</div><p>Cada documento se abre listo para imprimir o guardar como PDF.</p>`)};
   $('#eMas').onclick=()=>{SX.tipo=b=>{P.tipo=b.dataset.t;put('pacientes',P);closeSheet();toast('Expediente cambiado a '+TIPOS[P.tipo][0].toLowerCase());suave(true)};
     SX.borrar=()=>{SX.borrar2=()=>{cs.forEach(c=>del('consultas',c.id));rs.forEach(r=>del('referencias',r.id));L('citas').filter(c=>c.pid===P.id).forEach(c=>del('citas',c.id));del('pacientes',P.id);closeSheet();toast('Paciente eliminado');G.go('consultas-2')};
@@ -700,6 +721,7 @@ const avisos=()=>{if(MODO==='login')return '<p>Inicia sesión para ver los aviso
   const now=Date.now(),cs=L('citas').filter(c=>c.estado==='pendiente'&&citaTs(c)>=now-36e5&&citaTs(c)<=now+48*36e5).sort((x,y)=>citaTs(x)-citaTs(y));
   const u=store.get('gche2-ultresp',0),np=L('pacientes').length,viejo=np&&(!u||now-u>7*864e5);
   return `<p class="slabel" style="margin:4px 0 0">Citas de las próximas 48 horas</p>${cs.length?`<div class="nlist">${cs.map(c=>`<button data-cxh="consultas-0"><i></i><span><b style="font-size:15px">${esc(c.fecha===hoy()?'Hoy':fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="hint">Sin citas pendientes.</p>'}
+  ${(()=>{const P=S.pacientes[store.get('gche2-ultp','')];if(!P||!window.VX)return'';const pe=VX.pendP(P).filter(x=>x.est==='hoy');return pe.length?`<p class="slabel" style="margin:16px 0 0">Vacunas pendientes de ${esc(nombreP(P))}</p><div class="nlist">${pe.slice(0,5).map(x=>`<button data-cxh="consultas-p-${P.id}"><i style="background:#03aa49"></i><span><b style="font-size:15px">${esc(x.v?x.v.n:x.n)}${x.t?' · '+esc(x.t):''}</b><small>${esc(x.txt||'Toca hoy')}</small></span></button>`).join('')}</div>`:''})()}
   ${viejo?`<p class="slabel" style="margin:16px 0 0">Respaldo</p><div class="nlist"><button data-cxr="1"><i style="background:#ff9f0a"></i><span><b style="font-size:15px">${u?'Tu último respaldo tiene más de una semana':'Aún no respaldas tus pacientes'}</b><small>Toca para descargar el archivo</small></span></button></div>`:''}`};
 document.getElementById('sBody').addEventListener('click',e=>{if(e.target.closest('[data-cxr]')){e.stopPropagation();respaldo()}});
 

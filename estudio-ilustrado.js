@@ -2,7 +2,7 @@
    Cada tema ilustrado se registra en window.SXILU con la misma clave que window.SXTEMAS
    (slug de la materia y número de capítulo). estudio-libros.js lo muestra en la pestaña Resumen
    y deja el resumen en texto completo debajo, plegado.
-   Ilustraciones dibujadas para la app (sin imágenes con derechos de autor). */
+   Dibujos hechos para la app; fotos de Wikimedia Commons con su crédito (img/estudio/CREDITOS.md). */
 (function(){
 document.head.insertAdjacentHTML('beforeend',`<style>.sxi{--blue:#0071e3;--blue2:color-mix(in srgb,#0071e3 11%,transparent);--card:var(--solid);--ok:#0a9f4a;--okb:color-mix(in srgb,#0a9f4a 12%,transparent);--no:#d93a3f;--nob:color-mix(in srgb,#d93a3f 11%,transparent);--mid:#c77a00;--midb:color-mix(in srgb,#e39500 14%,transparent);--rosa:#d65a68;--rosab:color-mix(in srgb,#d65a68 10%,transparent);--vio:#7a5af5;--viob:color-mix(in srgb,#7a5af5 12%,transparent);--teal:#00879a;--tealb:color-mix(in srgb,#00a1b3 12%,transparent);--piel:#f2cdb2;--pielL:#e2b394;--aire:#dfeaf5;--sombra:0 1px 2px rgba(0,0,0,.05);display:grid;gap:14px}
 :root.dark .sxi{--piel:#c99b7d;--pielL:#ab7f62;--aire:#22323f;--sombra:none}
@@ -10,37 +10,11 @@ document.head.insertAdjacentHTML('beforeend',`<style>.sxi{--blue:#0071e3;--blue2
 .sxi .snav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .sxi .snav button{flex:none;font-size:14px;padding:8px 13px;min-height:40px;border-radius:999px;border:1px solid var(--line);background:var(--ctrl);cursor:pointer}
 .sxi a.ir,.sxi button.ir{color:var(--blue);font-weight:600;background:none;border:0;padding:8px 0;cursor:pointer;font-size:16px}
-.sxi details.texto{border-radius:20px;padding:12px 16px}.sxi details.texto summary{cursor:pointer;font-weight:600;min-height:32px}
 @keyframes sxiresp{0%,100%{transform:scale(.92)}50%{transform:scale(1.04)}}
-.sxi .scard{background:var(--card);border-radius:22px;padding:clamp(16px,3vw,26px);box-shadow:var(--sombra);border:1px solid var(--line);scroll-margin-top:150px}.sxi h2{font-size:clamp(21px,3vw,26px);line-height:1.15;margin:6px 0 8px;letter-spacing:-.01em;text-wrap:balance}.sxi h3{font-size:17px;margin:14px 0 6px}.sxi p{margin:6px 0}.sxi .muted{color:var(--ink2);font-size:14px}.sxi .tag{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;margin:0 4px 4px 0}.sxi .t-dia{background:var(--blue2);color:var(--blue)}.sxi .t-tar{background:var(--tealb);color:var(--teal)}.sxi .t-foto{background:var(--midb);color:var(--mid)}.sxi .t-lib{background:var(--viob);color:var(--vio)}.sxi .t-int{background:var(--okb);color:var(--ok)}.sxi .leyenda{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.sxi .duo{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}@media(min-width:760px){.sxi .duo{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}.sxi .ilu{background:var(--rosab);border-radius:18px;padding:10px;position:relative}.sxi .ilu svg{display:block;width:100%;height:auto}.sxi .seg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.sxi .seg button{min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--ctrl);font-size:15px;font-weight:500;cursor:pointer}.sxi .seg button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}.sxi .spanel{border-radius:16px;padding:14px 16px;background:var(--ctrl)}.sxi .spanel b{font-weight:650}.sxi .sgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}.sxi .sem{border-radius:16px;padding:14px;border:1px solid var(--line);cursor:pointer;text-align:left;background:var(--card);min-height:44px}.sxi .sem .st{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:3px 9px;border-radius:999px}.sxi .sem h4{margin:8px 0 2px;font-size:16px}.sxi .sem p{font-size:14px;color:var(--ink2)}.sxi .sem .mas{display:none;font-size:14px;margin-top:8px;color:var(--ink)}.sxi .sem[aria-expanded=true] .mas{display:block}.sxi .si{background:var(--okb);color:var(--ok)}.sxi .no{background:var(--nob);color:var(--no)}.sxi .dep{background:var(--midb);color:var(--mid)}.sxi .ico{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.sxi .lista{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.sxi .lista li{display:flex;gap:10px;align-items:flex-start}.sxi .lista .sic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none}.sxi .crit{display:grid;gap:8px}.sxi .crit label{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 14px;border-radius:14px;background:var(--ctrl);cursor:pointer;font-weight:500}.sxi .crit input{width:22px;height:22px;accent-color:var(--blue);flex:none}.sxi .crit .ico{flex:none}.sxi .crit .pt{margin-left:auto;font-size:14px;color:var(--ink2);white-space:nowrap}.sxi .res{display:flex;gap:14px;align-items:center;border-radius:18px;padding:14px 16px;margin-top:10px}.sxi .res .sn{font-size:clamp(44px,8vw,60px);font-weight:800;line-height:1;letter-spacing:-.03em;min-width:1.2em;text-align:center}.sxi .barra{display:flex;gap:3px;margin:10px 0 0}.sxi .barra i{flex:1;height:8px;border-radius:4px;background:var(--line)}.sxi .dosis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));margin-top:12px}.sxi .dc{border-radius:16px;padding:14px;border:1px solid var(--line);background:var(--card)}.sxi .dc h4{margin:0 0 2px;font-size:16px;display:flex;gap:8px;align-items:center}.sxi .dc .sbig{font-size:24px;font-weight:750;letter-spacing:-.02em;margin:4px 0;white-space:nowrap}.sxi .dc .sub{font-size:14px;color:var(--ink2)}.sxi .campos{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.sxi .campos label{display:grid;gap:4px;font-size:14px;color:var(--ink2);font-weight:500}.sxi input[type=number],.sxi select{font:inherit;font-size:17px;min-height:46px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--ctrl);color:var(--ink);width:150px}.sxi select{width:auto}.sxi .foto{margin:0;border-radius:16px;overflow:hidden;background:var(--ctrl);border:1px solid var(--line)}.sxi .foto img{display:block;width:100%;height:auto;background:#222}.sxi .foto figcaption{padding:10px 14px 12px;font-size:15px}.sxi .foto small{display:block;font-size:12.5px;color:var(--ink2);margin-top:6px}.sxi .foto a{color:var(--blue)}.sxi .slot{border:2px dashed var(--line);border-radius:18px;padding:14px;display:flex;gap:14px;align-items:center}.sxi .slot .marco{width:96px;height:96px;border-radius:14px;display:grid;place-items:center;flex:none}.sxi .slot.foto .marco{background:var(--midb);color:var(--mid)}.sxi .slot.lib .marco{background:var(--viob);color:var(--vio)}.sxi .slot .marco .ico{width:40px;height:40px;stroke-width:1.6}.sxi .slot b{display:block}.sxi .slot small{display:block;color:var(--ink2);font-size:13px;margin-top:4px}.sxi .linea{margin:10px 0 4px;display:grid;gap:10px}.sxi .linea .fil small{display:block;font-size:14px;font-weight:600;margin-bottom:4px}.sxi .linea .pista{position:relative;height:12px;border-radius:6px;background:var(--ctrl)}.sxi .linea .pista i{position:absolute;top:0;bottom:0;border-radius:6px}.sxi .linea .ej{position:relative;height:20px;border-top:2px solid var(--line);margin-top:2px}.sxi .linea .mk{position:absolute;top:2px;font-size:13px;color:var(--ink2);transform:translateX(-50%);white-space:nowrap}.sxi .linea .mk:first-child{transform:none}.sxi .linea .mk:last-child{transform:translateX(-100%)}.sxi .flip{perspective:900px;min-height:150px;cursor:pointer;border:0;background:none;padding:0;text-align:left}.sxi .flip .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .5s var(--e,ease);transform-style:preserve-3d}.sxi .flip[aria-pressed=true] .in{transform:rotateY(180deg)}.sxi .flip .cara{position:absolute;inset:0;border-radius:16px;padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line)}.sxi .flip .frente{background:var(--blue2)}.sxi .flip .bk{background:var(--card);transform:rotateY(180deg)}.sxi .flip .frente b{font-size:18px;line-height:1.25}.sxi .flip small{color:var(--ink2);font-size:13px}.sxi .algo{display:grid;gap:6px;margin-top:10px}.sxi .algo .nodo{border-radius:14px;padding:10px 14px;background:var(--ctrl);display:flex;justify-content:space-between;gap:10px;font-size:15px}.sxi .algo .nodo.on{background:var(--blue2);color:var(--ink)}.sxi .algo .flecha{height:16px;width:2px;background:var(--line);margin-left:24px}.sxi .fin{border-radius:16px;padding:14px 16px;margin-top:6px}.sxi .scmp{display:grid;gap:10px}.sxi .scmp .fila{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}@media(min-width:640px){.sxi .scmp .fila{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.sxi .scmp .c{border-radius:14px;padding:12px 14px;font-size:15px}.sxi .scmp .c small{display:block;font-weight:700;font-size:13px;margin-bottom:4px}.sxi .pulso{transform-origin:center;transform-box:fill-box;animation:sxipul 2.2s ease-in-out infinite}@keyframes sxipul{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.05;transform:scale(1.7)}}.sxi .resp{transform-origin:center;transform-box:fill-box}@media(prefers-reduced-motion:reduce){.sxi .pulso,.sxi .resp{animation:none!important}.sxi .flip .in{transition:none}}.sxi .hs{cursor:pointer}.sxi .nota{font-size:13px;color:var(--ink2);margin-top:8px}.sxi strong{font-weight:650}</style>`);
+.sxi .scard{background:var(--card);border-radius:22px;padding:clamp(16px,3vw,26px);box-shadow:var(--sombra);border:1px solid var(--line);scroll-margin-top:150px}.sxi h2{font-size:clamp(21px,3vw,26px);line-height:1.15;margin:6px 0 8px;letter-spacing:-.01em;text-wrap:balance}.sxi h3{font-size:17px;margin:14px 0 6px}.sxi p{margin:6px 0}.sxi .muted{color:var(--ink2);font-size:14px}.sxi .tag{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;margin:0 4px 4px 0}.sxi .t-dia{background:var(--blue2);color:var(--blue)}.sxi .t-tar{background:var(--tealb);color:var(--teal)}.sxi .t-foto{background:var(--midb);color:var(--mid)}.sxi .t-lib{background:var(--viob);color:var(--vio)}.sxi .t-int{background:var(--okb);color:var(--ok)}.sxi .leyenda{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.sxi .duo{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}@media(min-width:760px){.sxi .duo{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}}.sxi .ilu{background:var(--rosab);border-radius:18px;padding:10px;position:relative}.sxi .ilu svg{display:block;width:100%;height:auto}.sxi .seg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.sxi .seg button{min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--ctrl);font-size:15px;font-weight:500;cursor:pointer}.sxi .seg button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}.sxi .spanel{border-radius:16px;padding:14px 16px;background:var(--ctrl)}.sxi .spanel b{font-weight:650}.sxi .sgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}.sxi .sem{border-radius:16px;padding:14px;border:1px solid var(--line);cursor:pointer;text-align:left;background:var(--card);min-height:44px}.sxi .sem .st{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:3px 9px;border-radius:999px}.sxi .sem h4{margin:8px 0 2px;font-size:16px}.sxi .sem p{font-size:14px;color:var(--ink2)}.sxi .sem .mas{display:none;font-size:14px;margin-top:8px;color:var(--ink)}.sxi .sem[aria-expanded=true] .mas{display:block}.sxi .si{background:var(--okb);color:var(--ok)}.sxi .no{background:var(--nob);color:var(--no)}.sxi .dep{background:var(--midb);color:var(--mid)}.sxi .ico{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.sxi .lista{list-style:none;padding:0;margin:8px 0;display:grid;gap:8px}.sxi .lista li{display:flex;gap:10px;align-items:flex-start}.sxi .lista .sic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none}.sxi .crit{display:grid;gap:8px}.sxi .crit label{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 14px;border-radius:14px;background:var(--ctrl);cursor:pointer;font-weight:500;text-align:left;justify-content:flex-start}.sxi .crit input{width:22px;height:22px;accent-color:var(--blue);flex:none}.sxi .crit .ico{flex:none}.sxi .crit .pt{margin-left:auto;font-size:14px;color:var(--ink2);white-space:nowrap}.sxi .res{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-radius:18px;padding:14px 16px;margin-top:10px}.sxi .res .sn{font-size:clamp(44px,8vw,60px);font-weight:800;line-height:1;letter-spacing:-.03em;min-width:1.2em;text-align:center}.sxi .res>div:last-child{flex:1 1 190px}.sxi .barra{display:flex;gap:3px;margin:10px 0 0}.sxi .barra i{flex:1;height:8px;border-radius:4px;background:var(--line)}.sxi .dosis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));margin-top:12px}.sxi .dc{border-radius:16px;padding:14px;border:1px solid var(--line);background:var(--card)}.sxi .dc h4{margin:0 0 2px;font-size:16px;display:flex;gap:8px;align-items:center}.sxi .dc .sbig{font-size:24px;font-weight:750;letter-spacing:-.02em;margin:4px 0;white-space:nowrap}.sxi .dc .sub{font-size:14px;color:var(--ink2)}.sxi .campos{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.sxi .campos label{display:grid;gap:4px;font-size:14px;color:var(--ink2);font-weight:500}.sxi input[type=number],.sxi select{font:inherit;font-size:17px;min-height:46px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--ctrl);color:var(--ink);width:150px}.sxi select{width:auto}.sxi .foto{margin:0;border-radius:16px;overflow:hidden;background:var(--ctrl);border:1px solid var(--line)}.sxi .foto img{display:block;width:100%;height:auto;background:#222}.sxi .foto figcaption{padding:10px 14px 12px;font-size:15px}.sxi .foto small{display:block;font-size:12.5px;color:var(--ink2);margin-top:6px}.sxi .foto a{color:var(--blue)}.sxi .slot{border:2px dashed var(--line);border-radius:18px;padding:14px;display:flex;gap:14px;align-items:center}.sxi .slot .marco{width:96px;height:96px;border-radius:14px;display:grid;place-items:center;flex:none}.sxi .slot.foto .marco{background:var(--midb);color:var(--mid)}.sxi .slot.lib .marco{background:var(--viob);color:var(--vio)}.sxi .slot .marco .ico{width:40px;height:40px;stroke-width:1.6}.sxi .slot b{display:block}.sxi .slot small{display:block;color:var(--ink2);font-size:13px;margin-top:4px}.sxi .linea{margin:10px 0 4px;display:grid;gap:10px}.sxi .linea .fil small{display:block;font-size:14px;font-weight:600;margin-bottom:4px}.sxi .linea .pista{position:relative;height:12px;border-radius:6px;background:var(--ctrl)}.sxi .linea .pista i{position:absolute;top:0;bottom:0;border-radius:6px}.sxi .linea .ej{position:relative;height:20px;border-top:2px solid var(--line);margin-top:2px}.sxi .linea .mk{position:absolute;top:2px;font-size:13px;color:var(--ink2);transform:translateX(-50%);white-space:nowrap}.sxi .linea .mk:first-child{transform:none}.sxi .linea .mk:last-child{transform:translateX(-100%)}.sxi .flip{perspective:900px;min-height:150px;cursor:pointer;border:0;background:none;padding:0;text-align:left}.sxi .flip .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .5s var(--e,ease);transform-style:preserve-3d}.sxi .flip[aria-pressed=true] .in{transform:rotateY(180deg)}.sxi .flip .cara{position:absolute;inset:0;border-radius:16px;padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line)}.sxi .flip .frente{background:var(--blue2)}.sxi .flip .bk{background:var(--card);transform:rotateY(180deg)}.sxi .flip .frente b{font-size:18px;line-height:1.25}.sxi .flip small{color:var(--ink2);font-size:13px}.sxi .algo{display:grid;gap:6px;margin-top:10px}.sxi .algo .nodo{border-radius:14px;padding:10px 14px;background:var(--ctrl);display:flex;justify-content:space-between;gap:10px;font-size:15px}.sxi .algo .nodo.on{background:var(--blue2);color:var(--ink)}.sxi .algo .flecha{height:16px;width:2px;background:var(--line);margin-left:24px}.sxi .fin{border-radius:16px;padding:14px 16px;margin-top:6px}.sxi .scmp{display:grid;gap:10px}.sxi .scmp .fila{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}@media(min-width:640px){.sxi .scmp .fila{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.sxi .scmp .c{border-radius:14px;padding:12px 14px;font-size:15px}.sxi .scmp .c small{display:block;font-weight:700;font-size:13px;margin-bottom:4px}.sxi .pulso{transform-origin:center;transform-box:fill-box;animation:sxipul 2.2s ease-in-out infinite}@keyframes sxipul{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.05;transform:scale(1.7)}}.sxi .resp{transform-origin:center;transform-box:fill-box}@media(prefers-reduced-motion:reduce){.sxi .pulso,.sxi .resp{animation:none!important}.sxi .flip .in{transition:none}}.sxi .hs{cursor:pointer}.sxi .nota{font-size:13px;color:var(--ink2);margin-top:8px}.sxi strong{font-weight:650}.sxi .matriz{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:stretch;font-size:14px}.sxi .matriz .h{font-weight:600;color:var(--ink2);display:flex;align-items:center;justify-content:center;text-align:center;padding:4px}.sxi .matriz button{min-height:72px;border-radius:14px;border:2px solid transparent;font-weight:650;font-size:14px;line-height:1.25;cursor:pointer;padding:8px 6px;white-space:normal;overflow-wrap:anywhere;hyphens:auto}.sxi .matriz .h{font-size:13px}.sxi .matriz button[aria-pressed=true]{border-color:var(--ink)}.sxi .pasos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end;margin:12px 0}.sxi .pasos button{border:0;border-radius:14px 14px 8px 8px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;padding:10px 8px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;gap:2px}.sxi .pasos button small{font-weight:500;font-size:12.5px;opacity:.95}.sxi .pasos button[aria-pressed=true]{outline:3px solid var(--ink);outline-offset:2px}.sxi .uso{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}@media(min-width:640px){.sxi .uso{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.sxi .uso .c{border-radius:14px;padding:12px 14px}.sxi .uso .c small{display:block;font-weight:700;font-size:13px;margin-bottom:4px}.sxi .escala{position:relative;margin:14px 0 30px}.sxi .escala .zonas{display:flex;height:22px;border-radius:11px;overflow:hidden}.sxi .escala .zonas i{display:block;height:100%}.sxi .escala .marca{position:absolute;top:-8px;width:4px;height:38px;border-radius:2px;background:var(--ink);transform:translateX(-50%);transition:left .3s}.sxi .escala .et{position:absolute;top:28px;font-size:12.5px;color:var(--ink2);transform:translateX(-50%);white-space:nowrap}.sxi .escala .et:first-of-type{transform:none}.sxi .gauge{position:relative;height:16px;border-radius:8px;background:var(--ctrl);margin:10px 0 22px}.sxi .gauge i{position:absolute;top:0;bottom:0;border-radius:8px;background:var(--ok);transition:width .3s}.sxi .gauge span{position:absolute;top:20px;font-size:12.5px;color:var(--ink2);transform:translateX(-50%)}.sxi .gauge span:nth-of-type(1){transform:none}.sxi .gauge span:last-child{transform:translateX(-100%)}.sxi .chips2{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.sxi .chips2 span{font-size:14px;padding:6px 11px;border-radius:999px;background:var(--ctrl)}.sxi .clase{border-radius:16px;padding:14px;border:2px solid var(--line);background:var(--card);transition:border-color .2s,background .2s}.sxi .clase.elegida{border-color:var(--ok);background:var(--okb)}.sxi .clase.evitar{border-color:var(--no);background:var(--nob)}.sxi .clase h4{margin:0 0 4px;font-size:16px}.sxi .clase .muted{font-size:13.5px}.sxi .clase .sello{display:none;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-bottom:6px}.sxi .clase.elegida .sello{display:inline-block;background:var(--ok);color:#fff}.sxi .clase.evitar .sello{display:inline-block;background:var(--no);color:#fff}.sxi .escalera{display:grid;gap:6px;grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;margin:12px 0}.sxi .escalera div{border-radius:12px 12px 6px 6px;background:var(--blue2);padding:8px;font-size:13px;text-align:center;display:flex;flex-direction:column;justify-content:flex-end}.sxi .escalera b{font-size:16px;display:block;color:var(--blue)}.sxi .scal{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}.sxi .scal .col{border-radius:16px;padding:14px;background:var(--ctrl)}.sxi .scal .col h4{margin:0 0 8px;font-size:16px}</style>`);
 const ILU=window.SXILU=window.SXILU||{};
-ILU['enfermedades-infecciosas-6']={
-html:()=>`<div class="sxi"><svg width="0" height="0" style="position:absolute" aria-hidden="true">
-<symbol id="sxi-i-term" viewBox="0 0 24 24"><path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol>
-<symbol id="sxi-i-gota" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7Z"/></symbol>
-<symbol id="sxi-i-ojo" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
-<symbol id="sxi-i-tos" viewBox="0 0 24 24"><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
-<symbol id="sxi-i-pild" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a5 5 0 1 0-7-7l-10 10a5 5 0 1 0 7 7ZM8.5 8.5l7 7"/></symbol>
-<symbol id="sxi-i-jer" viewBox="0 0 24 24"><path d="m18 2 4 4M17 7l3-3M19 9 8.7 19.3a1 1 0 0 1-1.4 0l-2.6-2.6a1 1 0 0 1 0-1.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6"/></symbol>
-<symbol id="sxi-i-alerta" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01"/></symbol>
-<symbol id="sxi-i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
-<symbol id="sxi-i-cor" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol>
-<symbol id="sxi-i-ok" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-<symbol id="sxi-i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
-<symbol id="sxi-i-vaso" viewBox="0 0 24 24"><path d="M5 3h14l-2 18H7ZM6 9c2 1.3 4 1.3 6 0s4-1.3 6 0"/></symbol>
-<symbol id="sxi-i-miel" viewBox="0 0 24 24"><path d="M7 7h10v3a5 5 0 0 1 2 4v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a5 5 0 0 1 2-4ZM8 3h8v4H8z"/></symbol>
-<symbol id="sxi-i-spray" viewBox="0 0 24 24"><path d="M9 10h6v10a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2ZM10 10V6l2-4 2 4v4M5 5l2 1M4 9h2M18 6l2-1M18 9h2"/></symbol>
-<symbol id="sxi-i-bebe" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21c0-4 2.7-7 6-7s6 3 6 7M10 7h.01M14 7h.01"/></symbol>
-<symbol id="sxi-i-mayor" viewBox="0 0 24 24"><circle cx="11" cy="5" r="2.5"/><path d="M11 8v7l-3 6M11 15l3 6M8 11l3-2 3 2M17 11v10"/></symbol>
-<symbol id="sxi-i-emb" viewBox="0 0 24 24"><circle cx="11" cy="4.5" r="2.5"/><path d="M10 8c-2 1-2 4-1 6l-1 7M12 8c3 1 5 3.5 4 6.5-.6 1.8-2.6 2-4 1.5M11 16l1 5"/></symbol>
-<symbol id="sxi-i-cron" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
-<symbol id="sxi-i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5Z"/><circle cx="12" cy="13" r="3.5"/></symbol>
-<symbol id="sxi-i-libro" viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5 2.5 2.5 0 0 0 6.5 24H20M8 7h8M8 11h6"/></symbol>
-<symbol id="sxi-i-gang" viewBox="0 0 24 24"><path d="M7 3c-1 4 0 8 3 11s4 6 3 8"/><circle cx="14" cy="9" r="2.5"/><circle cx="17" cy="14" r="2"/></symbol>
-<symbol id="sxi-i-pulm" viewBox="0 0 24 24"><path d="M12 3v8M12 11c-1.5 1-3 1-3 1M12 11c1.5 1 3 1 3 1M9 6.5C6 7 3 11 3 16c0 3 1 5 3 5s3-1.5 3-4V6.5ZM15 6.5c3 .5 6 4.5 6 9.5 0 3-1 5-3 5s-3-1.5-3-4V6.5Z"/></symbol>
-<symbol id="sxi-i-bazo" viewBox="0 0 24 24"><path d="M7 4c5-2 12 1 12 7s-5 10-10 9c-3-.6-5-3-4-6 .8-2.3 3-2.5 3-5S5 5 7 4Z"/></symbol>
-<symbol id="sxi-i-piel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="9" r="1"/><circle cx="14" cy="7" r="1"/><circle cx="16" cy="13" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="12" cy="11" r="1"/></symbol>
-</svg><nav class="snav" aria-label="Secciones"><button type="button" data-ir="mapa">Mapa</button><button type="button" data-ir="antibiotico">¿Antibiótico?</button><button type="button" data-ir="resfriado">Resfriado</button><button type="button" data-ir="faringe">Faringe</button><button type="button" data-ir="centor">Centor</button><button type="button" data-ir="dosis">Dosis</button><button type="button" data-ir="complicaciones">Complicaciones</button><button type="button" data-ir="oido">Oído</button><button type="button" data-ir="senos">Senos</button><button type="button" data-ir="influenza">Influenza</button><button type="button" data-ir="alarma">Alarma</button><button type="button" data-ir="perlas">Perlas</button><button type="button" data-ir="mexico">México</button></nav>
+ILU["enfermedades-infecciosas-6"]={
+html:()=>`<div class="sxi"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="sxi-i-term" viewBox="0 0 24 24"><path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol><symbol id="sxi-i-gota" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7Z"/></symbol><symbol id="sxi-i-ojo" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="sxi-i-tos" viewBox="0 0 24 24"><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol><symbol id="sxi-i-pild" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a5 5 0 1 0-7-7l-10 10a5 5 0 1 0 7 7ZM8.5 8.5l7 7"/></symbol><symbol id="sxi-i-jer" viewBox="0 0 24 24"><path d="m18 2 4 4M17 7l3-3M19 9 8.7 19.3a1 1 0 0 1-1.4 0l-2.6-2.6a1 1 0 0 1 0-1.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6"/></symbol><symbol id="sxi-i-alerta" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01"/></symbol><symbol id="sxi-i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="sxi-i-cor" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol><symbol id="sxi-i-ok" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="sxi-i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol><symbol id="sxi-i-vaso" viewBox="0 0 24 24"><path d="M5 3h14l-2 18H7ZM6 9c2 1.3 4 1.3 6 0s4-1.3 6 0"/></symbol><symbol id="sxi-i-miel" viewBox="0 0 24 24"><path d="M7 7h10v3a5 5 0 0 1 2 4v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a5 5 0 0 1 2-4ZM8 3h8v4H8z"/></symbol><symbol id="sxi-i-spray" viewBox="0 0 24 24"><path d="M9 10h6v10a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2ZM10 10V6l2-4 2 4v4M5 5l2 1M4 9h2M18 6l2-1M18 9h2"/></symbol><symbol id="sxi-i-bebe" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21c0-4 2.7-7 6-7s6 3 6 7M10 7h.01M14 7h.01"/></symbol><symbol id="sxi-i-mayor" viewBox="0 0 24 24"><circle cx="11" cy="5" r="2.5"/><path d="M11 8v7l-3 6M11 15l3 6M8 11l3-2 3 2M17 11v10"/></symbol><symbol id="sxi-i-emb" viewBox="0 0 24 24"><circle cx="11" cy="4.5" r="2.5"/><path d="M10 8c-2 1-2 4-1 6l-1 7M12 8c3 1 5 3.5 4 6.5-.6 1.8-2.6 2-4 1.5M11 16l1 5"/></symbol><symbol id="sxi-i-cron" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol><symbol id="sxi-i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5Z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="sxi-i-libro" viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5 2.5 2.5 0 0 0 6.5 24H20M8 7h8M8 11h6"/></symbol><symbol id="sxi-i-gang" viewBox="0 0 24 24"><path d="M7 3c-1 4 0 8 3 11s4 6 3 8"/><circle cx="14" cy="9" r="2.5"/><circle cx="17" cy="14" r="2"/></symbol><symbol id="sxi-i-pulm" viewBox="0 0 24 24"><path d="M12 3v8M12 11c-1.5 1-3 1-3 1M12 11c1.5 1 3 1 3 1M9 6.5C6 7 3 11 3 16c0 3 1 5 3 5s3-1.5 3-4V6.5ZM15 6.5c3 .5 6 4.5 6 9.5 0 3-1 5-3 5s-3-1.5-3-4V6.5Z"/></symbol><symbol id="sxi-i-bazo" viewBox="0 0 24 24"><path d="M7 4c5-2 12 1 12 7s-5 10-10 9c-3-.6-5-3-4-6 .8-2.3 3-2.5 3-5S5 5 7 4Z"/></symbol><symbol id="sxi-i-piel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="9" r="1"/><circle cx="14" cy="7" r="1"/><circle cx="16" cy="13" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="12" cy="11" r="1"/></symbol><symbol id="sxi-i-cerebro" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1ZM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></symbol><symbol id="sxi-i-sal" viewBox="0 0 24 24"><path d="M8 9h8l-1 12H9ZM9 9l1-5h4l1 5M11 6h.01M13 6h.01"/></symbol><symbol id="sxi-i-rinon" viewBox="0 0 24 24"><path d="M9 3C5 3 3 7 3 12s2 9 6 9c2.5 0 3-2 3-4 0-1.5-1.5-2.5-1.5-5S12 8.5 12 7c0-2-1-4-3-4ZM15 3c4 0 6 4 6 9s-2 9-6 9"/></symbol><symbol id="sxi-i-correr" viewBox="0 0 24 24"><circle cx="15" cy="4" r="2"/><path d="m4 17 4-1 2-4 3 2v6M10 12l1-5 4 2 3 3M7 9l4-2"/></symbol><symbol id="sxi-i-pesa" viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></symbol><symbol id="sxi-i-copa" viewBox="0 0 24 24"><path d="M8 3h8l-1 7a3 3 0 0 1-6 0ZM12 13v7M8 21h8"/></symbol><symbol id="sxi-i-humo" viewBox="0 0 24 24"><path d="M3 15h13v3H3zM18 15h3v3h-3M18 11c0-2 2-2 2-4M21 11c0-2 1-3 0-5M2 2l20 20"/></symbol><symbol id="sxi-i-plato" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 12h9"/></symbol><symbol id="sxi-i-lab" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7.5 15h9"/></symbol><symbol id="sxi-i-ecg" viewBox="0 0 24 24"><path d="M2 12h5l2-5 3 10 2-5h8"/></symbol><symbol id="sxi-i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></symbol><symbol id="sxi-i-pie" viewBox="0 0 24 24"><path d="M8 21c-2 0-3-2-3-5 0-4 1-7 1-10a3 3 0 0 1 6 0c0 3-1 5-1 8s2 4 2 5-1 2-5 2ZM15 4h.01M17.5 5.5h.01M19 8h.01M19.5 11h.01"/></symbol><symbol id="sxi-i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol></svg><nav class="snav" aria-label="Secciones"><button type="button" data-ir="mapa">Mapa</button><button type="button" data-ir="antibiotico">¿Antibiótico?</button><button type="button" data-ir="resfriado">Resfriado</button><button type="button" data-ir="faringe">Faringe</button><button type="button" data-ir="centor">Centor</button><button type="button" data-ir="dosis">Dosis</button><button type="button" data-ir="complicaciones">Complicaciones</button><button type="button" data-ir="oido">Oído</button><button type="button" data-ir="senos">Senos</button><button type="button" data-ir="influenza">Influenza</button><button type="button" data-ir="alarma">Alarma</button><button type="button" data-ir="perlas">Perlas</button><button type="button" data-ir="mexico">México</button></nav>
 <section class="scard glass" id="sxi-mapa">
 
 <h2>Toca dónde está la infección</h2>
@@ -80,7 +54,7 @@ html:()=>`<div class="sxi"><svg width="0" height="0" style="position:absolute" a
 </div>
 <div class="sgrid" style="margin-top:14px">
 <figure class="foto"><img src="img/estudio/faringitis-estreptococica.jpg" width="720" height="623" loading="lazy" decoding="async" alt="Faringe enrojecida con petequias en el paladar blando"><figcaption><b>Faringitis estreptocócica:</b> faringe roja y edematosa con <b>petequias en el paladar blando</b>, poco frecuentes pero muy específicas.<small>Foto: Centros para el Control y la Prevención de Enfermedades de Estados Unidos, Dr. Heinz F. Eichenwald. Dominio público. <a href="https://commons.wikimedia.org/wiki/File:Streptococcal_pharyngitis.jpg" target="_blank" rel="noopener noreferrer">Ver en Wikimedia Commons</a></small></figcaption></figure>
-<div class="slot lib"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 6.1: faringoamigdalitis pultácea</b><small>Ábrela en tu libro: Enfermedades infecciosas, página 51.</small></div></div>
+<div class="slot lib"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 6.1: faringoamigdalitis pultácea</b><small>Ábrela en tu libro: Enfermedades infecciosas, página 51 del archivo.</small></div></div>
 </div>
 </section>
 
@@ -126,7 +100,7 @@ html:()=>`<div class="sxi"><svg width="0" height="0" style="position:absolute" a
 <div class="sgrid" style="margin-top:10px">
 <figure class="foto"><img src="img/estudio/absceso-periamigdalino.jpg" width="615" height="720" loading="lazy" decoding="async" alt="Absceso periamigdalino derecho con abombamiento del paladar"><figcaption><b>Absceso periamigdalino derecho</b> (flecha): abombamiento del paladar blando de un lado y úvula empujada al lado contrario.<small>Foto: James Heilman, MD. Licencia Creative Commons Atribución-CompartirIgual 3.0. <a href="https://commons.wikimedia.org/wiki/File:PeritonsilarAbsess.jpg" target="_blank" rel="noopener noreferrer">Ver en Wikimedia Commons</a></small></figcaption></figure>
 <div class="dc"><h4><svg class="ico" style="color:var(--rosa)"><use href="#sxi-i-bazo"/></svg>Mononucleosis infecciosa</h4><p class="sub">Adolescente con faringitis exudativa, <strong>adenopatía cervical posterior</strong>, esplenomegalia y fatiga. Con amoxicilina aparece <strong>exantema</strong>. Sin deportes de contacto: riesgo de rotura de bazo.</p></div>
-<div class="slot lib"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 6.2: síndrome de Lemierre</b><small>Ábrela en tu libro: Enfermedades infecciosas, página 52.</small></div></div>
+<div class="slot lib"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 6.2: síndrome de Lemierre</b><small>Ábrela en tu libro: Enfermedades infecciosas, página 52 del archivo.</small></div></div>
 </div>
 </section>
 
@@ -269,8 +243,8 @@ function garganta(svg,o){
  const ux=abs?-16:0,rot=abs?12:0;
  const blotch=cx=>[[-8,-12,6,4],[6,-2,7,4.5],[-6,10,5,3.5],[8,14,4,3]].map(([dx,dy,rx,ry])=>`<ellipse cx="${cx+dx*s}" cy="${118+dy*s}" rx="${rx}" ry="${ry}" fill="#fff6dc" stroke="#efdca8" stroke-width=".8"/>`).join('');
  svg.innerHTML=`
- <defs><clipPath id="cp${svg.id}"><ellipse cx="150" cy="108" rx="118" ry="80"/></clipPath>
- <radialGradient id="rg${svg.id}" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="${ph}"/><stop offset="1" stop-color="#7a2632"/></radialGradient></defs>
+ <defs><clipPath id="sxi-cp${svg.id}"><ellipse cx="150" cy="108" rx="118" ry="80"/></clipPath>
+ <radialGradient id="sxi-rg${svg.id}" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="${ph}"/><stop offset="1" stop-color="#7a2632"/></radialGradient></defs>
  <ellipse cx="150" cy="106" rx="132" ry="92" fill="#c25b66"/>
  <g clip-path="url(#cp${svg.id})">
   <rect x="0" y="0" width="300" height="210" fill="#4a1720"/>
@@ -428,5 +402,550 @@ fl.onclick=e=>{const b=e.target.closest('.flip');if(b)b.setAttribute('aria-press
 
 /* ---------- México ---------- */
 $('#sxi-cmp').innerHTML=[['Faringoamigdalitis (guía IMSS-073-08 del Instituto Mexicano del Seguro Social, 2008)','Penicilina compuesta seguida de procaínica; erradicación con benzatínica cada 21 días por 3 meses.','Penicilina benzatínica dosis única, o penicilina V o amoxicilina por 10 días.'],['Alergia a penicilina','Eritromicina o trimetoprima con sulfametoxazol.','Cefalexina, clindamicina o macrólido. El trimetoprima con sulfametoxazol no sirve para el estreptococo del grupo A.'],['Niños de 3 meses a 18 años (IMSS-062-08, 2016)','Paracetamol; sin antitusivos, descongestionantes, ipratropio, vitamina C ni zinc.','Coincide con el CTO y el Harrison.']].map(([t,g,a])=>`<div><h3 style="margin:4px 0">${t}</h3><div class="fila"><div class="c" style="background:var(--midb)"><small style="color:var(--mid)">Guía mexicana</small>${g}</div><div class="c" style="background:var(--okb)"><small style="color:var(--ok)">Usa esto</small>${a}</div></div></div>`).join('');
+}};
+ILU["cardiologia-14"]={
+html:()=>`<div class="sxi"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="sxi-i-term" viewBox="0 0 24 24"><path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol><symbol id="sxi-i-gota" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7Z"/></symbol><symbol id="sxi-i-ojo" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="sxi-i-tos" viewBox="0 0 24 24"><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol><symbol id="sxi-i-pild" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a5 5 0 1 0-7-7l-10 10a5 5 0 1 0 7 7ZM8.5 8.5l7 7"/></symbol><symbol id="sxi-i-jer" viewBox="0 0 24 24"><path d="m18 2 4 4M17 7l3-3M19 9 8.7 19.3a1 1 0 0 1-1.4 0l-2.6-2.6a1 1 0 0 1 0-1.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6"/></symbol><symbol id="sxi-i-alerta" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01"/></symbol><symbol id="sxi-i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="sxi-i-cor" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol><symbol id="sxi-i-ok" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="sxi-i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol><symbol id="sxi-i-vaso" viewBox="0 0 24 24"><path d="M5 3h14l-2 18H7ZM6 9c2 1.3 4 1.3 6 0s4-1.3 6 0"/></symbol><symbol id="sxi-i-miel" viewBox="0 0 24 24"><path d="M7 7h10v3a5 5 0 0 1 2 4v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a5 5 0 0 1 2-4ZM8 3h8v4H8z"/></symbol><symbol id="sxi-i-spray" viewBox="0 0 24 24"><path d="M9 10h6v10a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2ZM10 10V6l2-4 2 4v4M5 5l2 1M4 9h2M18 6l2-1M18 9h2"/></symbol><symbol id="sxi-i-bebe" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21c0-4 2.7-7 6-7s6 3 6 7M10 7h.01M14 7h.01"/></symbol><symbol id="sxi-i-mayor" viewBox="0 0 24 24"><circle cx="11" cy="5" r="2.5"/><path d="M11 8v7l-3 6M11 15l3 6M8 11l3-2 3 2M17 11v10"/></symbol><symbol id="sxi-i-emb" viewBox="0 0 24 24"><circle cx="11" cy="4.5" r="2.5"/><path d="M10 8c-2 1-2 4-1 6l-1 7M12 8c3 1 5 3.5 4 6.5-.6 1.8-2.6 2-4 1.5M11 16l1 5"/></symbol><symbol id="sxi-i-cron" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol><symbol id="sxi-i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5Z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="sxi-i-libro" viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5 2.5 2.5 0 0 0 6.5 24H20M8 7h8M8 11h6"/></symbol><symbol id="sxi-i-gang" viewBox="0 0 24 24"><path d="M7 3c-1 4 0 8 3 11s4 6 3 8"/><circle cx="14" cy="9" r="2.5"/><circle cx="17" cy="14" r="2"/></symbol><symbol id="sxi-i-pulm" viewBox="0 0 24 24"><path d="M12 3v8M12 11c-1.5 1-3 1-3 1M12 11c1.5 1 3 1 3 1M9 6.5C6 7 3 11 3 16c0 3 1 5 3 5s3-1.5 3-4V6.5ZM15 6.5c3 .5 6 4.5 6 9.5 0 3-1 5-3 5s-3-1.5-3-4V6.5Z"/></symbol><symbol id="sxi-i-bazo" viewBox="0 0 24 24"><path d="M7 4c5-2 12 1 12 7s-5 10-10 9c-3-.6-5-3-4-6 .8-2.3 3-2.5 3-5S5 5 7 4Z"/></symbol><symbol id="sxi-i-piel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="9" r="1"/><circle cx="14" cy="7" r="1"/><circle cx="16" cy="13" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="12" cy="11" r="1"/></symbol><symbol id="sxi-i-cerebro" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1ZM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></symbol><symbol id="sxi-i-sal" viewBox="0 0 24 24"><path d="M8 9h8l-1 12H9ZM9 9l1-5h4l1 5M11 6h.01M13 6h.01"/></symbol><symbol id="sxi-i-rinon" viewBox="0 0 24 24"><path d="M9 3C5 3 3 7 3 12s2 9 6 9c2.5 0 3-2 3-4 0-1.5-1.5-2.5-1.5-5S12 8.5 12 7c0-2-1-4-3-4ZM15 3c4 0 6 4 6 9s-2 9-6 9"/></symbol><symbol id="sxi-i-correr" viewBox="0 0 24 24"><circle cx="15" cy="4" r="2"/><path d="m4 17 4-1 2-4 3 2v6M10 12l1-5 4 2 3 3M7 9l4-2"/></symbol><symbol id="sxi-i-pesa" viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></symbol><symbol id="sxi-i-copa" viewBox="0 0 24 24"><path d="M8 3h8l-1 7a3 3 0 0 1-6 0ZM12 13v7M8 21h8"/></symbol><symbol id="sxi-i-humo" viewBox="0 0 24 24"><path d="M3 15h13v3H3zM18 15h3v3h-3M18 11c0-2 2-2 2-4M21 11c0-2 1-3 0-5M2 2l20 20"/></symbol><symbol id="sxi-i-plato" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 12h9"/></symbol><symbol id="sxi-i-lab" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7.5 15h9"/></symbol><symbol id="sxi-i-ecg" viewBox="0 0 24 24"><path d="M2 12h5l2-5 3 10 2-5h8"/></symbol><symbol id="sxi-i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></symbol><symbol id="sxi-i-pie" viewBox="0 0 24 24"><path d="M8 21c-2 0-3-2-3-5 0-4 1-7 1-10a3 3 0 0 1 6 0c0 3-1 5-1 8s2 4 2 5-1 2-5 2ZM15 4h.01M17.5 5.5h.01M19 8h.01M19.5 11h.01"/></symbol><symbol id="sxi-i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol></svg><nav class="snav" aria-label="Secciones"><button type="button" data-ir="clasifica">Clasificar</button><button type="button" data-ir="medir">Medir</button><button type="button" data-ir="fenomenos">Bata blanca</button><button type="button" data-ir="evaluacion">Evaluación</button><button type="button" data-ir="secundaria">Secundaria</button><button type="button" data-ir="estilo">Estilo de vida</button><button type="button" data-ir="iniciar">¿Iniciar?</button><button type="button" data-ir="pasos">Pasos</button><button type="button" data-ir="segun">Según paciente</button><button type="button" data-ir="dosis">Dosis</button><button type="button" data-ir="resistente">Resistente</button><button type="button" data-ir="crisis">Crisis</button><button type="button" data-ir="seguimiento">Seguimiento</button><button type="button" data-ir="perlas">Perlas</button><button type="button" data-ir="mexico">México</button></nav><section class="scard glass" id="sxi-clasifica">
+<h2>Clasifica la presión de tu paciente</h2>
+<div class="duo">
+<div>
+<div class="campos"><label>Sistólica (mmHg)<input type="number" id="sxi-sis" value="152" inputmode="numeric"></label><label>Diastólica (mmHg)<input type="number" id="sxi-dia" value="88" inputmode="numeric"></label></div>
+<div class="res" id="sxi-resPA"></div>
+<p class="nota">El diagnóstico se confirma en al menos <b>dos visitas</b> o con mediciones fuera del consultorio: en casa 135/85 o más; con monitoreo de 24 horas, 135/85 de día y 120/70 de noche.</p>
+</div>
+<div class="ilu" style="background:var(--aire)"><svg id="sxi-mapaPA" viewBox="0 0 340 262" role="img" aria-label="Gráfica de categorías de presión arterial"></svg></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-medir">
+<h2>Cómo medir bien</h2>
+<p class="muted">Toca cada número.</p>
+<div class="duo">
+<div class="ilu" style="background:var(--aire)"><svg id="sxi-sentado" viewBox="0 0 320 260" role="img" aria-label="Persona sentada con el brazo apoyado a la altura del corazón"></svg></div>
+<div><div class="spanel" id="sxi-infoMedir"></div>
+<ul class="lista" style="margin-top:10px"><li class="muted"><span>La primera vez, mide <b>ambos brazos</b> y usa el más alto. Toma 2 o 3 lecturas separadas 1 a 2 minutos y promedia.</span></li><li class="muted"><span>El protocolo del Instituto Mexicano del Seguro Social confirma con monitoreo en casa: dos mediciones al día por 10 días.</span></li></ul></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-fenomenos">
+<h2>Bata blanca, enmascarada y patrón nocturno</h2>
+<div class="duo">
+<div>
+<div class="matriz" id="sxi-matriz"></div>
+<div class="spanel" id="sxi-infoMatriz" style="margin-top:10px"></div>
+</div>
+<div>
+<div class="seg" id="sxi-segDip"></div>
+<div class="ilu" style="background:var(--aire)"><svg id="sxi-curva24" viewBox="0 0 340 180" role="img" aria-label="Presión durante 24 horas"></svg></div>
+<p class="nota" id="sxi-notaDip"></p>
+</div>
+</div>
+<div class="sgrid" style="margin-top:12px">
+<div class="dc"><h4>Seudohipertensión del anciano</h4><div class="sub">Arterias rígidas. <b>Signo de Osler:</b> la radial se sigue palpando con el brazalete inflado.</div></div>
+<div class="slot lib"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 14.1: monitoreo de 24 horas</b><small>Cardiología, página 142 del archivo.</small></div></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-evaluacion">
+<h2>Evaluación inicial</h2>
+<div class="sgrid" id="sxi-evalua"></div>
+<div class="slot lib" style="margin-top:12px"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 14.3: electrocardiograma con hipertrofia ventricular izquierda</b><small>Cardiología, página 144 del archivo.</small></div></div>
+</section>
+
+<section class="scard glass" id="sxi-secundaria">
+<h2>Pista clínica, ¿qué causa secundaria?</h2>
+<div class="sgrid" id="sxi-flipsSec"></div>
+</section>
+
+<section class="scard glass" id="sxi-estilo">
+<h2>Estilo de vida para todos</h2>
+<div class="sgrid" id="sxi-estiloG"></div>
+</section>
+
+<section class="scard glass" id="sxi-iniciar">
+<h2>¿Inicio fármaco ya?</h2>
+<div class="seg" id="sxi-segGrado"></div>
+<div class="crit"><label><input type="checkbox" id="sxi-altoR">Alto riesgo: diabetes, enfermedad renal, enfermedad cardiovascular o daño a órgano blanco</label></div>
+<div class="res" id="sxi-resIni"></div>
+</section>
+
+<section class="scard glass" id="sxi-pasos">
+<h2>Esquema por pasos</h2>
+<p class="muted">Toca cada escalón.</p>
+<div class="pasos" id="sxi-escPasos"></div>
+<div class="spanel" id="sxi-infoPaso"></div>
+<div class="sgrid" style="margin-top:10px">
+<div class="dc" style="background:var(--nob);border-color:transparent"><h4 style="color:var(--no)">Nunca</h4><div class="sub" style="color:var(--ink)">Combinar un inhibidor de la enzima convertidora de angiotensina con un antagonista del receptor de angiotensina II.</div></div>
+<div class="dc"><h4>Betabloqueadores</h4><div class="sub">En cualquier paso si hay indicación: cardiopatía isquémica, insuficiencia cardiaca o control de frecuencia en fibrilación auricular.</div></div>
+<div class="slot lib"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 14.4: manejo farmacológico</b><small>Cardiología, página 145 del archivo.</small></div></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-segun">
+<h2>¿Qué fármaco según el paciente?</h2>
+<div class="seg" id="sxi-segPac"></div>
+<div class="uso" id="sxi-usoPac"></div>
+</section>
+
+<section class="scard glass" id="sxi-dosis">
+<h2>Dosis habituales en adultos</h2>
+<div class="sgrid" id="sxi-dosisG"></div>
+<p class="nota">Vigila creatinina y potasio a las 1 a 2 semanas de iniciar o subir un inhibidor de la enzima convertidora o un antagonista del receptor de angiotensina.</p>
+</section>
+
+<section class="scard glass" id="sxi-resistente">
+<h2>Hipertensión resistente</h2>
+<p>Fuera de meta con <b>tres fármacos a dosis óptimas, uno de ellos diurético</b>. Antes, descarta la seudorresistencia:</p>
+<div class="crit" id="sxi-chkRes"></div>
+<div class="res" id="sxi-resRes"></div>
+</section>
+
+<section class="scard glass" id="sxi-crisis">
+<h2>Crisis hipertensiva: ¿urgencia o emergencia?</h2>
+<div class="duo">
+<div>
+<div class="campos"><label>Sistólica<input type="number" id="sxi-cs" value="196" inputmode="numeric"></label><label>Diastólica<input type="number" id="sxi-cd" value="118" inputmode="numeric"></label></div>
+<h3>¿Hay daño agudo?</h3>
+<div class="crit" id="sxi-danos"></div>
+</div>
+<div><div class="res" id="sxi-resCri" style="margin-top:0"></div>
+<div class="fin" style="background:var(--nob);margin-top:10px"><b style="color:var(--no)">No uses nifedipino sublingual:</b> la caída brusca puede causar isquemia cerebral o coronaria.</div></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-seguimiento">
+<h2>Seguimiento</h2>
+<div class="linea" id="sxi-lineaSeg"></div>
+<p class="nota">Referir: emergencia hipertensiva, sospecha de hipertensión secundaria, hipertensión resistente, embarazo con hipertensión o daño renal que progresa.</p>
+</section>
+
+<section class="scard glass" id="sxi-perlas">
+<h2>Perlas: toca para voltear</h2>
+<div class="sgrid" id="sxi-flips"></div>
+</section>
+
+<section class="scard glass" id="sxi-mexico">
+<h2>Lo mexicano frente al CTO</h2>
+<div class="scmp" id="sxi-cmp"></div>
+<p class="nota">Fuentes: Manual CTO 14.ª edición, Cardiología capítulo 14; Guía de Práctica Clínica de hipertensión en el primer nivel (Centro Nacional de Excelencia Tecnológica en Salud, 2021); Protocolo de Atención Integral de hipertensión del Instituto Mexicano del Seguro Social (2022); Harrison 21.ª edición, capítulo 277.</p>
+</section>
+</div>`,
+init:root=>{if(!root)return;
+const $=s=>root.querySelector(s);
+const ir=k=>{const el=$('#sxi-'+k);if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})};
+root.addEventListener('click',e=>{const b=e.target.closest('[data-ir]');if(b){e.preventDefault();ir(b.dataset.ir)}});
+const ico=(n,c='')=>`<svg class="ico" ${c?`style="color:${c}"`:''}><use href="#sxi-i-${n}"/></svg>`;
+const seg=(el,ops,val,fn)=>{const r=()=>{el.innerHTML=ops.map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===val}">${t}</button>`).join('')};r();el.onclick=e=>{const b=e.target.closest('button');if(!b)return;val=b.dataset.k;r();fn(val)};fn(val)};
+const li=arr=>arr.map(([i,c,b,t])=>`<li><span class="sic" style="background:${b};color:${c}">${ico(i)}</span><span>${t}</span></li>`).join('');
+const flips=(el,arr)=>{el.innerHTML=arr.map(([q,a])=>`<button type="button" class="flip" aria-pressed="false"><div class="in"><div class="cara frente"><b>${q}</b><small>Toca para ver la respuesta</small></div><div class="cara bk"><b style="font-size:16px;line-height:1.35">${a}</b><small>Toca para regresar</small></div></div></button>`).join('');el.onclick=e=>{const b=e.target.closest('.flip');if(b)b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true')}};
+
+/* ---------- Clasificación ---------- */
+const X=d=>50+(Math.max(60,Math.min(130,d))-60)/70*280,Y=s=>230-(Math.max(90,Math.min(200,s))-90)/110*210;
+const CAT=[['Grado 3',200,130,'#d93a3f'],['Grado 2',180,110,'#ee7a3a'],['Grado 1',160,100,'#f2b13b'],['Normal alta',140,90,'#c8d65a'],['Normal',130,85,'#7cc77a'],['Óptima',120,80,'#33a868']];
+function clasif(s,d){if(s>=180||d>=110)return 0;if(s>=160||d>=100)return 1;if(s>=140||d>=90)return 2;if(s>=130||d>=85)return 3;if(s>=120||d>=80)return 4;return 5}
+function pa(){const s=parseFloat($('#sxi-sis').value),d=parseFloat($('#sxi-dia').value),ok=!isNaN(s)&&!isNaN(d);
+ const svg=$('#sxi-mapaPA');
+ svg.innerHTML=CAT.map(([t,ms,md,c])=>`<rect x="${X(60)}" y="${Y(ms)}" width="${X(md)-X(60)}" height="${Y(90)-Y(ms)}" fill="${c}"/>`).join('')+
+ CAT.map(([t,ms],i)=>{const lo=i<5?CAT[i+1][1]:90;return `<text x="${X(60)+8}" y="${(Y(ms)+Y(lo))/2+4}" font-size="11.5" font-weight="700" fill="#fff">${t}</text>`}).join('')+
+ [80,85,90,100,110,120].map(v=>`<text x="${X(v)}" y="248" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".7">${v}</text>`).join('')+
+ [120,130,140,160,180].map(v=>`<text x="44" y="${Y(v)+4}" text-anchor="end" font-size="10.5" fill="currentColor" opacity=".7">${v}</text>`).join('')+
+ `<text x="190" y="261" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".7">Diastólica</text><text x="12" y="125" font-size="10.5" fill="currentColor" opacity=".7" transform="rotate(-90 12 125)" text-anchor="middle">Sistólica</text>`+
+ (ok?`<circle cx="${X(d)}" cy="${Y(s)}" r="12" fill="#fff" opacity=".45" class="pulso"/><circle cx="${X(d)}" cy="${Y(s)}" r="7" fill="#1d1d1f" stroke="#fff" stroke-width="2.5"/>`:'');
+ svg.style.color='var(--ink)';
+ if(!ok){$('#sxi-resPA').innerHTML='Escribe las dos cifras.';return}
+ const i=clasif(s,d),[t,,,c]=CAT[i];let x='';
+ if(s>=140&&d<90)x+=' <b>Sistólica aislada</b>: típica del adulto mayor por rigidez arterial.';
+ if(s>=180||d>=120)x+=' Cifras de <b>crisis hipertensiva</b>: busca daño agudo de órgano blanco (más abajo).';
+ if(i<=2&&!x.includes('crisis'))x+=' Confírmala en otra visita o fuera del consultorio.';
+ $('#sxi-resPA').style.background=`color-mix(in srgb,${c} 16%,transparent)`;
+ $('#sxi-resPA').innerHTML=`<div class="sn" style="color:${c};font-size:clamp(26px,5vw,36px);min-width:auto">${s}/${d}</div><div><b>${t}.</b>${x}</div>`}
+['sis','dia'].forEach(id=>$('#sxi-'+id).addEventListener('input',pa));pa();
+
+/* ---------- Medir ---------- */
+const MED=[[1,'Espalda apoyada y 5 minutos de reposo','Sentado, sin hablar. Sin café, tabaco ni ejercicio en los 30 minutos previos y con la vejiga vacía.',104,70],[2,'Brazo apoyado a la altura del corazón','Brazo descubierto y apoyado en la mesa.',196,118],[3,'Brazalete del tamaño correcto','Uno pequeño da cifras falsamente altas.',152,104],[4,'Piernas sin cruzar, pies en el piso','',150,232]];
+const sen=$('#sxi-sentado');
+function medir(n){sen.innerHTML=`<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+ <rect x="208" y="122" width="100" height="10" rx="3" fill="#b9a089" stroke="none"/><path d="M296 132V250M222 132V250" stroke="#b9a089" stroke-width="6"/>
+ <path d="M70 60V200M70 160H150M76 200V250M144 166V250" stroke="#8d7a6a" stroke-width="7"/>
+ <circle cx="104" cy="44" r="20" fill="var(--piel)" stroke="none"/>
+ <path d="M100 66C96 100 96 130 100 160" stroke="var(--pielL)" stroke-width="26"/>
+ <path d="M100 160H156" stroke="#3b5a8a" stroke-width="22"/><path d="M156 160V238" stroke="#3b5a8a" stroke-width="18"/><path d="M150 244H176" stroke="#2a2a2a" stroke-width="10"/>
+ <path d="M104 84L150 112L210 120" stroke="var(--piel)" stroke-width="14"/>
+ <rect x="128" y="94" width="30" height="20" rx="5" fill="#2e6fd1" stroke="none" transform="rotate(31 143 104)"/>
+ <path d="M146 108C160 140 176 150 196 150" stroke="#2e6fd1" stroke-width="2.5"/>
+ <path d="M60 118H300" stroke="#d93a3f" stroke-width="1.5" stroke-dasharray="5 5"/></g>
+ <text x="300" y="112" text-anchor="end" font-size="11" fill="#d93a3f" font-weight="600">altura del corazón</text>
+ <path d="M114 124c4-6 12-6 12 0 0 6-6 10-12 14-6-4-12-8-12-14 0-6 8-6 12 0Z" fill="#d93a3f"/>
+ ${MED.map(([k,t,,x,y])=>`<g class="hs" data-k="${k}" tabindex="0" role="button" aria-label="${t}"><circle cx="${x}" cy="${y}" r="15" fill="#0071e3" class="pulso"/><circle cx="${x}" cy="${y}" r="12" fill="${k===n?'#0071e3':'#fff'}" stroke="#0071e3" stroke-width="2.5"/><text x="${x}" y="${y+4.5}" text-anchor="middle" font-size="13" font-weight="800" fill="${k===n?'#fff':'#0071e3'}">${k}</text></g>`).join('')}`;
+ const m=MED.find(z=>z[0]===n);$('#sxi-infoMedir').innerHTML=`<div class="muted">Punto ${n} de 4</div><h3 style="margin:2px 0 6px">${m[1]}</h3>${m[2]?`<p>${m[2]}</p>`:''}`}
+sen.addEventListener('click',e=>{const g=e.target.closest('.hs');if(g)medir(+g.dataset.k)});
+sen.addEventListener('keydown',e=>{const g=e.target.closest('.hs');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();medir(+g.dataset.k)}});
+medir(2);
+
+/* ---------- Matriz ---------- */
+const MZ={aa:['Hipertensión sostenida','Alta en consultorio y fuera.','var(--no)','var(--nob)'],an:['Bata blanca','Alta en consultorio, normal fuera. Se descarta con monitoreo de 24 horas.','var(--mid)','var(--midb)'],na:['Hipertensión enmascarada','Normal en consultorio, alta fuera. <b>Se trata como hipertensión.</b>','var(--no)','var(--nob)'],nn:['Normotensión','Normal en ambos.','var(--ok)','var(--okb)']};
+let mz='an';
+function matriz(){$('#sxi-matriz').innerHTML=`<span></span><span class="h">Fuera: alta</span><span class="h">Fuera: normal</span><span class="h">Consultorio: alta</span>${['aa','an'].map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===mz}" style="background:${MZ[k][3]};color:${MZ[k][2]}">${MZ[k][0]}</button>`).join('')}<span class="h">Consultorio: normal</span>${['na','nn'].map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===mz}" style="background:${MZ[k][3]};color:${MZ[k][2]}">${MZ[k][0]}</button>`).join('')}`;
+ $('#sxi-infoMatriz').innerHTML=`<b>${MZ[mz][0]}:</b> ${MZ[mz][1]}`}
+$('#sxi-matriz').onclick=e=>{const b=e.target.closest('button');if(b){mz=b.dataset.k;matriz()}};matriz();
+seg($('#sxi-segDip'),[['dip','Normal: baja de noche'],['non','Non-dipper']],'non',k=>{const H=h=>30+h/24*290,V=v=>150-(v-100)/60*120;
+ const day=[[0,118],[6,122],[8,138],[12,142],[16,140],[20,134],[22,128],[24,120]];
+ const pts=k==='dip'?[[0,112],[3,110],[6,118],[8,138],[12,142],[16,140],[20,134],[22,122],[24,112]]:[[0,138],[3,136],[6,138],[8,142],[12,144],[16,142],[20,140],[22,139],[24,138]];
+ const p=pts.map(([h,v],i)=>(i?'L':'M')+H(h)+' '+V(v)).join('');
+ $('#sxi-curva24').innerHTML=`<rect x="${H(22)}" y="20" width="${H(24)-H(22)}" height="130" fill="#0b2340" opacity=".18"/><rect x="${H(0)}" y="20" width="${H(6)-H(0)}" height="130" fill="#0b2340" opacity=".18"/>
+ <text x="${H(3)}" y="34" text-anchor="middle" font-size="11" fill="currentColor" opacity=".75">noche</text><text x="${H(14)}" y="34" text-anchor="middle" font-size="11" fill="currentColor" opacity=".75">día</text>
+ <line x1="30" y1="150" x2="320" y2="150" stroke="currentColor" opacity=".3"/>${[0,6,12,18,24].map(h=>`<text x="${H(h)}" y="166" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".7">${h} h</text>`).join('')}
+ <path d="${p}" fill="none" stroke="${k==='dip'?'#0a9f4a':'#d93a3f'}" stroke-width="4" stroke-linejoin="round"/>`;
+ $('#sxi-curva24').style.color='var(--ink)';
+ $('#sxi-notaDip').innerHTML=k==='dip'?'Lo normal: la presión <b>baja de noche</b> (con monitoreo de 24 horas, menos de 120/70 de noche).':'<b>Non-dipper:</b> la presión no baja de noche. Obliga a buscar <b>apnea obstructiva del sueño</b>.'});
+
+/* ---------- Evaluación ---------- */
+$('#sxi-evalua').innerHTML=[['lab','Laboratorio','Glucosa, creatinina con filtración glomerular, sodio y potasio, perfil de lípidos, ácido úrico, biometría hemática y examen general de orina con albuminuria.'],['ecg','Electrocardiograma','Busca hipertrofia ventricular izquierda.'],['ojo','Fondo de ojo','Daño en retina.'],['cor','Riesgo cardiovascular global','Y daño a órgano blanco: corazón, riñón, cerebro, retina y arterias periféricas.']].map(([i,t,d])=>`<div class="dc"><h4>${ico(i,'var(--blue)')}${t}</h4><div class="sub">${d}</div></div>`).join('');
+
+/* ---------- Secundaria ---------- */
+flips($('#sxi-flipsSec'),[['Hipertensión con hipopotasemia y alcalosis metabólica','Hiperaldosteronismo primario.'],['Crisis de cefalea, sudoración y palpitaciones','Feocromocitoma.'],['Creatinina sube más de 30% al iniciar enalapril o losartán','Estenosis de arteria renal.'],['Ronquido, somnolencia de día y obesidad','Apnea obstructiva del sueño.'],['Inicio antes de los 30 años o descontrol súbito','Sospecha de causa secundaria: búscala.'],['Toma antiinflamatorios, anticonceptivos o corticoides','Causa farmacológica. También descongestionantes y alcohol.']]);
+
+/* ---------- Estilo ---------- */
+$('#sxi-estiloG').innerHTML=[['sal','Sal','Menos de 5 g','al día: una cucharadita'],['correr','Ejercicio','30 minutos','al día, 5 a 7 días por semana'],['pesa','Peso','−5 kg = −5/−3','mmHg de sistólica y diastólica, aproximadamente'],['copa','Alcohol','Menos de 20 g','al día en hombres; menos de 10 g en mujeres'],['plato','Dieta','Frutas y verduras','dieta para detener la hipertensión'],['humo','Tabaco','Dejarlo','']].map(([i,t,b,s])=>`<div class="dc"><h4>${ico(i,'var(--teal)')}${t}</h4><div class="sbig" style="font-size:21px">${b}</div><div class="sub">${s}</div></div>`).join('');
+
+/* ---------- Iniciar ---------- */
+let gr='g1';
+function ini(){const ar=$('#sxi-altoR').checked;let t,c;
+ if(gr==='na'){t='<b>No se dan fármacos.</b> Solo estilo de vida.';c='ok'}
+ else if(gr==='g1'&&!ar){t='<b>Estilo de vida 3 a 6 meses</b>; si no se controla, fármaco.';c='mid'}
+ else{t='<b>Fármaco desde el inicio</b>, junto con estilo de vida.';c='no'}
+ $('#sxi-resIni').style.background=`var(--${c}b)`;$('#sxi-resIni').innerHTML=`<div style="color:var(--${c});display:flex">${ico(c==='no'?'pild':c==='ok'?'ok':'reloj')}</div><div>${t}</div>`}
+seg($('#sxi-segGrado'),[['na','Normal alta'],['g1','Grado 1'],['g2','Grado 2'],['g3','Grado 3']],'g1',k=>{gr=k;ini()});
+$('#sxi-altoR').addEventListener('change',ini);
+
+/* ---------- Pasos ---------- */
+const PS=[['Paso 1','Doble terapia','#0071e3',90,'<b>Inhibidor de la enzima convertidora de angiotensina o antagonista del receptor de angiotensina II</b> más <b>calcioantagonista o diurético tiazídico</b>, de preferencia en una sola tableta. Monoterapia solo en grado 1 de bajo riesgo o en adultos mayores frágiles.'],['Paso 2','Triple terapia','#5a4fd6',130,'Los <b>tres grupos juntos</b>: inhibidor de la enzima convertidora o antagonista del receptor de angiotensina, calcioantagonista y tiazida.'],['Paso 3','Más espironolactona','#a03ad0',170,'Agrega <b>espironolactona</b>. Revisa antes el potasio y la función renal.']];
+let ps=0;
+function pasos(){$('#sxi-escPasos').innerHTML=PS.map(([a,b,c,h],i)=>`<button type="button" aria-pressed="${i===ps}" data-i="${i}" style="height:${h}px;background:${c}">${a}<small>${b}</small></button>`).join('');$('#sxi-infoPaso').innerHTML=`<b>${PS[ps][0]}:</b> ${PS[ps][4]}`}
+$('#sxi-escPasos').onclick=e=>{const b=e.target.closest('button');if(b){ps=+b.dataset.i;pasos()}};pasos();
+
+/* ---------- Según paciente ---------- */
+const PA={dm:['Inhibidor de la enzima convertidora o antagonista del receptor de angiotensina II.','—','Diabetes, albuminuria o enfermedad renal crónica'],viejo:['Calcioantagonista o tiazida.','—','Adulto mayor con sistólica aislada'],emb:['Alfametildopa, labetalol o nifedipino.','Inhibidores de la enzima convertidora y antagonistas del receptor de angiotensina: contraindicados.','Embarazo'],hpb:['Alfabloqueador como fármaco agregado.','—','Hiperplasia prostática'],asma:['Los grupos del paso 1.','Betabloqueadores.','Asma'],gota:['Los otros grupos.','Tiazidas.','Gota'],tos:['Cambiar a un antagonista del receptor de angiotensina II.','Seguir con enalapril.','Tos seca con enalapril'],edema:['Es efecto de clase de las dihidropiridinas, no insuficiencia cardiaca.','—','Edema de tobillos con amlodipino']};
+seg($('#sxi-segPac'),Object.entries(PA).map(([k,v])=>[k,v[2]]),'emb',k=>{const [u,e]=PA[k];$('#sxi-usoPac').innerHTML=`<div class="c" style="background:var(--okb)"><small style="color:var(--ok)">Usa</small>${u}</div><div class="c" style="background:var(--nob)"><small style="color:var(--no)">Evita</small>${e}</div>`});
+
+/* ---------- Dosis ---------- */
+$('#sxi-dosisG').innerHTML=[['Losartán','50 mg','una vez al día; rango de 25 a 100 mg'],['Enalapril','5 mg al día','2.5 mg si toma diurético; mantenimiento 10 a 40 mg al día en 1 o 2 tomas'],['Amlodipino','5 mg','una vez al día, máximo 10 mg; 2.5 mg en adultos mayores frágiles'],['Hidroclorotiazida o clortalidona','12.5 a 25 mg','una vez al día']].map(([t,b,s])=>`<div class="dc"><h4>${ico('pild','var(--blue)')}${t}</h4><div class="sbig">${b}</div><div class="sub">${s}</div></div>`).join('');
+
+/* ---------- Resistente ---------- */
+const RS=['Falta de apego (la causa más frecuente)','Mala técnica de medición','Bata blanca: confirmada con monitoreo de 24 horas','Exceso de sal','Antiinflamatorios u otros fármacos que suben la presión'];
+$('#sxi-chkRes').innerHTML=RS.map((t,i)=>`<label><input type="checkbox" data-i="${i}">Descartado: ${t}</label>`).join('');
+function res(){const n=[...$('#sxi-chkRes').querySelectorAll('input')].filter(x=>x.checked).length,all=n===RS.length;
+ $('#sxi-resRes').style.background=all?'var(--okb)':'var(--ctrl)';
+ $('#sxi-resRes').innerHTML=`<div class="sn" style="color:${all?'var(--ok)':'var(--ink2)'};font-size:clamp(30px,6vw,40px)">${n}/${RS.length}</div><div>${all?'<b>Es resistente de verdad.</b> Cuarto fármaco: <b>espironolactona</b>. Busca causa secundaria y refiere a cardiología o medicina interna.':'Marca lo que ya descartaste antes de llamarla resistente.'}</div>`}
+$('#sxi-chkRes').addEventListener('change',res);res();
+
+/* ---------- Crisis ---------- */
+const DN=[['cerebro','Encefalopatía o evento vascular cerebral'],['cor','Síndrome coronario agudo'],['pulm','Edema pulmonar'],['alerta','Disección aórtica'],['rinon','Lesión renal aguda'],['emb','Eclampsia']];
+$('#sxi-danos').innerHTML=DN.map(([i,t],k)=>`<label>${ico(i,'var(--no)')}<input type="checkbox" data-k="${k}">${t}</label>`).join('');
+function cri(){const s=parseFloat($('#sxi-cs').value),d=parseFloat($('#sxi-cd').value),dan=[...$('#sxi-danos').querySelectorAll('input')].some(x=>x.checked),cr=s>=180||d>=120;let t,c;
+ if(dan&&cr){t='<b>Emergencia hipertensiva.</b> Daño agudo de órgano blanco: <b>referencia inmediata</b> para tratamiento intravenoso.';c='no'}
+ else if(cr){t='<b>Urgencia hipertensiva.</b> Sin daño agudo: fármacos <b>orales</b>, bajar de forma gradual en <b>24 a 48 horas</b>; revisa el apego y cita pronto.';c='mid'}
+ else if(dan){t='No llega a cifras de crisis, pero hay datos de daño agudo: valora y refiere a urgencias según el cuadro.';c='mid'}
+ else{t='No es crisis hipertensiva (crisis: 180 o más de sistólica y/o 120 o más de diastólica).';c='ok'}
+ $('#sxi-resCri').style.background=`var(--${c}b)`;$('#sxi-resCri').innerHTML=`<div class="sn" style="color:var(--${c});font-size:clamp(26px,5vw,34px);min-width:auto">${isNaN(s)?'–':s}/${isNaN(d)?'–':d}</div><div>${t}</div>`}
+['cs','cd'].forEach(id=>$('#sxi-'+id).addEventListener('input',cri));$('#sxi-danos').addEventListener('change',cri);cri();
+
+/* ---------- Seguimiento ---------- */
+$('#sxi-lineaSeg').innerHTML=[['Revalorar 2 a 4 semanas después de iniciar o ajustar',0,4,'var(--blue)'],['Meta alcanzada en unos 3 meses',0,13,'var(--ok)'],['Ya controlado: cada 3 a 6 meses',13,26,'var(--teal)']].map(([t,a,b,c])=>`<div class="fil"><small style="color:${c}">${t}</small><div class="pista"><i style="left:${a/26*100}%;width:${(b-a)/26*100}%;background:${c}"></i></div></div>`).join('')+`<div class="ej"><span class="mk" style="left:0">Semana 0</span><span class="mk" style="left:${13/26*100}%">3 meses</span><span class="mk" style="left:100%">6 meses</span></div>`;
+
+/* ---------- Perlas ---------- */
+flips($('#sxi-flips'),[['¿Cómo se confirma el diagnóstico?','Dos visitas o mediciones fuera del consultorio; la bata blanca se descarta con monitoreo de 24 horas.'],['¿Con cuántos fármacos se inicia casi siempre?','Doble terapia. Monoterapia solo en grado 1 de bajo riesgo o anciano frágil.'],['¿Cuarto fármaco en la resistente?','Espironolactona.'],['¿Antihipertensivo en el embarazo?','Alfametildopa. Nunca inhibidores de la enzima convertidora ni antagonistas del receptor de angiotensina.'],['¿Hipopotasemia más hipertensión?','Hiperaldosteronismo primario.'],['¿Urgencia frente a emergencia?','Urgencia sin daño: orales y bajar gradual. Emergencia con daño: intravenoso y referencia.']]);
+
+/* ---------- México ---------- */
+$('#sxi-cmp').innerHTML=[['Meta de presión','Menor de 130/80 si se tolera; adulto mayor frágil, sistólica de 140 a 150.','Menor de 130/80 sin bajar de 110/70; menor de 140/90 en el adulto mayor.'],['Doble terapia inicial','Inhibidor de la enzima convertidora o antagonista del receptor de angiotensina más calcioantagonista o tiazida.','Inhibidor de la enzima convertidora o antagonista del receptor de angiotensina más indapamida o hidroclorotiazida; calcioantagonista como segundo paso a las 2 semanas, o desde el inicio con riesgo cardiometabólico o diabetes.'],['Umbral de diagnóstico','140/90 (guías europeas).','140/90. La guía de Estados Unidos usa 130/80, pero en el ENARM (Examen Nacional de Aspirantes a Residencias Médicas) se usa 140/90.']].map(([t,g,a])=>`<div><h3 style="margin:4px 0">${t}</h3><div class="fila"><div class="c" style="background:var(--blue2)"><small style="color:var(--blue)">CTO (guías europeas)</small>${g}</div><div class="c" style="background:var(--okb)"><small style="color:var(--ok)">México (Instituto Mexicano del Seguro Social)</small>${a}</div></div></div>`).join('');
+}};
+ILU["endocrinologia-5"]={
+html:()=>`<div class="sxi"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="sxi-i-term" viewBox="0 0 24 24"><path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol><symbol id="sxi-i-gota" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7Z"/></symbol><symbol id="sxi-i-ojo" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="sxi-i-tos" viewBox="0 0 24 24"><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol><symbol id="sxi-i-pild" viewBox="0 0 24 24"><path d="m10.5 20.5 10-10a5 5 0 1 0-7-7l-10 10a5 5 0 1 0 7 7ZM8.5 8.5l7 7"/></symbol><symbol id="sxi-i-jer" viewBox="0 0 24 24"><path d="m18 2 4 4M17 7l3-3M19 9 8.7 19.3a1 1 0 0 1-1.4 0l-2.6-2.6a1 1 0 0 1 0-1.4L15 5M9 11l4 4M5 19l-3 3M14 4l6 6"/></symbol><symbol id="sxi-i-alerta" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01"/></symbol><symbol id="sxi-i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="sxi-i-cor" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol><symbol id="sxi-i-ok" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="sxi-i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol><symbol id="sxi-i-vaso" viewBox="0 0 24 24"><path d="M5 3h14l-2 18H7ZM6 9c2 1.3 4 1.3 6 0s4-1.3 6 0"/></symbol><symbol id="sxi-i-miel" viewBox="0 0 24 24"><path d="M7 7h10v3a5 5 0 0 1 2 4v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a5 5 0 0 1 2-4ZM8 3h8v4H8z"/></symbol><symbol id="sxi-i-spray" viewBox="0 0 24 24"><path d="M9 10h6v10a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2ZM10 10V6l2-4 2 4v4M5 5l2 1M4 9h2M18 6l2-1M18 9h2"/></symbol><symbol id="sxi-i-bebe" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21c0-4 2.7-7 6-7s6 3 6 7M10 7h.01M14 7h.01"/></symbol><symbol id="sxi-i-mayor" viewBox="0 0 24 24"><circle cx="11" cy="5" r="2.5"/><path d="M11 8v7l-3 6M11 15l3 6M8 11l3-2 3 2M17 11v10"/></symbol><symbol id="sxi-i-emb" viewBox="0 0 24 24"><circle cx="11" cy="4.5" r="2.5"/><path d="M10 8c-2 1-2 4-1 6l-1 7M12 8c3 1 5 3.5 4 6.5-.6 1.8-2.6 2-4 1.5M11 16l1 5"/></symbol><symbol id="sxi-i-cron" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol><symbol id="sxi-i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5Z"/><circle cx="12" cy="13" r="3.5"/></symbol><symbol id="sxi-i-libro" viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5 2.5 2.5 0 0 0 6.5 24H20M8 7h8M8 11h6"/></symbol><symbol id="sxi-i-gang" viewBox="0 0 24 24"><path d="M7 3c-1 4 0 8 3 11s4 6 3 8"/><circle cx="14" cy="9" r="2.5"/><circle cx="17" cy="14" r="2"/></symbol><symbol id="sxi-i-pulm" viewBox="0 0 24 24"><path d="M12 3v8M12 11c-1.5 1-3 1-3 1M12 11c1.5 1 3 1 3 1M9 6.5C6 7 3 11 3 16c0 3 1 5 3 5s3-1.5 3-4V6.5ZM15 6.5c3 .5 6 4.5 6 9.5 0 3-1 5-3 5s-3-1.5-3-4V6.5Z"/></symbol><symbol id="sxi-i-bazo" viewBox="0 0 24 24"><path d="M7 4c5-2 12 1 12 7s-5 10-10 9c-3-.6-5-3-4-6 .8-2.3 3-2.5 3-5S5 5 7 4Z"/></symbol><symbol id="sxi-i-piel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="9" r="1"/><circle cx="14" cy="7" r="1"/><circle cx="16" cy="13" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="12" cy="11" r="1"/></symbol><symbol id="sxi-i-cerebro" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1ZM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></symbol><symbol id="sxi-i-sal" viewBox="0 0 24 24"><path d="M8 9h8l-1 12H9ZM9 9l1-5h4l1 5M11 6h.01M13 6h.01"/></symbol><symbol id="sxi-i-rinon" viewBox="0 0 24 24"><path d="M9 3C5 3 3 7 3 12s2 9 6 9c2.5 0 3-2 3-4 0-1.5-1.5-2.5-1.5-5S12 8.5 12 7c0-2-1-4-3-4ZM15 3c4 0 6 4 6 9s-2 9-6 9"/></symbol><symbol id="sxi-i-correr" viewBox="0 0 24 24"><circle cx="15" cy="4" r="2"/><path d="m4 17 4-1 2-4 3 2v6M10 12l1-5 4 2 3 3M7 9l4-2"/></symbol><symbol id="sxi-i-pesa" viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></symbol><symbol id="sxi-i-copa" viewBox="0 0 24 24"><path d="M8 3h8l-1 7a3 3 0 0 1-6 0ZM12 13v7M8 21h8"/></symbol><symbol id="sxi-i-humo" viewBox="0 0 24 24"><path d="M3 15h13v3H3zM18 15h3v3h-3M18 11c0-2 2-2 2-4M21 11c0-2 1-3 0-5M2 2l20 20"/></symbol><symbol id="sxi-i-plato" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 12h9"/></symbol><symbol id="sxi-i-lab" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7.5 15h9"/></symbol><symbol id="sxi-i-ecg" viewBox="0 0 24 24"><path d="M2 12h5l2-5 3 10 2-5h8"/></symbol><symbol id="sxi-i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></symbol><symbol id="sxi-i-pie" viewBox="0 0 24 24"><path d="M8 21c-2 0-3-2-3-5 0-4 1-7 1-10a3 3 0 0 1 6 0c0 3-1 5-1 8s2 4 2 5-1 2-5 2ZM15 4h.01M17.5 5.5h.01M19 8h.01M19.5 11h.01"/></symbol><symbol id="sxi-i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol></svg><nav class="snav" aria-label="Secciones"><button type="button" data-ir="mapa">Mapa</button><button type="button" data-ir="diagnostico">Diagnóstico</button><button type="button" data-ir="tamizaje">Tamizaje</button><button type="button" data-ir="metas">Metas</button><button type="button" data-ir="estilo">Estilo de vida</button><button type="button" data-ir="metformina">Metformina</button><button type="button" data-ir="plan">Tratamiento</button><button type="button" data-ir="adversos">Efectos adversos</button><button type="button" data-ir="insulina">Insulina</button><button type="button" data-ir="hipoglucemia">Hipoglucemia</button><button type="button" data-ir="vigilancia">Vigilancia</button><button type="button" data-ir="referir">Referir</button><button type="button" data-ir="perlas">Perlas</button><button type="button" data-ir="mexico">México</button></nav><section class="scard glass" id="sxi-mapa">
+<h2>Qué revisar en el paciente con diabetes</h2>
+<p class="muted">Toca cada órgano. La diabetes tipo 2 es resistencia a la insulina más falla progresiva de la célula beta.</p>
+<div class="duo">
+<div class="ilu" style="background:var(--aire)"><svg id="sxi-cuerpo" viewBox="0 0 320 430" role="img" aria-label="Silueta con ojos, corazón, páncreas, riñones y pies"></svg></div>
+<div><div class="seg" id="sxi-segCuerpo"></div><div class="spanel" id="sxi-infoCuerpo"></div></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-diagnostico">
+<h2>¿Normal, prediabetes o diabetes?</h2>
+<p class="muted">Elige la prueba y escribe el resultado.</p>
+<div class="seg" id="sxi-segPrueba"></div>
+<div class="campos"><label><span id="sxi-lblValor">Glucosa en ayuno (mg/dL)</span><input type="number" id="sxi-valor" step="0.1" inputmode="decimal" value="118"></label></div>
+<div class="escala" id="sxi-escala"></div>
+<div class="res" id="sxi-resDx"></div>
+<p class="nota" id="sxi-notaDx"></p>
+<div class="slot lib" style="margin-top:12px"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 5.1: niveles normales y patológicos de glucemia</b><small>Endocrinología, página 100 del archivo.</small></div></div>
+</section>
+
+<section class="scard glass" id="sxi-tamizaje">
+<h2>A quién buscarle diabetes</h2>
+<div class="duo">
+<div>
+<div class="res" style="background:var(--blue2)"><div class="sn" style="color:var(--blue)">35</div><div><b>Todo adulto desde los 35 años.</b> Antes, si tiene índice de masa corporal de 25 o más y al menos un factor de riesgo.</div></div>
+<h3>Factores de riesgo</h3>
+<div class="chips2"><span>Familiar de primer grado con diabetes</span><span>Origen latino</span><span>Hipertensión</span><span>Enfermedad cardiovascular</span><span>Colesterol de alta densidad menor de 35</span><span>Triglicéridos mayores de 250</span><span>Síndrome de ovario poliquístico</span><span>Sedentarismo</span><span>Acantosis nigricans</span><span>Diabetes gestacional o recién nacido de más de 4 kg</span></div>
+<p>Si sale normal, repetir <strong>cada 3 años</strong>. Con diabetes gestacional previa, al menos cada 3 años de por vida.</p>
+</div>
+<figure class="foto"><img src="img/estudio/acantosis-nigricans.jpg" width="720" height="684" loading="lazy" decoding="async" alt="Piel engrosada, oscura y aterciopelada en el codo"><figcaption><b>Acantosis nigricans:</b> piel engrosada, oscura y aterciopelada en pliegues; marcador de resistencia a la insulina.<small>Foto: Vassia Atanassova (Spiritia). Licencia Creative Commons Atribución-CompartirIgual 4.0. <a href="https://commons.wikimedia.org/wiki/File:Acanthosis_negricans_-_elbow_(cropped).jpg" target="_blank" rel="noopener noreferrer">Ver en Wikimedia Commons</a></small></figcaption></figure>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-metas">
+<h2>Metas de control</h2>
+<div class="seg" id="sxi-segMeta"></div>
+<div class="res" style="background:var(--okb)" id="sxi-resMeta"></div>
+<div class="gauge" id="sxi-gauge"></div>
+<div class="sgrid">
+<div class="dc"><h4>Glucosa en ayuno o antes de comer</h4><div class="sbig">80 a 130</div><div class="sub">mg/dL</div></div>
+<div class="dc"><h4>Glucosa 2 horas después de comer</h4><div class="sbig">Menor de 180</div><div class="sub">mg/dL</div></div>
+<div class="dc"><h4>Presión arterial</h4><div class="sbig">Menor de 130/80</div><div class="sub">mmHg</div></div>
+<div class="dc"><h4>Colesterol de baja densidad</h4><div class="sbig">Menor de 70 o 100</div><div class="sub">Muy alto riesgo menor de 70; alto riesgo menor de 100 mg/dL</div></div>
+<div class="dc"><h4>Peso</h4><div class="sbig">Bajar 5 a 10%</div><div class="sub">si hay sobrepeso u obesidad</div></div>
+</div>
+</section>
+
+<section class="scard glass" id="sxi-estilo">
+<h2>Sin fármacos, para todos</h2>
+<ul class="lista" id="sxi-listaEstilo"></ul>
+<h3>Una semana de ejercicio</h3>
+<div class="escalera" id="sxi-semana" style="grid-template-columns:repeat(7,minmax(0,1fr))"></div>
+<p class="nota">Al menos 150 minutos por semana de ejercicio aeróbico moderado en 3 o más días, más fuerza 2 veces por semana.</p>
+</section>
+
+<section class="scard glass" id="sxi-metformina">
+<h2>Metformina: el primer fármaco</h2>
+<div class="escalera" id="sxi-escMet"></div>
+<p class="nota">Inicio: 500 mg cada 12 horas u 850 mg una vez al día, con alimentos. Subir 500 mg por semana. Máximo 2,550 mg al día.</p>
+<h3>¿Puedo darla con esta función renal?</h3>
+<div class="campos"><label>Filtración glomerular (mL/min/1.73 m²)<input type="range" id="sxi-tfg" min="5" max="120" value="52" style="width:min(100%,320px);accent-color:var(--blue)"></label></div>
+<div class="res" id="sxi-resTfg"></div>
+<div class="chips2"><span>Náusea, diarrea y distensión al inicio</span><span>Deficiencia de vitamina B12 con el uso prolongado</span><span>Acidosis láctica: rara</span><span>Suspender antes de contraste yodado</span></div>
+<p class="nota">Si no se tolera: presentación de liberación prolongada o cambiar a un inhibidor de la dipeptidil peptidasa 4.</p>
+</section>
+
+<section class="scard glass" id="sxi-plan">
+<h2>Arma el tratamiento de tu paciente</h2>
+<div class="duo">
+<div>
+<div class="campos"><label>Hemoglobina glucosilada (%)<input type="number" id="sxi-hba" step="0.1" value="8.8" inputmode="decimal"></label><label>Glucosa (mg/dL)<input type="number" id="sxi-glu" value="190" inputmode="numeric"></label></div>
+<div class="crit" id="sxi-perfil" style="margin-top:10px"></div>
+</div>
+<div><div class="algo" id="sxi-algoPlan"></div></div>
+</div>
+<h3>Las clases de fármacos</h3>
+<div class="sgrid" id="sxi-clases"></div>
+<p class="nota"><b>No combinar</b> un inhibidor de la dipeptidil peptidasa 4 con un agonista del péptido similar al glucagón tipo 1.</p>
+<div class="slot lib" style="margin-top:12px"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 5.11: algoritmo de manejo farmacológico</b><small>Endocrinología, página 121 del archivo. La figura 5.10 (página 119) resume los fármacos.</small></div></div>
+</section>
+
+<section class="scard glass" id="sxi-adversos">
+<h2>Efectos adversos que más se preguntan</h2>
+<div class="sgrid" id="sxi-flipsAdv"></div>
+</section>
+
+<section class="scard glass" id="sxi-insulina">
+<h2>Insulina basal: inicio y ajuste</h2>
+<p><b>Desde el inicio</b> si hay pérdida de peso o cetosis, hemoglobina glucosilada mayor de 10% o glucosa de 300 mg/dL o más.</p>
+<div class="duo">
+<div>
+<div class="campos"><label>Peso en kilos<input type="number" id="sxi-pesoIns" value="80" inputmode="decimal"></label></div>
+<div class="seg" id="sxi-segIns"></div>
+<div class="sgrid" id="sxi-dosisIns"></div>
+</div>
+<div>
+<h3 style="margin-top:4px">Ajuste semanal de glargina</h3>
+<div class="campos"><label>Promedio de glucosa en ayuno (mg/dL)<input type="number" id="sxi-ayunoProm" value="165" inputmode="numeric"></label></div>
+<div class="res" id="sxi-resAjuste"></div>
+<div class="linea" id="sxi-lineaAjuste"></div>
+</div>
+</div>
+<p class="nota">Al iniciar insulina se suspenden sulfonilureas y pioglitazona; la metformina se mantiene.</p>
+<div class="slot lib" style="margin-top:12px"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 5.9: pautas de tratamiento con insulina</b><small>Endocrinología, página 118 del archivo.</small></div></div>
+</section>
+
+<section class="scard glass" id="sxi-hipoglucemia">
+<h2>Hipoglucemia: regla 15-15</h2>
+<div class="duo">
+<div class="ilu" style="background:var(--blue2)"><svg id="sxi-ciclo" viewBox="0 0 300 260" role="img" aria-label="Ciclo de la regla 15-15"></svg></div>
+<div>
+<p>Glucosa <b>menor de 70 mg/dL</b>. Síntomas adrenérgicos (temblor, sudoración, palpitaciones) y neuroglucopénicos (confusión, convulsiones).</p>
+<div class="fin" style="background:var(--nob)"><b style="color:var(--no)">Inconsciente:</b> glucagón intramuscular o glucosa intravenosa al 50%.</div>
+<p class="nota">Los betabloqueadores pueden <b>ocultar</b> los síntomas adrenérgicos.</p>
+</div>
+</div>
+<div class="slot lib" style="margin-top:12px"><div class="marco"><svg class="ico"><use href="#sxi-i-libro"/></svg></div><div><b>Mira en tu CTO la figura 5.3: tratamiento de la hipoglucemia</b><small>Endocrinología, página 109 del archivo.</small></div></div>
+</section>
+
+<section class="scard glass" id="sxi-vigilancia">
+<h2>Qué revisar y cada cuándo</h2>
+<div class="scal" id="sxi-cal"></div>
+<p class="nota">Estatina de intensidad moderada en diabéticos de 40 a 75 años; de alta intensidad si ya hay enfermedad cardiovascular.</p>
+</section>
+
+<section class="scard glass" id="sxi-referir">
+<h2>Cuándo referir</h2>
+<div class="sgrid" id="sxi-alarmas"></div>
+</section>
+
+<section class="scard glass" id="sxi-perlas">
+<h2>Perlas: toca para voltear</h2>
+<div class="sgrid" id="sxi-flips"></div>
+</section>
+
+<section class="scard glass" id="sxi-mexico">
+<h2>Lo mexicano frente al CTO</h2>
+<div class="scmp" id="sxi-cmp"></div>
+<p class="nota">Fuentes: Manual CTO 14.ª edición, Endocrinología capítulo 5; Guía de Práctica Clínica GPC-IMSS-718-18; Protocolo de Atención Integral de diabetes del Instituto Mexicano del Seguro Social (2022); Harrison 21.ª edición.</p>
+</section>
+</div>`,
+init:root=>{if(!root)return;
+const $=s=>root.querySelector(s);
+const ico=(n,c='')=>`<svg class="ico" ${c?`style="color:${c}"`:''}><use href="#sxi-i-${n}"/></svg>`;
+const seg=(el,ops,val,fn)=>{const r=()=>{el.innerHTML=ops.map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===val}">${t}</button>`).join('')};r();el.onclick=e=>{const b=e.target.closest('button');if(!b)return;val=b.dataset.k;r();fn(val)};fn(val)};
+const ir=k=>{const el=$('#sxi-'+k);if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})};
+root.addEventListener('click',e=>{const b=e.target.closest('[data-ir]');if(b){e.preventDefault();ir(b.dataset.ir)}});
+const fmt=n=>Math.round(n).toLocaleString('es-MX');
+const li=arr=>arr.map(([i,c,b,t])=>`<li><span class="sic" style="background:${b};color:${c}">${ico(i)}</span><span>${t}</span></li>`).join('');
+const flips=(el,arr)=>{el.innerHTML=arr.map(([q,a])=>`<button type="button" class="flip" aria-pressed="false"><div class="in"><div class="cara frente"><b>${q}</b><small>Toca para ver la respuesta</small></div><div class="cara bk"><b style="font-size:16px;line-height:1.35">${a}</b><small>Toca para regresar</small></div></div></button>`).join('');el.onclick=e=>{const b=e.target.closest('.flip');if(b)b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true')}};
+
+/* ---------- Cuerpo ---------- */
+const ORG={
+ ojos:{t:'Ojos',x:171,y:50,lx:212,ly:20,d:'Retinopatía',txt:'<b>Fondo de ojo cada año</b> desde el diagnóstico. Cualquier alteración: referir a oftalmología.'},
+ cor:{t:'Corazón',x:176,y:142,lx:226,ly:112,d:'Riesgo cardiovascular',txt:'Presión <b>menor de 130/80</b>. Estatina de intensidad moderada de 40 a 75 años; alta intensidad si ya hay enfermedad cardiovascular. Con enfermedad cardiovascular, insuficiencia cardiaca o enfermedad renal: agregar un inhibidor del cotransportador sodio-glucosa tipo 2 o un agonista del péptido similar al glucagón tipo 1.'},
+ pan:{t:'Páncreas',x:160,y:176,lx:6,ly:150,d:'Cómo se produce',txt:'<b>Resistencia a la insulina</b> más <b>falla progresiva de la célula beta</b>. Casi siempre con sobrepeso, obesidad abdominal y sedentarismo.'},
+ rin:{t:'Riñones',x:134,y:204,lx:6,ly:214,d:'Nefropatía',txt:'<b>Cociente albúmina/creatinina en orina y filtración glomerular cada año.</b> Albuminuria de 30 mg/g o más, confirmada en 2 de 3 muestras en 3 a 6 meses. Referir a nefrología con más de 300 mg/g o si la filtración cae rápido.'},
+ pies:{t:'Pies',x:196,y:404,lx:224,ly:362,d:'Pie diabético',txt:'Revisar los pies <b>en cada consulta</b>. Exploración completa cada año con <b>monofilamento de 10 g</b> y diapasón de 128 Hz. Pie infectado o con isquemia: urgencias.'}};
+const cu=$('#sxi-cuerpo');
+function cuerpo(sel){const on=k=>k===sel,hl=k=>on(k)?'stroke="#0071e3" stroke-width="3"':'';
+ cu.innerHTML=`<defs><linearGradient id="gpc" x1="0" x2="1"><stop offset="0" stop-color="var(--piel)"/><stop offset="1" stop-color="var(--pielL)"/></linearGradient></defs>
+ <g fill="url(#gpc)" stroke="rgba(0,0,0,.12)">
+ <circle cx="160" cy="50" r="30"/><rect x="150" y="76" width="20" height="22" rx="6"/>
+ <path d="M110 100Q160 88 210 100L224 236Q160 254 96 236Z"/>
+ <path d="M112 104L84 222" stroke="url(#gpc)" stroke-width="22" stroke-linecap="round"/><path d="M208 104L236 222" stroke="url(#gpc)" stroke-width="22" stroke-linecap="round"/>
+ <path d="M138 240L130 392" stroke="url(#gpc)" stroke-width="28" stroke-linecap="round"/><path d="M182 240L190 392" stroke="url(#gpc)" stroke-width="28" stroke-linecap="round"/>
+ </g>
+ <ellipse cx="124" cy="404" rx="24" ry="11" fill="${on('pies')?'#ff8a8a':'var(--pielL)'}" ${hl('pies')}/><ellipse cx="196" cy="404" rx="24" ry="11" fill="${on('pies')?'#ff8a8a':'var(--pielL)'}" ${hl('pies')}/>
+ <circle cx="149" cy="48" r="5" fill="${on('ojos')?'#0071e3':'#4b3a33'}"/><circle cx="171" cy="48" r="5" fill="${on('ojos')?'#0071e3':'#4b3a33'}"/>
+ <path d="M176 156C160 146 152 138 152 130a8 8 0 0 1 16-4 8 8 0 0 1 16 4c0 8-8 16-8 26Z" transform="translate(-2 -4)" fill="${on('cor')?'#ff3b4d':'#d8434f'}" ${hl('cor')}/>
+ <path d="M136 178C150 168 176 168 192 172C198 174 196 182 188 182C170 182 152 186 140 186C132 186 130 182 136 178Z" fill="${on('pan')?'#ffc46b':'#efb07a'}" ${hl('pan')}/>
+ <path d="M128 192c-8 0-10 12-6 20s12 8 14 2-2-8 0-12-2-10-8-10Z" fill="${on('rin')?'#e2474f':'#a83444'}" ${hl('rin')}/><path d="M192 192c8 0 10 12 6 20s-12 8-14 2 2-8 0-12 2-10 8-10Z" fill="${on('rin')?'#e2474f':'#a83444'}" ${hl('rin')}/>
+ ${Object.entries(ORG).map(([k,z])=>{const w=z.t.length*7.4+24,cx=z.lx+w/2;return `<g class="hs" data-k="${k}" tabindex="0" role="button" aria-label="${z.t}">
+ <line x1="${cx}" y1="${z.ly+13}" x2="${z.x}" y2="${z.y}" stroke="${on(k)?'#0071e3':'rgba(0,0,0,.35)'}" stroke-width="1.5" stroke-dasharray="3 3"/>
+ <circle cx="${z.x}" cy="${z.y}" r="15" fill="#0071e3" class="pulso"/><circle cx="${z.x}" cy="${z.y}" r="6" fill="${on(k)?'#0071e3':'#fff'}" stroke="#0071e3" stroke-width="2.5"/>
+ <rect x="${z.lx}" y="${z.ly}" width="${w}" height="26" rx="13" fill="${on(k)?'#0071e3':'#fff'}" stroke="#0071e3" stroke-width="1.5"/>
+ <text x="${cx}" y="${z.ly+17.5}" text-anchor="middle" font-size="13" font-weight="600" fill="${on(k)?'#fff':'#0071e3'}">${z.t}</text></g>`}).join('')}`;}
+const sc=$('#sxi-segCuerpo');
+function org(k){cuerpo(k);const z=ORG[k];$('#sxi-infoCuerpo').innerHTML=`<div class="muted">${z.t}</div><h3 style="margin:2px 0 6px">${z.d}</h3><p>${z.txt}</p>`;sc.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k))}
+sc.innerHTML=Object.entries(ORG).map(([k,z])=>`<button type="button" data-k="${k}">${z.t}</button>`).join('');
+sc.onclick=e=>{const b=e.target.closest('button');if(b)org(b.dataset.k)};
+cu.addEventListener('click',e=>{const g=e.target.closest('.hs');if(g)org(g.dataset.k)});
+cu.addEventListener('keydown',e=>{const g=e.target.closest('.hs');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();org(g.dataset.k)}});
+org('rin');
+
+/* ---------- Diagnóstico ---------- */
+const PR={
+ ay:{l:'Glucosa en ayuno (mg/dL)',min:60,max:200,c:[100,126],v:118,e:['Normal','Prediabetes: glucosa alterada en ayuno','Diabetes'],n:'Ayuno de al menos 8 horas.'},
+ cu:{l:'Glucosa a las 2 horas de la curva con 75 g (mg/dL)',min:80,max:300,c:[140,200],v:165,e:['Normal','Prediabetes: intolerancia a la glucosa','Diabetes'],n:'Curva de tolerancia oral con 75 g de glucosa.'},
+ hb:{l:'Hemoglobina glucosilada (%)',min:4,max:10,c:[5.7,6.5],v:6.1,e:['Normal','Prediabetes','Diabetes'],n:'No sirve en anemia de células falciformes, embarazo en segundo y tercer trimestre, hemodiálisis, transfusión o tratamiento con eritropoyetina: usa solo criterios de glucosa.'},
+ az:{l:'Glucosa al azar con síntomas clásicos (mg/dL)',min:80,max:400,c:[200,200],v:240,e:['No establece el diagnóstico','','Diabetes'],n:'Síntomas clásicos: poliuria, polidipsia, polifagia y pérdida de peso, o crisis hiperglucémica.'}};
+let pr='ay';
+function dx(){const P=PR[pr],v=parseFloat($('#sxi-valor').value),span=P.max-P.min,pc=x=>Math.max(0,Math.min(100,(x-P.min)/span*100));
+ const z=pr==='az'?[[P.min,200,'var(--line)'],[200,P.max,'var(--no)']]:[[P.min,P.c[0],'var(--ok)'],[P.c[0],P.c[1],'var(--mid)'],[P.c[1],P.max,'var(--no)']];
+ $('#sxi-escala').innerHTML=`<div class="zonas">${z.map(([a,b,c])=>`<i style="width:${(b-a)/span*100}%;background:${c}"></i>`).join('')}</div>${isNaN(v)?'':`<div class="marca" style="left:${pc(v)}%"></div>`}<span class="et" style="left:0">${P.min}</span>${[...new Set(P.c)].map(c=>`<span class="et" style="left:${pc(c)}%">${c}</span>`).join('')}`;
+ let i=isNaN(v)?-1:v>=P.c[1]?2:v>=P.c[0]?1:0;const col=['var(--ok)','var(--mid)','var(--no)'][i]||'var(--ink2)',bg=['var(--okb)','var(--midb)','var(--nob)'][i]||'var(--ctrl)';
+ let txt=i<0?'Escribe un valor.':P.e[i];
+ if(pr==='az'&&i===0)txt+='. Pide glucosa en ayuno, curva o hemoglobina glucosilada.';
+ if(i===2)txt+=pr==='az'?'. <b>Basta sola: no requiere confirmación.</b>':'. <b>Confírmala</b> con una segunda prueba alterada: la misma repetida o una distinta.';
+ if(i===1)txt+='. Vigilar <b>cada año</b> y tratar los factores de riesgo cardiovascular.';
+ $('#sxi-resDx').style.background=bg;$('#sxi-resDx').innerHTML=`<div class="sn" style="color:${col};font-size:clamp(34px,6vw,46px)">${isNaN(v)?'–':v}</div><div>${txt}</div>`;
+ $('#sxi-notaDx').innerHTML=P.n+(pr!=='az'?' Si dos pruebas distintas no coinciden, se repite la que salió alterada.':'');}
+seg($('#sxi-segPrueba'),[['ay','Ayuno'],['cu','Curva 2 horas'],['hb','Hemoglobina glucosilada'],['az','Al azar con síntomas']],'ay',k=>{pr=k;$('#sxi-lblValor').textContent=PR[k].l;$('#sxi-valor').value=PR[k].v;dx()});
+$('#sxi-valor').addEventListener('input',dx);
+
+/* ---------- Metas ---------- */
+const MT={jov:[6.5,'Menor de 6.5%','Jóvenes, con poca evolución y sin riesgo de hipoglucemia.'],may:[7,'Menor de 7%','La mayoría de los adultos.'],fra:[8,'Menor de 8%','Adultos mayores frágiles, hipoglucemias graves, poca expectativa de vida o complicaciones avanzadas (hasta 8.5%).']};
+seg($('#sxi-segMeta'),[['jov','Joven sin hipoglucemias'],['may','La mayoría'],['fra','Adulto mayor frágil']],'may',k=>{const [v,t,d]=MT[k];
+ $('#sxi-resMeta').innerHTML=`<div class="sn" style="color:var(--ok);font-size:clamp(30px,6vw,44px)">${v}%</div><div><b>Hemoglobina glucosilada ${t.toLowerCase()}.</b> ${d}</div>`;
+ const pc=x=>(x-5)/5*100;$('#sxi-gauge').innerHTML=`<i style="width:${pc(v)}%"></i>${[5,6,7,8,9,10].map(x=>`<span style="left:${pc(x)}%">${x}%</span>`).join('')}`;});
+
+/* ---------- Estilo de vida ---------- */
+$('#sxi-listaEstilo').innerHTML=li([['plato','var(--ok)','var(--okb)','Plan de alimentación con nutrición: menos azúcares simples y <b>bebidas azucaradas</b>; porciones con el plato del bien comer.'],['correr','var(--ok)','var(--okb)','<b>150 minutos por semana</b> de ejercicio aeróbico moderado, en 3 o más días.'],['pesa','var(--ok)','var(--okb)','Ejercicios de <b>fuerza 2 veces por semana</b>.'],['humo','var(--ok)','var(--okb)','Dejar de fumar.'],['pie','var(--ok)','var(--okb)','Educación en diabetes y <b>autocuidado de los pies</b>.']]);
+$('#sxi-semana').innerHTML=[['Lun',30,1],['Mar',0,1],['Mié',30,0],['Jue',0,1],['Vie',30,0],['Sáb',30,0],['Dom',30,0]].map(([d,m,f])=>`<div style="height:${40+m*2.2}px;${m?'':'background:var(--ctrl)'}"><b>${m?m:'–'}</b>${m?'min':''}${f?'<small style="color:var(--teal);font-weight:600">fuerza</small>':''}<span class="muted" style="font-size:12px">${d}</span></div>`).join('');
+
+/* ---------- Metformina ---------- */
+$('#sxi-escMet').innerHTML=[['Semana 1','1,000'],['Semana 2','1,500'],['Semana 3','2,000'],['Máximo','2,550']].map(([s,m],i)=>`<div style="height:${60+i*26}px"><b>${m}</b>mg al día<span class="muted" style="font-size:12px">${s}</span></div>`).join('');
+function tfg(){const v=+$('#sxi-tfg').value;let c,b,t;
+ if(v>=45){c='var(--ok)';b='var(--okb)';t='<b>Se puede usar.</b>'}
+ else if(v>=30){c='var(--mid)';b='var(--midb)';t='<b>No iniciar.</b> Si ya la toma, revalora riesgo y beneficio.'}
+ else{c='var(--no)';b='var(--nob)';t='<b>Contraindicada.</b> Suspender.'}
+ $('#sxi-resTfg').style.background=b;$('#sxi-resTfg').innerHTML=`<div class="sn" style="color:${c};font-size:clamp(34px,6vw,46px)">${v}</div><div>${t}<div class="muted">Filtración glomerular en mL/min/1.73 m²</div></div>`}
+$('#sxi-tfg').addEventListener('input',tfg);tfg();
+
+/* ---------- Plan de tratamiento ---------- */
+const PF=[['ecv','corazón','Enfermedad cardiovascular aterosclerótica o alto riesgo'],['ic','cor','Insuficiencia cardiaca'],['erc','rinon','Enfermedad renal crónica con albuminuria'],['peso','pesa','Necesita bajar de peso'],['hipo','alerta','Riesgo de hipoglucemia o adulto mayor frágil'],['costo','pild','El costo es lo principal'],['cat','term','Pérdida de peso o cetosis (catabolismo)']];
+$('#sxi-perfil').innerHTML=PF.map(([k,i,t])=>`<label>${ico(i==='corazón'?'cor':i,'var(--blue)')}<input type="checkbox" id="sxi-p-${k}">${t}</label>`).join('');
+const CL={
+ sglt:['Inhibidores del cotransportador sodio-glucosa tipo 2','Empagliflozina, dapagliflozina, canagliflozina','De preferencia en insuficiencia cardiaca y enfermedad renal con albuminuria. Bajan peso.'],
+ glp:['Agonistas del receptor del péptido similar al glucagón tipo 1','Liraglutida, dulaglutida, semaglutida','Enfermedad cardiovascular aterosclerótica y necesidad de bajar de peso.'],
+ dpp:['Inhibidores de la dipeptidil peptidasa 4','Sitagliptina, linagliptina (sin ajuste renal)','Poco riesgo de hipoglucemia: adulto mayor frágil.'],
+ su:['Sulfonilureas','Glibenclamida, glimepirida','Bajo costo. Causan hipoglucemia y aumento de peso.'],
+ pio:['Pioglitazona','','Retención de líquidos; empeora la insuficiencia cardiaca. Aumenta peso y fracturas.']};
+function plan(){const h=parseFloat($('#sxi-hba').value),g=parseFloat($('#sxi-glu').value),P=k=>$('#sxi-p-'+k).checked;
+ const ins=P('cat')||h>10||g>=300;const sel=new Set(),evi=new Set();
+ if(P('ecv')){sel.add('glp');sel.add('sglt')}if(P('ic')){sel.add('sglt');evi.add('pio')}if(P('erc'))sel.add('sglt');if(P('peso')){sel.add('glp');sel.add('sglt');evi.add('su');evi.add('pio')}
+ if(P('hipo')){sel.add('dpp');evi.add('su')}if(P('costo')&&!P('hipo'))sel.add('su');
+ const org=P('ecv')||P('ic')||P('erc');const dual=!isNaN(h)&&h>=8.5;
+ const N=[];
+ if(ins)N.push(['Insulina desde el inicio',`${P('cat')?'Hay catabolismo':h>10?'Hemoglobina glucosilada mayor de 10%':'Glucosa de 300 mg/dL o más'}: inicia insulina basal y mantén metformina.`,'no']);
+ N.push(['Paso 1','Metformina más cambios de estilo de vida.','ok']);
+ if(org)N.push(['Ya, sin importar la hemoglobina glucosilada',P('ecv')?'Agonista del péptido similar al glucagón tipo 1 o inhibidor del cotransportador sodio-glucosa tipo 2 con beneficio cardiovascular.':'Inhibidor del cotransportador sodio-glucosa tipo 2.','ok']);
+ else if(dual)N.push(['Inicia con dos fármacos','La hemoglobina glucosilada está 1.5 puntos o más por arriba de la meta de 7%.','mid']);
+ N.push(['Si no llega a la meta en 3 meses','Agrega el segundo fármaco según el perfil (resaltado abajo). Evita la inercia terapéutica.','mid']);
+ $('#sxi-algoPlan').innerHTML=N.map(([t,d,c],i)=>`<div class="fin" style="background:var(--${c}b);margin:0"><b style="color:var(--${c})">${t}</b><br>${d}</div>${i<N.length-1?'<div class="flecha"></div>':''}`).join('');
+ $('#sxi-clases').innerHTML=Object.entries(CL).map(([k,[t,e,d]])=>`<div class="clase ${sel.has(k)?'elegida':evi.has(k)?'evitar':''}"><span class="sello">${sel.has(k)?'Buena opción':'Evitar'}</span><h4>${t}</h4>${e?`<div class="muted">${e}</div>`:''}<p style="font-size:14px;margin:6px 0 0">${d}</p></div>`).join('');}
+['hba','glu'].forEach(id=>$('#sxi-'+id).addEventListener('input',plan));$('#sxi-perfil').addEventListener('change',plan);
+$('#sxi-p-ecv').checked=true;plan();
+
+/* ---------- Adversos ---------- */
+flips($('#sxi-flipsAdv'),[['Inhibidores del cotransportador sodio-glucosa tipo 2','Infecciones genitales, infección urinaria, hipovolemia y cetoacidosis euglucémica.'],['Agonistas del péptido similar al glucagón tipo 1','Náusea y vómito. Suspender si hay pancreatitis. Contraindicados con carcinoma medular de tiroides o neoplasia endocrina múltiple tipo 2.'],['Pioglitazona','Retención de líquidos, empeora la insuficiencia cardiaca, aumento de peso y fracturas.'],['Sulfonilureas','Hipoglucemia (sobre todo en adultos mayores y con falla renal) y aumento de peso.'],['Metformina','Molestias digestivas al inicio, deficiencia de vitamina B12; acidosis láctica rara.']]);
+
+/* ---------- Insulina ---------- */
+let base='10';
+function ins(){const w=parseFloat($('#sxi-pesoIns').value)||0;const u=base==='10'?10:Math.round(w*(+base));
+ const m=Math.round(u*2/3),n=u-m;
+ $('#sxi-dosisIns').innerHTML=`<div class="dc"><h4>${ico('jer','var(--blue)')}Glargina</h4><div class="sbig">${u} unidades</div><div class="sub">una vez al día, en la noche</div></div><div class="dc"><h4>${ico('jer','var(--blue)')}NPH</h4><div class="sbig">${m} + ${n} unidades</div><div class="sub">dos tercios en la mañana y un tercio en la noche</div></div>`}
+seg($('#sxi-segIns'),[['10','10 unidades al día'],['0.1','0.1 unidades por kilo'],['0.2','0.2 unidades por kilo']],'10',k=>{base=k;ins()});
+$('#sxi-pesoIns').addEventListener('input',ins);
+function aj(){const v=parseFloat($('#sxi-ayunoProm').value);let t,c,b;
+ if(isNaN(v)){t='Escribe el promedio.';c='var(--ink2)';b='var(--ctrl)'}
+ else if(v<80){t='<b>Bajar 2 unidades.</b>';c='var(--no)';b='var(--nob)'}
+ else if(v<130){t='<b>En meta:</b> sin cambio.';c='var(--ok)';b='var(--okb)'}
+ else if(v<150){t='<b>Subir 1 unidad.</b>';c='var(--mid)';b='var(--midb)'}
+ else if(v<180){t='<b>Subir 2 unidades.</b>';c='var(--mid)';b='var(--midb)'}
+ else{t='<b>Subir 3 unidades.</b>';c='var(--no)';b='var(--nob)'}
+ $('#sxi-resAjuste').style.background=b;$('#sxi-resAjuste').innerHTML=`<div class="sn" style="color:${c};font-size:clamp(30px,6vw,42px)">${isNaN(v)?'–':v}</div><div>${t} Revisa cada 7 días.</div>`}
+$('#sxi-ayunoProm').addEventListener('input',aj);aj();
+$('#sxi-lineaAjuste').innerHTML=[['Menor de 80','−2','var(--no)'],['80 a 129','Sin cambio','var(--ok)'],['130 a 149','+1','var(--mid)'],['150 a 179','+2','var(--mid)'],['180 o más','+3','var(--no)']].map(([r,a,c])=>`<div class="fil" style="display:flex;justify-content:space-between;border-radius:10px;padding:6px 10px;background:var(--ctrl)"><span>${r} mg/dL</span><b style="color:${c}">${a}</b></div>`).join('');
+
+/* ---------- Ciclo 15-15 ---------- */
+const P4=[['15 g de azúcar rápida','Medio vaso de jugo o refresco normal'],['Esperar 15 minutos',''],['Medir la glucosa',''],['¿Sigue menor de 70?','Repetir']];
+$('#sxi-ciclo').innerHTML=`<circle cx="150" cy="130" r="86" fill="none" stroke="#0071e3" stroke-width="3" stroke-dasharray="8 8" opacity=".5"/>
+ <text x="150" y="124" text-anchor="middle" font-size="30" font-weight="800" fill="#0071e3">15-15</text><text x="150" y="146" text-anchor="middle" font-size="12" fill="currentColor" opacity=".7">glucosa menor de 70</text>
+ ${P4.map(([t,s],i)=>{const a=-Math.PI/2+i*Math.PI/2,x=150+86*Math.cos(a),y=130+86*Math.sin(a),w=Math.max(t.length,s.length)*6.2+20;return `<g><rect x="${Math.max(2,Math.min(298-w,x-w/2))}" y="${y-(s?20:13)}" width="${w}" height="${s?40:26}" rx="12" fill="#fff" stroke="#0071e3" stroke-width="1.5"/><text x="${Math.max(2,Math.min(298-w,x-w/2))+w/2}" y="${y+(s?-3:4.5)}" text-anchor="middle" font-size="12" font-weight="700" fill="#1d1d1f">${t}</text>${s?`<text x="${Math.max(2,Math.min(298-w,x-w/2))+w/2}" y="${y+13}" text-anchor="middle" font-size="10.5" fill="#6e6e73">${s}</text>`:''}</g>`}).join('')}`;
+$('#sxi-ciclo').style.color='var(--ink)';
+
+/* ---------- Calendario ---------- */
+$('#sxi-cal').innerHTML=[['Cada consulta',[['pie','Revisar los pies'],['cor','Presión arterial y peso']]],['Cada 3 a 6 meses',[['lab','Hemoglobina glucosilada: cada 3 meses si no está en meta; cada 6 si está controlada']]],['Cada año',[['ojo','Fondo de ojo'],['rinon','Albúmina/creatinina en orina y filtración glomerular'],['pie','Monofilamento de 10 g y diapasón de 128 Hz'],['lab','Perfil de lípidos (el protocolo mexicano: cada 6 meses)']]]].map(([t,it])=>`<div class="col"><h4>${ico('cal','var(--blue)')} ${t}</h4><ul class="lista">${li(it.map(([i,x])=>[i,'var(--blue)','var(--blue2)',x]))}</ul></div>`).join('');
+
+/* ---------- Referir ---------- */
+$('#sxi-alarmas').innerHTML=[['alerta','Urgencias','Cetoacidosis, estado hiperglucémico hiperosmolar, hipoglucemia grave, pie diabético infectado o con isquemia.'],['rinon','Nefrología','Albuminuria mayor de 300 mg/g o filtración que cae rápido.'],['lab','Medicina interna o endocrinología','Falla a triple terapia, insulina intensiva, sospecha de diabetes autoinmune del adulto o monogénica.'],['ojo','Oftalmología','Cualquier alteración en el fondo de ojo.']].map(([i,t,d])=>`<div class="dc" style="border-color:transparent;background:var(--nob)"><h4><span style="color:var(--no);display:flex">${ico(i)}</span>${t}</h4><div class="sub" style="color:var(--ink)">${d}</div></div>`).join('');
+
+/* ---------- Perlas ---------- */
+flips($('#sxi-flips'),[['¿Glucosa al azar de 200 o más con síntomas se confirma?','No: basta sola. Todo lo demás se confirma.'],['¿Cuándo se suspende la metformina?','Filtración glomerular menor de 30 y antes de contraste yodado.'],['¿Diabético con insuficiencia cardiaca o enfermedad renal?','Inhibidor del cotransportador sodio-glucosa tipo 2, aunque la hemoglobina glucosilada esté en meta.'],['¿Pioglitazona en insuficiencia cardiaca?','Contraindicada.'],['¿Prurito genital con dapagliflozina?','Candidosis por el fármaco, no descontrol.'],['¿Estudio clave del pie en primer nivel?','Monofilamento de 10 g: detecta pérdida de la sensibilidad protectora.']]);
+
+/* ---------- México ---------- */
+$('#sxi-cmp').innerHTML=[['Metas de hemoglobina glucosilada','Menor de 7% para la mayoría; 6.5% en jóvenes; 8% en frágiles.','Por grupos: menor de 7% en menores de 65 sin daño renal; 7.5% en mayores de 65 independientes o enfermedad renal 3; 8% en frágiles o enfermedad renal 4; 8.5% en enfermedad renal 5 o terminal.'],['Agonistas del péptido similar al glucagón tipo 1','Segundo fármaco con enfermedad cardiovascular o para bajar de peso.','En el Instituto Mexicano del Seguro Social se reservan a índice de masa corporal mayor de 35 y los prescribe endocrinología.'],['Cuándo iniciar insulina','Hemoglobina glucosilada mayor de 10% o glucosa de 300 o más.','Hemoglobina glucosilada de 9% o más o glucosa mayor de 260; falla a triple terapia oral; embarazo; cirugía.'],['Prediabetes','Vigilar cada año y tratar factores de riesgo.','Metformina en menores de 60 años, índice de masa corporal mayor de 35 o diabetes gestacional previa.']].map(([t,g,a])=>`<div><h3 style="margin:4px 0">${t}</h3><div class="fila"><div class="c" style="background:var(--blue2)"><small style="color:var(--blue)">CTO (Asociación Americana de Diabetes)</small>${g}</div><div class="c" style="background:var(--okb)"><small style="color:var(--ok)">México (Instituto Mexicano del Seguro Social)</small>${a}</div></div></div>`).join('');
 }};
 })();

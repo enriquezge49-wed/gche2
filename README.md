@@ -25,3 +25,8 @@ App personal de consultas, medicamentos, estudio y herramientas clínicas del Dr
 
 - Diabetes tipo 2 (Endocrinología, tema 5), hipertensión arterial (Cardiología, tema 14) e infecciones respiratorias agudas altas (Enfermedades Infecciosas, tema 6): resumen, 30 preguntas tipo ENARM con opciones revueltas y explicación, repaso en audio con la voz del dispositivo, y fuentes.
 - El contenido vive en `estudio-temas.js`, redactado con palabras propias a partir de la bibliografía citada; solo enlaza a sitios .gob.mx.
+
+## 1.12.0
+
+- Estudio: siete temas de consulta completos (resumen ilustrado e interactivo, preguntas tipo ENARM, audio y fuentes): diabetes tipo 2, hipertensión arterial, infecciones respiratorias altas, dislipidemia y obesidad, infección de vías urinarias, diarrea aguda, y dispepsia con reflujo gastroesofágico.
+- `estudio-ilustrado.js` se genera desde los modelos de cada tema; las fotos clínicas están en `img/estudio/` con sus créditos en `img/estudio/CREDITOS.md`.

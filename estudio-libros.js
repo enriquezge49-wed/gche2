@@ -76,6 +76,7 @@ const materia=(a,j)=>{const m=A[a]&&A[a][1][j];if(!m){G.go('estudio-1');return}c
 let tab={};
 const TABS=['Resumen','Preguntas','Mis notas','Audio','Profundizar'];
 const TM=()=>window.SXTEMAS||{};
+const ILU=k=>(window.SXILU||{})[k];
 const clave=(m,i)=>`${slug(m[0])}-${i+1}`;
 const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -83,6 +84,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .sx-sec ul{margin:0;padding-left:20px}.sx-sec li{margin:6px 0;line-height:1.5}.sx-sec b{font-weight:600}
 .sx-box{border-radius:18px;padding:14px 18px;margin:14px 0;border:1px solid color-mix(in srgb,var(--k) 35%,transparent);background:color-mix(in srgb,var(--k) 8%,transparent)}.sx-box h3{margin:0 0 6px;font-size:16px;font-weight:600;color:var(--k)}.sx-box ul{margin:0;padding-left:20px}.sx-box li{margin:5px 0}
 .sx-enf{color:var(--ink2);font-size:15px;margin:0 0 14px}
+.sx-txt{margin-top:14px}.sx-txt>summary{cursor:pointer;font-weight:600;font-size:17px;min-height:44px;display:flex;align-items:center}.sx-txt[open]>summary{margin-bottom:8px}
 .sx-q{border-radius:22px;padding:18px}.sx-q .cs{font-size:16px;line-height:1.55;margin:0 0 10px}.sx-q .pq{font-weight:600;margin:0 0 12px}
 .sx-op{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:13px 14px;margin:8px 0;border-radius:14px;background:var(--ctrl);font-size:15.5px;line-height:1.45;min-height:48px;transition:background .2s}
 .sx-op .l{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--solid);font-weight:600;font-size:13px}
@@ -122,7 +124,7 @@ const tema=(a,j,i)=>{const m=A[a]&&A[a][1][j],t=m&&m[2][i];if(!t){G.go('estudio-
   const PH=[['El resumen con lo más preguntado se arma cuando estudies este tema: definición, epidemiología, fisiopatología, cuadro clínico, diagnóstico, tratamiento y perlas para el examen.','Aquí irá la diferencia con la Guía de Práctica Clínica mexicana vigente, si la hay.'+(t[3]?' Este tema está hecho para España: se rehace con la normativa mexicana.':'')],['Aquí irán las 30 preguntas tipo ENARM del tema, con caso clínico, explicación de cada opción y su fuente.'],null,['Aquí irá el repaso en audio, en bloques cortos de pregunta y respuesta.'],['Aquí irán los capítulos del Harrison, Principios de Medicina Interna, 21.ª edición, que corresponden a este tema.','Aquí irá el enlace a la Guía de Práctica Clínica vigente.']];
   let body='';
   if(tb===2)body=`<textarea class="sx-note" id="sxNota" placeholder="Escribe aquí tus notas de este tema. Se guardan solas.">${esc(leeNota(id))}</textarea><p class="sx-hint">${enCuenta()?'Se guardan en tu cuenta.':'Se guardan en este dispositivo. Al iniciar sesión se pasan a tu cuenta.'}</p>`;
-  else if(T&&tb===0)body=resumenHTML(T);
+  else if(T&&tb===0)body=ILU(ck)?`${ILU(ck).html()}<details class="sx-sec glass sx-txt"><summary>Resumen en texto completo</summary>${resumenHTML(T)}</details>`:resumenHTML(T);
   else if(T&&tb===1)body=`<div id="sxQz">${quizHTML(ck,T)}</div>`;
   else if(T&&tb===3)body=`<div id="sxAu"></div>`;
   else if(T&&tb===4)body=`<section class="sx-sec glass sx-ref"><h3>Harrison, Principios de Medicina Interna, 21.ª edición</h3>${T.profundizar.harrison.map(([n,x])=>`<p style="margin:6px 0">Capítulo ${n}: ${esc(x)}</p>`).join('')}<p class="sx-hint">Lo tienes en el chat de estudio; pídeme profundizar en cualquier punto.</p></section>
@@ -132,6 +134,7 @@ const tema=(a,j,i)=>{const m=A[a]&&A[a][1][j],t=m&&m[2][i];if(!t){G.go('estudio-
   EL.innerHTML=`<div class="cx">${crumbs([['Mis materias','estudio-1'],[m[0],`estudio-1-${a}-${j}`],['Tema '+(i+1)]])}<div class="phead"><div><h1 class="rise" style="--i:1">${esc(T&&T.titulo||t[0])}</h1><p class="sx-src rise" style="--i:2">${T?`Capítulo ${i+1} de ${esc(m[0])}: ${esc(t[0])}. `:''}Fuente base: ${LIB}, ${esc(m[0])}, capítulo ${i+1}, páginas ${t[1]} a ${t[2]} del archivo.</p></div></div>
   <div class="sx-tabs rise" style="--i:3" role="tablist">${TABS.map((x,n)=>`<button role="tab" aria-selected="${n===tb}" class="${n===tb?'on':''}" data-tb="${n}">${x}${T&&n===1?` · ${T.preguntas.length}`:''}</button>`).join('')}</div>
   <div class="rise" style="--i:4">${body}</div></div>`;
+  if(T&&tb===0&&ILU(ck))try{ILU(ck).init(EL.querySelector('.sxi'))}catch(e){console.error(e)}
   EL.querySelector('.sx-tabs').onclick=e=>{const b=e.target.closest('[data-tb]');if(!b)return;tab[k]=+b.dataset.tb;vib();tema(a,j,i)};
   const ta=$('#sxNota');if(ta){let tt;ta.oninput=()=>{clearTimeout(tt);tt=setTimeout(()=>guardaNota(id,{materia:m[0],tema:t[0]},ta.value),600)};ta.onblur=()=>{clearTimeout(tt);guardaNota(id,{materia:m[0],tema:t[0]},ta.value)}}
   const qz=$('#sxQz');if(qz)qz.onclick=e=>{const o=e.target.closest('[data-op]'),b=e.target.closest('[data-qz]');const Z=QZ;

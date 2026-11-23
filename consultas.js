@@ -70,7 +70,10 @@ const saveInd=(busy)=>{const e=document.getElementById('cxSave');if(!e)return;
 addEventListener('online',()=>saveInd());addEventListener('offline',()=>saveInd());
 
 /* pacientes */
-const nombreP=p=>((p&&p.hc&&p.hc.nombre)||'Sin nombre').trim();
+/* modo discreto: en pantalla solo iniciales; los documentos impresos llevan el nombre completo */
+const disc=()=>store.get('gche2-disc',false);let DOC=false;
+const dn=n=>disc()&&!DOC?(inic(n)||'Paciente'):n;
+const nombreP=p=>dn(((p&&p.hc&&p.hc.nombre)||'Sin nombre').trim());
 const ini=n=>n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'?';
 const consultasDe=pid=>L('consultas').filter(c=>c.pid===pid).sort((a,b)=>b.fecha-a.fecha);
 const refsDe=pid=>L('referencias').filter(c=>c.pid===pid).sort((a,b)=>b.fecha-a.fecha);
@@ -358,7 +361,7 @@ const vHome=el=>{
   <div class="cx-grid2"><div class="cx-card glass rise" style="--i:8"><h3>Citas de hoy <small>${citas.length}</small></h3>${citas.length?`<div class="cx-list">${citas.map(itemCita).join('')}</div>`:'<p class="cx-empty">Sin citas para hoy.</p>'}<div class="cx-row"><a class="cxb gris sm" href="#consultas-0">Abrir agenda</a></div></div>
   <div class="cx-card glass rise" style="--i:9"><h3>Pacientes recientes <small>${L('pacientes').length} en total</small></h3>${rec.length?`<div class="cx-list">${rec.map(p=>itemP(p)).join('')}</div>`:'<p class="cx-empty">Todavía no tienes pacientes. Empieza con Nuevo paciente o Consulta rápida.</p>'}</div></div>
   <div class="cx-card glass rise" style="--i:10;margin-top:14px"><h3>Resumen del consultorio</h3><div class="cx-row" style="gap:22px">${[['Hoy',n(t0)],['Esta semana',n(lun)],['Este mes',n(mes)]].map(([t,v])=>`<div><b style="font-size:30px;font-weight:700;letter-spacing:-.02em">${v}</b><div class="hint" style="margin:0">${t}</div></div>`).join('')}</div></div>`)};
-const itemCita=c=>{const P=c.pid&&S.pacientes[c.pid];return `<div class="cx-item">${P?avatar(P):`<span class="av">${esc(ini(c.nombre||'?'))}</span>`}<span><b>${esc(c.hora||'Sin hora')} · ${esc(c.nombre||'Sin nombre')}</b><small>${esc(c.motivo||'')}${c.estado!=='pendiente'?' · '+esc(c.estado):''}</small></span>${P?`<a class="cxb gris sm" href="#consultas-p-${P.id}">Abrir</a>`:''}</div>`};
+const itemCita=c=>{const P=c.pid&&S.pacientes[c.pid];return `<div class="cx-item">${P?avatar(P):`<span class="av">${esc(ini(c.nombre||'?'))}</span>`}<span><b>${esc(c.hora||'Sin hora')} · ${esc(dn(c.nombre||'Sin nombre'))}</b><small>${esc(c.motivo||'')}${c.estado!=='pendiente'?' · '+esc(c.estado):''}</small></span>${P?`<a class="cxb gris sm" href="#consultas-p-${P.id}">Abrir</a>`:''}</div>`};
 
 const vNuevo=(el,k)=>{const sel=k!==undefined?ORDEN_T[+k]:null;
   el.innerHTML=wrap(head([['Consultas','consultas'],['Nuevo paciente']],'Nuevo paciente','Elige el tipo de expediente. Cada uno trae sus apartados propios.',pinBtn('consultas-1'))+modoHTML()+
@@ -385,7 +388,7 @@ const vNuevo=(el,k)=>{const sel=k!==undefined?ORDEN_T[+k]:null;
   setTimeout(()=>$('#nNom')&&$('#nNom').focus({preventScroll:true}),350)};
 
 let FILTRO='',QB='';
-const indiceP=p=>norm([nombreP(p),(p.hc||{}).tel,(p.hc||{}).curp,...consultasDe(p.id).flatMap(c=>((c.datos||{}).dx||[]).map(r=>r&&r.n)),...(((p.hc||{}).dx)||[]).map(r=>r&&r.n),...((p.hc||{}).cron||[])].filter(Boolean).join(' '));
+const indiceP=p=>norm([((p.hc||{}).nombre||""),(p.hc||{}).tel,(p.hc||{}).curp,...consultasDe(p.id).flatMap(c=>((c.datos||{}).dx||[]).map(r=>r&&r.n)),...(((p.hc||{}).dx)||[]).map(r=>r&&r.n),...((p.hc||{}).cron||[])].filter(Boolean).join(' '));
 const vBuscar=el=>{
   el.innerHTML=wrap(head([['Consultas','consultas'],['Buscar paciente']],'Buscar paciente','Por nombre, teléfono, Clave Única de Registro de Población o diagnóstico',pinBtn('consultas-2'))+modoHTML()+
   `<label class="sinput cx-search glass">${icon('search',18)}<input id="bq" type="search" placeholder="Escribe para buscar" autocomplete="off" value="${esc(QB)}" aria-label="Buscar paciente"></label>
@@ -509,10 +512,10 @@ const vAgenda=el=>{const {y,m,sel}=CAL,first=(new Date(y,m,1).getDay()+6)%7,days
   el.innerHTML=wrap(head([['Consultas','consultas'],['Calendario y agenda']],'Calendario y agenda','Pacientes atendidos y citas por día',pinBtn('consultas-0'))+modoHTML()+
   `<div class="cx-grid2"><div class="cx-card glass rise" style="--i:3"><div class="cx-calh"><button class="cxb gris sm" data-mes="-1" aria-label="Mes anterior">‹</button><b>${(t=>t.charAt(0).toUpperCase()+t.slice(1))(new Date(y,m,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'}))}</b><button class="cxb gris sm" data-mes="1" aria-label="Mes siguiente">›</button></div><div class="cx-cal">${g}</div><p class="hint"><span style="color:var(--blue)">●</span> atendidos <span style="color:#ff9f0a;margin-left:10px">●</span> citas</p></div>
   <div class="cx-card glass rise" style="--i:4"><h3>${esc(fLarga(sel))}</h3>
-   <p class="hint" style="font-weight:600;margin-top:12px">Citas</p>${ci.length?`<div class="cx-list">${ci.map(c=>`<div class="cx-item" style="flex-wrap:wrap"><span><b>${esc(c.hora||'Sin hora')} · ${esc(c.nombre)}</b><small>${esc(c.motivo||'')}</small></span><div class="opts" style="width:100%">${['pendiente','atendida','cancelada'].map(e=>`<button class="chip${c.estado===e?' on':''}" style="min-height:30px;padding:0 10px;font-size:12px" data-est="${c.id}" data-v="${e}">${e.charAt(0).toUpperCase()+e.slice(1)}</button>`).join('')}${c.pid&&S.pacientes[c.pid]?`<a class="chip" style="min-height:30px;padding:0 10px;font-size:12px" href="#consultas-p-${c.pid}">Abrir</a>`:''}<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-edc="${c.id}">Editar</button>${c.estado==='pendiente'?`<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-alc="${c.id}">Alarma</button>`:''}</div></div>`).join('')}</div>`:'<p class="cx-empty">Sin citas.</p>'}
+   <p class="hint" style="font-weight:600;margin-top:12px">Citas</p>${ci.length?`<div class="cx-list">${ci.map(c=>`<div class="cx-item" style="flex-wrap:wrap"><span><b>${esc(c.hora||'Sin hora')} · ${esc(dn(c.nombre))}</b><small>${esc(c.motivo||'')}</small></span><div class="opts" style="width:100%">${['pendiente','atendida','cancelada'].map(e=>`<button class="chip${c.estado===e?' on':''}" style="min-height:30px;padding:0 10px;font-size:12px" data-est="${c.id}" data-v="${e}">${e.charAt(0).toUpperCase()+e.slice(1)}</button>`).join('')}${c.pid&&S.pacientes[c.pid]?`<a class="chip" style="min-height:30px;padding:0 10px;font-size:12px" href="#consultas-p-${c.pid}">Abrir</a>`:''}<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-edc="${c.id}">Editar</button>${c.estado==='pendiente'?`<button class="chip" style="min-height:30px;padding:0 10px;font-size:12px" data-alc="${c.id}">Alarma</button>`:''}</div></div>`).join('')}</div>`:'<p class="cx-empty">Sin citas.</p>'}
    <div class="cx-row"><button class="cxb sm" id="aNueva">+ Agregar cita</button><button class="cxb gris sm" id="aAlarmas">Alarmas y avisos</button></div>
    <p class="hint" style="font-weight:600;margin-top:18px">Atendidos</p>${at.length?`<div class="cx-list">${at.map(c=>{const P=S.pacientes[c.pid];return P?`<a class="cx-item" href="#consultas-p-${P.id}-n-${c.id}">${avatar(P)}<span><b>${esc(nombreP(P))}</b><small>${esc(new Date(c.fecha).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}))} · ${esc(((c.datos||{}).dx||[]).filter(r=>r&&r.n).map(r=>r.n).join(', ')||'Sin diagnóstico')}</small></span></a>`:''}).join('')}</div>`:'<p class="cx-empty">Nadie atendido este día.</p>'}</div></div>
-  <div class="cx-card glass rise" style="--i:5;margin-top:14px"><h3>Próximas citas</h3>${prox.length?`<div class="cx-list">${prox.map(c=>`<button class="cx-item" data-day="${c.fecha}"><span><b>${esc(fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="cx-empty">No hay citas pendientes.</p>'}</div>`);
+  <div class="cx-card glass rise" style="--i:5;margin-top:14px"><h3>Próximas citas</h3>${prox.length?`<div class="cx-list">${prox.map(c=>`<button class="cx-item" data-day="${c.fecha}"><span><b>${esc(fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(dn(c.nombre))}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="cx-empty">No hay citas pendientes.</p>'}</div>`);
   el.querySelector('.cx').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
     if(b.dataset.mes){CAL.m+=+b.dataset.mes;if(CAL.m<0){CAL.m=11;CAL.y--}if(CAL.m>11){CAL.m=0;CAL.y++}vib();vAgenda(el);return}
     if(b.dataset.day){CAL.sel=b.dataset.day;const d=pDate(CAL.sel);CAL.y=d.getFullYear();CAL.m=d.getMonth();vib();vAgenda(el);return}
@@ -574,13 +577,14 @@ const cuerpo=M=>{const c=M.ctx();let html='';
     if(b)html+=`<section class="ps${cells.length+largos.length*2+(sv?3:0)<=9?' keep':''}"><h3>${esc(s.t)}</h3>${b}</section>`});return html};
 const mono=n=>String(n).split(/\s+/).filter(w=>/^\p{Lu}/u.test(w)).slice(0,2).map(w=>w[0]).join('')||'G';
 const encabezado=(titulo,P,ts)=>{const m=med(),sub=[m.especialidad,`Cédula profesional: ${m.cedula||'pendiente'}`,m.titulo_inst].filter(Boolean).map(esc).join(' · '),dir=[m.consultorio,m.domicilio,m.telefono?'Teléfono '+m.telefono:''].filter(Boolean).map(esc).join(' · ');
-  return `<div class="dhe"><div class="dhl"><span class="mono">${esc(mono(m.nombre))}</span><div><b>${esc(`${m.titulo} ${m.nombre}`)}</b><small>${sub}</small>${dir?`<small>${dir}</small>`:''}</div></div><div class="dhr"><b>${esc(titulo)}</b>${P?`<small>${esc(nombreP(P))} · Expediente ${esc(P.id.slice(-6).toUpperCase())}</small>`:''}${ts?`<small>${esc(fHora(ts))}</small>`:''}</div></div>`};
+  return `<div class="dhe"><div class="dhl">${m.logo?`<img class="dlogo" src="${m.logo}" alt="">`:`<span class="mono">${esc(mono(m.nombre))}</span>`}<div><b>${esc(`${m.titulo} ${m.nombre}`)}</b><small>${sub}</small>${dir?`<small>${dir}</small>`:''}</div></div><div class="dhr"><b>${esc(titulo)}</b>${P?`<small>${esc(nombreP(P))} · Expediente ${esc(P.id.slice(-6).toUpperCase())}</small>`:''}${ts?`<small>${esc(fHora(ts))}</small>`:''}</div></div>`};
 const pidHTML=(P,extra=[])=>{const h=P.hc||{},a=alergias(P);
   return `<div class="pb"><div class="w2"><span class="k">Paciente</span><b>${esc(nombreP(P))}</b></div><div><span class="k">Edad</span>${esc(edadP(P)||'Sin registro')}</div><div><span class="k">Sexo</span>${esc(sexoP(P)||'Sin registro')}</div>${h.fnac?`<div><span class="k">Nacimiento</span>${esc(fLarga(h.fnac))}</div>`:''}${extra.join('')}<div class="${a.neg?'':'alg'}"><span class="k">Alergias</span>${esc(a.neg?'Negadas':a.txt)}</div></div>`};
-const firmaHTML=fz=>{const m=med();return `<div class="pf"><div><b>${esc(fz?fz.nombre:`${m.titulo} ${m.nombre}`)}</b><span>Cédula profesional: ${esc((fz&&fz.cedula)||m.cedula||'pendiente')}</span><span class="small">${fz?`Firmado electrónicamente el ${esc(fHora(fz.ts))}`:'Documento sin firmar'}</span></div></div>`};
+const firmaHTML=fz=>{const m=med();return `<div class="pf"><div>${m.firmaImg&&(!fz||!fz.nombre||fz.nombre===`${m.titulo} ${m.nombre}`)?`<img class="dfirma" src="${m.firmaImg}" alt="">`:''}<b>${esc(fz?fz.nombre:`${m.titulo} ${m.nombre}`)}</b><span>Cédula profesional: ${esc((fz&&fz.cedula)||m.cedula||'pendiente')}</span><span class="small">${fz?`Firmado electrónicamente el ${esc(fHora(fz.ts))}`:'Documento sin firmar'}</span></div></div>`};
 const aclHTML=a=>(a||[]).length?`<section class="ps"><h3>Notas aclaratorias</h3>${a.map(x=>`<p class="pl"><span class="k">${esc(fHora(x.ts))}</span>${esc(x.t)}</p>`).join('')}</section>`:'';
 const hoja=(cab,cuerpoH)=>`<table class="pt"><thead><tr><td>${cab}</td></tr></thead><tbody><tr><td>${cuerpoH}</td></tr></tbody></table>`;
-const vDoc=(el,kind,pid,id)=>{const P=S.pacientes[pid];if(!P){el.innerHTML=wrap(head([['Consultas','consultas']],'Documento no encontrado',''));return}
+const vDoc=(...a)=>{DOC=true;try{return vDoc0(...a)}finally{DOC=false}};
+const vDoc0=(el,kind,pid,id)=>{const P=S.pacientes[pid];if(!P){el.innerHTML=wrap(head([['Consultas','consultas']],'Documento no encontrado',''));return}
   let titulo='',doc='',vuelta='consultas-p-'+pid,cls='';
   if(kind==='hc'){const M=modeloHC(P);titulo='Historia clínica';vuelta+='-hc';doc=hoja(encabezado(titulo,P,P.creado),pidHTML(P)+cuerpo(M)+aclHTML(P.hcAcl)+firmaHTML(P.hcFirma))}
   else if(kind==='ref'){const R=S.referencias[id];if(!R)return vNoDoc(el,vuelta);const M=modeloRef(P,R);const d=R.datos;titulo=d.ref_tipo==='Interconsulta'?'Solicitud de interconsulta':'Hoja de referencia';vuelta+='-r-'+id;doc=hoja(encabezado(titulo,P,R.fecha),pidHTML(P)+cuerpo(M)+aclHTML(R.acl)+firmaHTML(R.firma))}
@@ -609,6 +613,16 @@ const vNoDoc=(el,vuelta)=>{el.innerHTML=wrap(head([['Consultas','consultas']],'D
 const perfil=()=>{const m=med();const C=[['titulo','Título (por ejemplo Dr.)'],['nombre','Nombre completo'],['cedula','Cédula profesional'],['titulo_inst','Institución que expidió el título'],['especialidad','Especialidad o leyenda'],['consultorio','Nombre del consultorio'],['domicilio','Domicilio del consultorio'],['telefono','Teléfono']];
   SX.perf=()=>{const o=Object.assign({id:'medico'},m);C.forEach(([k])=>o[k]=$('#pm_'+k).value.trim());put('perfil',o);closeSheet();toast('Datos del médico guardados')};
   openSheet('Datos del médico',`<div class="cx"><p>Aparecen en el encabezado de la receta, las notas y los documentos, y en la firma.</p><div class="fx">${C.map(([k,l])=>`<div class="fw${k==='domicilio'||k==='nombre'?' full':''}"><label for="pm_${k}">${l}</label><input id="pm_${k}" value="${esc(m[k]||'')}" autocomplete="off"></div>`).join('')}</div><div class="cx-row"><button class="cxb" data-x="perf">Guardar</button></div></div>`)};
+/* logo y firma escaneada para los documentos */
+const imgReduce=(file,max)=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/png'))};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)});
+const logoFirma=()=>{const m=med(),save=o=>{put('perfil',Object.assign({id:'medico'},med(),o));setTimeout(logoFirma,50)};
+  openSheet('Logo y firma',`<div class="cx"><p>Aparecen en la receta y en los documentos impresos. Usa imágenes con fondo blanco o transparente.</p>
+   <div class="lf"><div><b>Logo</b>${m.logo?`<img src="${m.logo}" alt="Logo actual">`:'<span class="hint">Sin logo: se usan tus iniciales.</span>'}<label class="cxb sm">Elegir imagen<input type="file" accept="image/*" id="lfL" hidden></label>${m.logo?'<button class="cxb gris sm" id="lfLx">Quitar</button>':''}</div>
+   <div><b>Firma</b>${m.firmaImg?`<img src="${m.firmaImg}" alt="Firma actual">`:'<span class="hint">Sin firma escaneada: queda la línea para firmar a mano.</span>'}<label class="cxb sm">Elegir imagen<input type="file" accept="image/*" id="lfF" hidden></label>${m.firmaImg?'<button class="cxb gris sm" id="lfFx">Quitar</button>':''}</div></div>
+   <p class="hint">Consejo: toma la foto de tu firma en una hoja blanca, con buena luz.</p></div>`);
+  const on=(id,k,max)=>{const i=document.getElementById(id);if(i)i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const d=await imgReduce(f,max);save({[k]:d});toast('Imagen guardada')}catch(e){toast('No se pudo leer la imagen')}}};
+  on('lfL','logo',320);on('lfF','firmaImg',560);
+  const x1=document.getElementById('lfLx');if(x1)x1.onclick=()=>save({logo:''});const x2=document.getElementById('lfFx');if(x2)x2.onclick=()=>save({firmaImg:''})};
 const cuentaRow=()=>{const u=window.NUBE&&window.NUBE.user;const t=MODO==='local'?'Modo de prueba: datos en este dispositivo':MODO==='nube'&&u?'Sesión: '+u.correo:MODO==='login'?'Iniciar sesión con Google':'Cuenta: conectando';
   return `<button class="srow" style="width:100%" data-sw="cuenta"><span style="text-align:left;overflow:hidden;text-overflow:ellipsis">${esc(t)}</span>${icon('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',18)}</button>`};
 const cuenta=()=>{if(MODO==='login'){closeSheet();entrar();return}
@@ -690,7 +704,7 @@ const almBind=()=>{SX.almMin=b=>{almSet({min:+b.dataset.m});b.parentNode.querySe
 const alarmaSheet=c=>{if(!c)return;
   SX.almIcs=()=>alCalendario([c],'cita-'+c.fecha+'.ics');
   SX.almG=()=>window.open(gcal(c,ALM()),'_blank','noopener');
-  openSheet('Alarma de la cita',`<div class="cx"><p><b>${esc(fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):' · sin hora'}</b><br>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</p>
+  openSheet('Alarma de la cita',`<div class="cx"><p><b>${esc(fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):' · sin hora'}</b><br>${esc(dn(c.nombre))}${c.motivo?' · '+esc(c.motivo):''}</p>
   <div class="fx">${almOpts()}</div>
   <div class="cx-row"><button class="cxb" data-x="almIcs">Agregar al calendario del celular</button><button class="cxb gris" data-x="almG">Abrir en Google Calendar</button></div>
   <p class="hint">La alarma del calendario suena aunque la app esté cerrada. Con el archivo, la alarma queda con el tiempo que elegiste. En Google Calendar se usa el aviso que tengas configurado en ese calendario.${c.hora?'':' Como la cita no tiene hora, el aviso sale a las 8 de la mañana de ese día.'}</p></div>`);almBind()};
@@ -720,7 +734,7 @@ setInterval(revisarCitas,30000);setTimeout(revisarCitas,4000);document.addEventL
 const avisos=()=>{if(MODO==='login')return '<p>Inicia sesión para ver los avisos de tus citas.</p>';
   const now=Date.now(),cs=L('citas').filter(c=>c.estado==='pendiente'&&citaTs(c)>=now-36e5&&citaTs(c)<=now+48*36e5).sort((x,y)=>citaTs(x)-citaTs(y));
   const u=store.get('gche2-ultresp',0),np=L('pacientes').length,viejo=np&&(!u||now-u>7*864e5);
-  return `<p class="slabel" style="margin:4px 0 0">Citas de las próximas 48 horas</p>${cs.length?`<div class="nlist">${cs.map(c=>`<button data-cxh="consultas-0"><i></i><span><b style="font-size:15px">${esc(c.fecha===hoy()?'Hoy':fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(c.nombre)}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="hint">Sin citas pendientes.</p>'}
+  return `<p class="slabel" style="margin:4px 0 0">Citas de las próximas 48 horas</p>${cs.length?`<div class="nlist">${cs.map(c=>`<button data-cxh="consultas-0"><i></i><span><b style="font-size:15px">${esc(c.fecha===hoy()?'Hoy':fLarga(c.fecha))}${c.hora?' · '+esc(c.hora):''}</b><small>${esc(dn(c.nombre))}${c.motivo?' · '+esc(c.motivo):''}</small></span></button>`).join('')}</div>`:'<p class="hint">Sin citas pendientes.</p>'}
   ${(()=>{const P=S.pacientes[store.get('gche2-ultp','')];if(!P||!window.VX)return'';const pe=VX.pendP(P).filter(x=>x.est==='hoy');return pe.length?`<p class="slabel" style="margin:16px 0 0">Vacunas pendientes de ${esc(nombreP(P))}</p><div class="nlist">${pe.slice(0,5).map(x=>`<button data-cxh="consultas-p-${P.id}"><i style="background:#03aa49"></i><span><b style="font-size:15px">${esc(x.v?x.v.n:x.n)}${x.t?' · '+esc(x.t):''}</b><small>${esc(x.txt||'Toca hoy')}</small></span></button>`).join('')}</div>`:''})()}
   ${viejo?`<p class="slabel" style="margin:16px 0 0">Respaldo</p><div class="nlist"><button data-cxr="1"><i style="background:#ff9f0a"></i><span><b style="font-size:15px">${u?'Tu último respaldo tiene más de una semana':'Aún no respaldas tus pacientes'}</b><small>Toca para descargar el archivo</small></span></button></div>`:''}`};
 document.getElementById('sBody').addEventListener('click',e=>{if(e.target.closest('[data-cxr]')){e.stopPropagation();respaldo()}});
@@ -728,7 +742,7 @@ document.getElementById('sBody').addEventListener('click',e=>{if(e.target.closes
 /* panel derecho */
 const panel=id=>{
   if(MODO==='login')return '<p class="cx-ph">Inicia sesión para ver tus pacientes.</p>';
-  if(id==='citas'){const c=L('citas').filter(x=>x.fecha===hoy()&&x.estado!=='cancelada').sort((a,b)=>(a.hora||'99').localeCompare(b.hora||'99'));return c.length?c.slice(0,4).map(x=>`<p class="cx-ph"><b style="color:var(--ink)">${esc(x.hora||'--:--')}</b> ${esc(x.nombre)}</p>`).join('')+(c.length>4?`<p class="cx-ph">y ${c.length-4} más</p>`:''):'<p class="cx-ph">Sin citas para hoy.</p>'}
+  if(id==='citas'){const c=L('citas').filter(x=>x.fecha===hoy()&&x.estado!=='cancelada').sort((a,b)=>(a.hora||'99').localeCompare(b.hora||'99'));return c.length?c.slice(0,4).map(x=>`<p class="cx-ph"><b style="color:var(--ink)">${esc(x.hora||'--:--')}</b> ${esc(dn(x.nombre))}</p>`).join('')+(c.length>4?`<p class="cx-ph">y ${c.length-4} más</p>`:''):'<p class="cx-ph">Sin citas para hoy.</p>'}
   if(id==='paciente'){const P=S.pacientes[store.get('gche2-ultp','')];if(!P)return '<p class="cx-ph">Abre un expediente y aparecerá aquí.</p>';const a=alergias(P);return `<div style="display:flex;align-items:center;gap:10px;margin-top:10px">${avatar(P)}<div><b style="font-size:15px">${esc(nombreP(P))}</b><div class="cx-ph" style="margin:0">${esc(edadP(P))}</div></div></div><p class="cx-ph" style="${a.neg?'':'color:#ff3b30;font-weight:600'}">${esc(a.txt)}</p>`}
   if(id==='consultorio'){const cs=L('consultas'),t0=new Date();t0.setHours(0,0,0,0);const lun=new Date(t0);lun.setDate(lun.getDate()-((lun.getDay()+6)%7));const mes=new Date(t0.getFullYear(),t0.getMonth(),1);return `<div class="count"><b>${cs.filter(c=>c.fecha>=lun.getTime()).length}<small>Semana</small></b><b>${cs.filter(c=>c.fecha>=mes.getTime()).length}<small>Mes</small></b></div>`}
   return ''};
@@ -743,7 +757,7 @@ const pacPorNombre=n=>{n=norm(n).trim();return n?L('pacientes').find(p=>norm(nom
 const alergiaDe=n=>{const P=pacPorNombre(n);return P?alergias(P):null};
 const choque=(n,med)=>{const P=pacPorNombre(n);return P?choqueAlergia(P,med):''};
 const nombres=()=>L('pacientes').map(nombreP);
-window.CX={owns,show,flush,perfil,respaldo,referir,col:L,guarda:put,borra:del,alarmasConfig,avisos,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
+window.CX={owns,show,flush,perfil,respaldo,logoFirma,referir,col:L,guarda:put,borra:del,alarmasConfig,avisos,cuentaRow,cuenta,panel,panelAct,buscar,pacienteActual,alergiaDe,choque,nombres,medicoDatos:med,get modo(){return MODO}};
 const h0=location.hash.slice(1);if(owns(h0))G.route();
 if(MODO==='local')G.renderPanel&&G.renderPanel();
 })();

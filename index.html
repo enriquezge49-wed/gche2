@@ -41,7 +41,8 @@ svg{display:block}
 .aurora i:nth-child(1){left:-20vmax;top:-25vmax;background:radial-gradient(circle,var(--a1),transparent 62%)}
 .aurora i:nth-child(2){right:-25vmax;top:5vh;background:radial-gradient(circle,var(--a2),transparent 62%);animation-duration:30s;animation-delay:-8s}
 .aurora i:nth-child(3){left:15vw;bottom:-35vmax;background:radial-gradient(circle,var(--a3),transparent 62%);animation-duration:27s;animation-delay:-15s}
-.scl .aurora i,.frz .aurora i{animation-play-state:paused}
+.aurora.paused i{animation-play-state:paused}
+.aurora{contain:strict}.aurora i{will-change:transform}#net{will-change:transform}
 @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(9vw,-7vh) scale(1.15)}100%{transform:translate(-7vw,9vh) scale(.92)}}
 .spot{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(420px circle at var(--mx,-500px) var(--my,-500px),color-mix(in srgb,var(--blue) 9%,transparent),transparent 70%)}
 #net{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
@@ -442,7 +443,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const root=document.documentElement;
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches||(()=>{try{return localStorage.getItem('gche2-anim')==='false'}catch(e){return false}})();
 const hoverable=matchMedia('(hover: hover)').matches;
 const COLS=['#0071e3','#8668ff','#00a1b3','#ffb829','#03aa49','#d4537e','#2997ff'];
 const PEND='Información pendiente';
@@ -581,7 +582,7 @@ const pmsg=t=>toast(t+': '+PEND.toLowerCase());
 
 /* ajustes: tema, guardia, contraste, acento, letra */
 const applyMode=d=>{root.classList.toggle('dark',d);document.querySelector('meta[name=theme-color]').content=d?'#000000':'#f5f5f7';store.set('gche2-dark',d);syncSw()};
-const syncSw=()=>{const m={swDark:root.classList.contains('dark'),swNight:root.classList.contains('guardia'),swHc:root.classList.contains('hc')};Object.entries(m).forEach(([k,v])=>{const e=document.getElementById(k);if(e)e.classList.toggle('on',v)})};
+const syncSw=()=>{const m={swDark:root.classList.contains('dark'),swNight:root.classList.contains('guardia'),swHc:root.classList.contains('hc'),swDisc:store.get('gche2-disc',false),swAnim:store.get('gche2-anim',true)!==false};Object.entries(m).forEach(([k,v])=>{const e=document.getElementById(k);if(e)e.classList.toggle('on',v)})};
 const sd=store.get('gche2-dark',null);
 applyMode(sd!==null?sd:(root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches));
 if(store.get('gche2-hc',false)||matchMedia('(prefers-contrast: more)').matches)root.classList.add('hc');
@@ -589,16 +590,14 @@ const ACC=[['Azul','#0071e3'],['Violeta','#8668ff'],['Verde','#03aa49'],['Naranj
 const setAcc=c=>{root.style.setProperty('--blue',c);store.set('gche2-acc',c)};setAcc(store.get('gche2-acc','#0071e3'));
 const FS=[['Normal',1],['Grande',1.1],['Muy grande',1.2]];
 const setFs=v=>{root.style.setProperty('--fs',v);store.set('gche2-fs',v)};setFs(store.get('gche2-fs',1));
-/* durante el cambio de modo el fondo animado se congela para que el círculo vaya fluido */
-let frz=false;
 const toggleTheme=e=>{
   const d=!root.classList.contains('dark');
   if(!document.startViewTransition||reduced){applyMode(d);return}
   const x=e&&e.clientX?e.clientX:innerWidth-40,y=e&&e.clientY?e.clientY:30,r=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
-  root.classList.add('vt-theme','frz');frz=true;
+  root.classList.add('vt-theme');hold('modo');
   const vt=document.startViewTransition(()=>applyMode(d));
   vt.ready.then(()=>root.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${r}px at ${x}px ${y}px)`]},{duration:450,easing:'cubic-bezier(.2,.8,.2,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{});
-  vt.finished.finally(()=>{root.classList.remove('vt-theme','frz');frz=false});
+  vt.finished.finally(()=>{root.classList.remove('vt-theme');release('modo',60)});
 };
 const toggleNight=()=>{const on=!root.classList.contains('guardia');root.classList.toggle('guardia',on);if(on&&!root.classList.contains('dark'))applyMode(true);syncSw();toast(on?'Modo guardia nocturna activado':'Modo guardia nocturna desactivado')};
 const toggleHc=()=>{const on=!root.classList.contains('hc');root.classList.toggle('hc',on);store.set('gche2-hc',on);syncSw()};
@@ -626,28 +625,26 @@ const pend=`<span class="pend">${PEND}</span>`;
 const sk=w=>`<div class="sk" style="width:${w}%;margin-top:10px"></div>`;
 const mcal=()=>{const d=new Date(),y=d.getFullYear(),m=d.getMonth(),first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate();let h=['L','M','M','J','V','S','D'].map(x=>`<span class="wd">${x}</span>`).join('');for(let i=0;i<first;i++)h+='<span class="mt">·</span>';for(let i=1;i<=days;i++)h+=`<span class="${i===d.getDate()?'td':''}">${i}</span>`;return `<div style="font-size:15px;font-weight:600;margin-top:6px">${d.toLocaleDateString('es-MX',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}</div><div class="mcal">${h}</div>`};
 const CARDS={
-  reloj:['Reloj','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',()=>{const a=ang();return `<div class="clockw" style="margin-top:10px"><svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="37" fill="none" stroke="var(--line)" stroke-width="2"/>${Array.from({length:12},(_,i)=>`<line x1="40" y1="7" x2="40" y2="${i%3?11:14}" stroke="var(--ink2)" stroke-width="${i%3?1.4:2.4}" stroke-linecap="round" transform="rotate(${i*30} 40 40)"/>`).join('')}<line id="hh" class="hand" data-a="${a.h}" style="transform:rotate(${a.h}deg)" x1="40" y1="40" x2="40" y2="22" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><line id="mh" class="hand" data-a="${a.m}" style="transform:rotate(${a.m}deg)" x1="40" y1="40" x2="40" y2="13" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><line id="sh" class="hand" data-a="${a.s}" style="transform:rotate(${a.s}deg)" x1="40" y1="46" x2="40" y2="11" stroke="#ff3b30" stroke-width="1.6" stroke-linecap="round"/><circle cx="40" cy="40" r="3" fill="#ff3b30"/></svg><div><span class="big" id="dclk">${hm()}</span><small>${fmtDate()}</small></div></div>`},''],
-  clima:['Clima','<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 18z"/>',()=>`<div class="wxi">${sunSvg}<div><span class="t" data-count="24">0°</span><small>Parcialmente nublado · Máx 27° · Mín 14°</small></div></div><small style="display:block;margin-top:8px;color:var(--ink2);font-size:12px">Datos de ejemplo. El clima real usará la ubicación de tu celular.</small>`,'s:clima'],
-  calendario:['Calendario','cal',mcal,'h:consultas-0'],
+  reloj:['Hoy','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',()=>window.PX?PX.hoyCard():sk(80),'x:'],
   citas:['Citas de hoy','consultas',()=>window.CX?CX.panel('citas'):sk(80)+sk(60)+pend,'h:consultas-0'],
   bloque:['Siguiente bloque de estudio','estudio',()=>{const n=window.EX&&EX.siguiente();return n?`<div style="margin-top:10px;padding-left:10px;box-shadow:inset 3px 0 0 ${n.color}"><b style="font-size:15px">${n.titulo}</b><div class="cx-ph" style="margin:2px 0 0">${n.cuando} · ${n.tipo}${n.tema?' · '+n.tema:''}</div></div>`:'<p class="cx-ph">Agrega tus clases, guardias y estudio en el calendario semanal.</p>'},'h:estudio-0'],
-  avisos:['Avisos','<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/>',()=>sk(85)+sk(55)+pend,'s:bell'],
-  semana:['Tu semana','target',()=>`<div class="rings"><svg width="96" height="96" viewBox="0 0 96 96" style="transform:rotate(-90deg)">${[[42,'#0071e3',.68],[31,'#03aa49',.45],[20,'#8668ff',.82]].map(([r,c,v])=>{const Lc=2*Math.PI*r;return `<circle cx="48" cy="48" r="${r}" stroke="${c}" opacity=".18"/><circle class="rg" cx="48" cy="48" r="${r}" stroke="${c}" stroke-dasharray="${Lc.toFixed(1)}" stroke-dashoffset="${Lc.toFixed(1)}" data-v="${(Lc*(1-v)).toFixed(1)}"/>`}).join('')}</svg><ul><li><i style="background:#0071e3"></i>Consultas</li><li><i style="background:#03aa49"></i>Horas de estudio</li><li><i style="background:#8668ff"></i>Preguntas</li></ul></div><small style="display:block;margin-top:6px;color:var(--ink2);font-size:12px">Ejemplo visual. ${PEND}.</small>`,'h:estudio-6'],
-  enarm:['Cuenta regresiva al ENARM','<path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9"/>',()=>`<div class="count">${['Días','Horas','Min'].map(x=>`<b>--<small>${x}</small></b>`).join('')}</div><span class="pend">Fecha pendiente</span>`,''],
-  recientes:['Recientes','<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',()=>sk(75)+sk(65)+sk(45)+pend,''],
-  perla:['Perla del día','star',()=>sk(95)+sk(80)+pend,''],
-  notas:['Notas rápidas','note',()=>sk(90)+sk(70)+sk(50)+pend,''],
+  avisos:['Avisos','<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/>',()=>window.PX?PX.avisosCard():sk(85),'s:bell'],
+  semana:['Tu semana','target',()=>window.PX?PX.semanaCard():sk(80),'h:estudio-0'],
+  enarm:['Cuenta regresiva al ENARM','<path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9"/>',()=>window.PX?PX.enarmCard():sk(80),'f:enarmSheet'],
+  recientes:['Recientes','<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',()=>window.PX?PX.recientes():sk(75),'x:'],
+  perla:['Perla del día','star',()=>window.PX?PX.perlaCard():sk(95),'h:estudio-1'],
+  notas:['Notas rápidas','note',()=>window.PX?PX.notasCard():sk(90),'f:notasSheet'],
   paciente:['Paciente en curso','person',()=>window.CX?CX.panel('paciente'):sk(80)+pend,'h:consultas-2'],
   consultorio:['Resumen del consultorio','chart',()=>window.CX?CX.panel('consultorio'):`<div class="count"><b>--<small>Semana</small></b><b>--<small>Mes</small></b></div>${pend}`,'h:consultas-0'],
-  pregunta:['Pregunta del día','quest',()=>sk(95)+sk(85)+sk(60)+pend,'h:estudio-1'],
-  temporizador:['Temporizador','timer',()=>`<div class="tring"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="70" stroke="var(--ctrl)"/><circle class="tg" cx="75" cy="75" r="70"/></svg><b>25:00</b></div>${pend}`,'s:timer']
+  pregunta:['Pregunta del día','quest',()=>window.PX?PX.preguntaCard():sk(95),'f:preguntaSheet'],
+  temporizador:['Temporizador','timer',()=>window.PX?PX.timerCard():sk(80),'s:timer']
 };
-const LAYOUT={inicio:{Hoy:['reloj','clima','citas','bloque','avisos'],Semana:['calendario','semana','enarm'],Notas:['notas','recientes','perla']},consultas:{Consulta:['paciente','consultorio','reloj','notas']},estudio:{Estudio:['pregunta','temporizador','reloj','notas']},otro:{'Mi día':['reloj','clima','recientes','notas']}};
+const LAYOUT={inicio:{Hoy:['reloj','citas','bloque','avisos'],Semana:['semana','enarm','temporizador'],Notas:['notas','recientes','perla','pregunta']},consultas:{Consulta:['paciente','consultorio','reloj','notas']},estudio:{Estudio:['pregunta','temporizador','reloj','notas']},otro:{'Mi día':['reloj','recientes','notas']}};
 let pctx='inicio',ptab='Hoy',editing=false;
 const lay=(c,t)=>store.get(`gche2-lay-${c}-${t}`,{o:LAYOUT[c][t],h:[]});
 const renderPanel=()=>{
   const L0=LAYOUT[pctx],tabs=Object.keys(L0);if(!L0[ptab])ptab=tabs[0];
-  const {o,h}=lay(pctx,ptab),vis=o.filter(id=>!h.includes(id)),ti=tabs.indexOf(ptab);
+  const L1=lay(pctx,ptab),o=L1.o.filter(id=>CARDS[id]),h=L1.h.filter(id=>CARDS[id]),vis=o.filter(id=>!h.includes(id)),ti=tabs.indexOf(ptab);
   const tb=tabs.length>1?`<div class="ptabs">${tabs.map(t=>`<button data-pt="${t}">${t}</button>`).join('')}<i style="transform:translateX(${ti*100}%)"></i></div>`:'';
   $('#panel').classList.toggle('edit',editing);
   $('#panel').innerHTML=`<div class="phd"><b>${tabs.length>1?'Mi día':tabs[0]}</b><button class="ed" id="pEdit">${editing?'Listo':'Editar'}</button></div>${tb}`+vis.map((id,k)=>{const [t,ic,body,act]=CARDS[id];return `<button class="pcard glass rise" style="--i:${k}" data-id="${id}" data-act="${act}"><h5>${icon(ic,16)}${t}</h5>${body()}<span class="pctl"><span data-up title="Subir">↑</span><span data-dn title="Bajar">↓</span><span data-x title="Ocultar">×</span></span></button>`}).join('')+(editing&&h.length?`<p class="slabel" style="margin:6px 4px">Ocultas, toca para mostrar</p><div class="hidl">${h.map(id=>`<button class="chip" data-show="${id}">${CARDS[id][0]}</button>`).join('')}</div>`:'')+(editing?`<button class="chip" id="pReset" style="margin-top:10px">Restablecer</button>`:'');
@@ -660,6 +657,11 @@ $('#panel').addEventListener('click',e=>{
   if(e.target.closest('#pEdit')){editing=!editing;renderPanel();return}
   if(e.target.closest('#pReset')){store.set(`gche2-lay-${pctx}-${ptab}`,{o:LAYOUT[pctx][ptab],h:[]});renderPanel();return}
   const pt=e.target.closest('[data-pt]');if(pt){ptab=pt.dataset.pt;vib();renderPanel();return}
+  if(!editing&&window.PX){const w=e.target.closest('[data-wxon]');if(w){PX.wxActivar();return}
+    if(e.target.closest('[data-wx]')){closeSides();PX.wxSheet();return}
+    const dd=e.target.closest('[data-day]');if(dd){closeSides();PX.diaSheet(dd.dataset.day);return}
+    const ms=e.target.closest('[data-mes]');if(ms){PX.mes(+ms.dataset.mes);return}
+    const gg=e.target.closest('[data-go]');if(gg){closeSides();go(gg.dataset.go);return}}
   const sh=e.target.closest('[data-show]');if(sh){setLay(c=>c.h=c.h.filter(x=>x!==sh.dataset.show));return}
   const b=e.target.closest('.pcard');if(!b)return;const id=b.dataset.id;
   if(editing){
@@ -667,7 +669,7 @@ $('#panel').addEventListener('click',e=>{
     else if(e.target.closest('[data-up]')||e.target.closest('[data-dn]'))setLay(c=>{const i=c.o.indexOf(id),j=i+(e.target.closest('[data-up]')?-1:1);if(j>=0&&j<c.o.length)[c.o[i],c.o[j]]=[c.o[j],c.o[i]]});
     return;
   }
-  const a=window.CX&&['citas','paciente','consultorio'].includes(id)?'h:'+CX.panelAct(id):b.dataset.act;if(a.startsWith('h:')){closeSides();go(a.slice(2))}else if(a.startsWith('s:')){closeSides();SHEETS[a.slice(2)]()}else pmsg(CARDS[id][0]);
+  const a=window.CX&&['citas','paciente','consultorio'].includes(id)?'h:'+CX.panelAct(id):b.dataset.act;if(a.startsWith('h:')){closeSides();go(a.slice(2))}else if(a.startsWith('s:')){closeSides();SHEETS[a.slice(2)]()}else if(a.startsWith('f:')&&window.PX){closeSides();PX[a.slice(2)]()}else if(a!=='x:')pmsg(CARDS[id][0]);
 });
 
 /* ventanas flotantes */
@@ -680,11 +682,11 @@ const sres=q=>{const n=norm(q.trim());if(!n)return `${hist.length?`<p class="sla
 const row=h=>{const r=resolve(h);if(!r)return'';return `<button data-h="${h}" style="--c:${r.m.c}"><i></i><span><b style="font-size:15px">${r.node.t}</b><small>${r.trail.slice(0,-1).map(x=>x[0]).join(' › ')||'Módulo'}</small></span>${icon(pickIcon(r.node.t,r.id),18)}</button>`};
 const SHEETS={
   search:()=>{openSheet('Buscar',`<label class="sinput">${icon('search',18)}<input id="sq" type="search" placeholder="Consulta rápida, omeprazol, Glasgow" autocomplete="off" aria-label="Buscar"></label><div id="sres">${sres('')}</div>`);$('#sq').addEventListener('input',e=>{$('#sres').innerHTML=sres(e.target.value)})},
-  timer:()=>openSheet('Temporizador',`<div class="tring"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="70" stroke="var(--ctrl)"/><circle class="tg" cx="75" cy="75" r="70"/></svg><b>25:00</b></div><p style="text-align:center">Aquí iría el temporizador con tiempos editables. ${PEND}.</p>${chips(['Estudio','Descanso','Cronómetro de consulta'])}`),
+  timer:()=>window.PX?PX.timerSheet():null,
   calc:()=>{openSheet('Calculadora',`<div class="tabs" id="tabs"><i></i><button data-tab="0">Calculadora normal</button><button data-tab="1">Calculadoras clínicas</button></div><div id="tabBody"></div>`);setTab(0)},
   pill:()=>window.MX?MX.sheet():openSheet('Medicamentos rápidos','<p>Información pendiente.</p>'),
   bell:()=>openSheet('Avisos',window.CX?`${CX.avisos()}<div class="chips" style="margin-top:16px"><button class="chip" data-cxa="1">Alarmas y avisos de citas</button></div><p class="hint" style="margin-top:14px">Los recordatorios de tus bloques de estudio usan el mismo permiso de avisos. Las tarjetas por repasar llegarán con el módulo de Estudio.</p>`:`<p>${PEND}.</p>`),
-  clima:()=>openSheet('Clima',`<p>Aquí iría el clima real con la ubicación de tu celular, por hora y por día. Se conecta cuando la app esté publicada fuera de Claude.</p>${chips(['Por hora','Próximos días'])}`),
+  clima:()=>window.PX?PX.wxSheet():null,
   me:()=>{openSheet('Perfil y ajustes',`<div style="display:flex;align-items:center;gap:14px;margin:14px 0 6px"><span class="av" style="width:56px;height:56px;font-size:19px">GC</span><div><b style="font-size:19px">Dr. Genaro</b><div class="pend" style="margin-top:4px">Cédula y datos pendientes</div></div></div>
     <button class="srow" style="width:100%" data-sw="dark">Modo oscuro <span class="sw" id="swDark"></span></button>
     <button class="srow" style="width:100%" data-sw="night">Modo guardia nocturna <span class="sw" id="swNight"></span></button>
@@ -694,8 +696,19 @@ const SHEETS={
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
     ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.10.2</p>`);syncSw();syncSet()},
-  help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
+    <button class="srow" style="width:100%" data-sw="disc">Modo discreto: solo iniciales de pacientes en pantalla <span class="sw" id="swDisc"></span></button>
+    <button class="srow" style="width:100%" data-sw="anim">Animaciones completas <span class="sw" id="swAnim"></span></button>
+    <button class="srow" style="width:100%" data-sw="enarm">Fecha del ENARM ${icon('<path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9"/>',18)}</button>
+    ${chips(['Datos del médico','Logo y firma','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.10.2</p>`);syncSw();syncSet()},
+  help:()=>openSheet('Ayuda y atajos',`<div class="ayuda">
+   <details open><summary>Consultas</summary><p>Con el botón + empiezas un paciente nuevo, una consulta rápida o una referencia. Todo se guarda solo mientras escribes y también con el botón Guardar; lo que no has firmado aparece en Consultas, en <b>Por terminar</b>. Al firmar, la nota ya no se edita y los cambios van en notas aclaratorias. En cada expediente: documentos para imprimir, citas, referencia y la tarjeta de vacunas.</p></details>
+   <details><summary>Medicamentos</summary><p>Busca por nombre o por grupo. Cada ficha trae su fuente oficial. <b>Calcular dosis</b> te guía paso a paso: para qué es, peso escrito a mano y presentación; el resultado sale en mililitros o tabletas con horario de tomas. También puedes comparar medicamentos y armar la receta.</p></details>
+   <details><summary>Estudio</summary><p>Calendario semanal de clases, estudio y guardias con recordatorios; Mis materias con temas, notas y preguntas; Mis cursos (los documentos se cargan en cada dispositivo con Agregar documentos); y las Guías de Práctica Clínica de tus rotaciones.</p></details>
+   <details><summary>Herramientas</summary><p>Escalas y calculadoras con bibliografía; el texto para la nota se puede editar antes de copiarlo. En <b>Vacunas</b> está el esquema 2026 con esquemas atrasados y embarazo.</p></details>
+   <details><summary>Panel de la derecha</summary><p>La tarjeta <b>Hoy</b> junta reloj, clima y calendario: toca el clima para ver el pronóstico y un día para ver tus citas y bloques. Con <b>Editar</b> ordenas u ocultas tarjetas.</p></details>
+  </div>
+  <p class="lbl" style="margin:14px 0 6px">Atajos de teclado</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div>
+  <p>El botón redondo de abajo a la izquierda regresa un paso. En el celular, mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar aplicación. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>`),
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
 const setTab=n=>{
@@ -705,11 +718,14 @@ const setTab=n=>{
 $('#sBody').addEventListener('click',e=>{
   const t=e.target.closest('[data-tab]');if(t){setTab(+t.dataset.tab);vib();return}
   if(e.target.closest('.keys button')){window.HX?HX.tecla(e.target.closest('.keys button')):pmsg('Calculadora');return}
-  const s=e.target.closest('[data-sw]');if(s){vib();({dark:()=>toggleTheme(),night:toggleNight,hc:toggleHc,full,install,cuenta:()=>window.CX&&CX.cuenta()})[s.dataset.sw]();setTimeout(syncSw,60);return}
+  const s=e.target.closest('[data-sw]');if(s){vib();({dark:()=>toggleTheme(),night:toggleNight,hc:toggleHc,full,install,cuenta:()=>window.CX&&CX.cuenta(),
+    disc:()=>{store.set('gche2-disc',!store.get('gche2-disc',false));toast(store.get('gche2-disc',false)?'Modo discreto: en pantalla solo se ven iniciales; los documentos impresos llevan el nombre completo':'Modo discreto apagado');route();renderPanel()},
+    anim:()=>{const v=store.get('gche2-anim',true)!==false;store.set('gche2-anim',!v);toast(v?'Animaciones reducidas: la app se reinicia para aplicarlo':'Animaciones completas: la app se reinicia para aplicarlo');setTimeout(()=>location.reload(),1200)},
+    enarm:()=>{closeSheet();window.PX&&setTimeout(PX.enarmSheet,250)}})[s.dataset.sw]();setTimeout(syncSw,60);return}
   const a=e.target.closest('[data-acc]');if(a){setAcc(a.dataset.acc);syncSet();vib();return}
   const f=e.target.closest('[data-fs]');if(f){setFs(+f.dataset.fs);syncSet();vib();return}
   const h=e.target.closest('[data-h]');if(h){const v=h.dataset.h;if($('#sq')){hist=[v,...hist.filter(x=>x!==v)].slice(0,6);store.set('gche2-hist',hist)}closeSheet();go(v);return}
-  const c=e.target.closest('.chip');if(c&&c.textContent==='Datos del médico'&&window.CX){CX.perfil();return}if(c&&c.textContent==='Respaldos'&&window.CX){CX.respaldo();return}if(c&&c.dataset.cxa&&window.CX){CX.alarmasConfig();return}if(c&&!c.closest('.cx'))pmsg(c.textContent);
+  const c=e.target.closest('.chip');if(c&&c.textContent==='Datos del médico'&&window.CX){CX.perfil();return}if(c&&c.textContent==='Respaldos'&&window.CX){CX.respaldo();return}if(c&&c.textContent==='Logo y firma'&&window.CX){CX.logoFirma();return}if(c&&c.dataset.cxa&&window.CX){CX.alarmasConfig();return}if(c&&!c.closest('.cx'))pmsg(c.textContent);
 });
 $('#bSearch').addEventListener('click',SHEETS.search);$('#bTimer').addEventListener('click',SHEETS.timer);$('#bCalc').addEventListener('click',SHEETS.calc);$('#bPill').addEventListener('click',SHEETS.pill);$('#bBell').addEventListener('click',SHEETS.bell);$('#bMe').addEventListener('click',SHEETS.me);
 $('#rMe').addEventListener('click',()=>{closeSides();SHEETS.me()});$('#rHelp').addEventListener('click',()=>{closeSides();SHEETS.help()});
@@ -764,11 +780,20 @@ $('#backb').addEventListener('click',()=>{vib();if(navDepth>0&&history.length>1)
   const cr=[...document.querySelectorAll('#v-page .crumbs a[href^="#"]')].map(a=>a.getAttribute('href').slice(1)).filter(x=>x!==location.hash.slice(1));go(cr.length?cr[cr.length-1]:'inicio')});
 syncBack();
 addEventListener('hashchange',route);
+addEventListener('hashchange',()=>setTimeout(()=>{const t=document.querySelector('#v-page h1');window.PX&&PX.visto(location.hash.slice(1),t&&t.textContent.trim())},400));
 addEventListener('scroll',()=>$('#bar').classList.toggle('scrolled',scrollY>8),{passive:true});
 /* deslizar fluido: el fondo animado se congela mientras deslizas y sigue al soltar */
-let scl=false,sclT=0;
-const sclOn=()=>{if(!scl){scl=true;root.classList.add('scl')}clearTimeout(sclT);sclT=setTimeout(()=>{scl=false;root.classList.remove('scl')},260)};
-addEventListener('scroll',sclOn,{passive:true});addEventListener('touchmove',sclOn,{passive:true});addEventListener('wheel',sclOn,{passive:true});
+/* el fondo se congela en los momentos pesados (dedo en pantalla, desplazamiento, hojas, cambio de pantalla o de modo)
+   y la marca va solo en el fondo, para que la tableta no recalcule toda la app */
+const AUR=document.querySelector('.aurora'),HOLD=new Set(),HT={};let scl=false;
+const bgSync=()=>{const f=HOLD.size>0;if(f!==scl){scl=f;AUR&&AUR.classList.toggle('paused',f)}};
+const hold=(k,ms)=>{HOLD.add(k);clearTimeout(HT[k]);if(ms)HT[k]=setTimeout(()=>{HOLD.delete(k);bgSync()},ms);bgSync()};
+const release=(k,ms=0)=>{clearTimeout(HT[k]);HT[k]=setTimeout(()=>{HOLD.delete(k);bgSync()},ms)};
+addEventListener('touchstart',()=>hold('dedo'),{passive:true});
+addEventListener('touchend',()=>release('dedo',320),{passive:true});addEventListener('touchcancel',()=>release('dedo',320),{passive:true});
+addEventListener('scroll',()=>hold('mueve',260),{passive:true});addEventListener('wheel',()=>hold('mueve',260),{passive:true});
+addEventListener('hashchange',()=>hold('pantalla',700));
+new MutationObserver(()=>{$('#scrim').classList.contains('on')?hold('hoja'):release('hoja',450)}).observe($('#scrim'),{attributes:true,attributeFilter:['class']});
 
 /* transición tipo Apple: la tarjeta tocada se convierte en el encabezado */
 let supT=0;
@@ -818,9 +843,10 @@ document.addEventListener('pointerdown',e=>{
   if(getComputedStyle(b).position==='static')b.style.position='relative';b.style.overflow='hidden';
   b.appendChild(d);setTimeout(()=>d.remove(),650);
 });
+const SPOT=document.querySelector('.spot');
 if(hoverable&&!reduced){
   document.addEventListener('pointermove',e=>{
-    root.style.setProperty('--mx',e.clientX+'px');root.style.setProperty('--my',e.clientY+'px');
+    SPOT.style.setProperty('--mx',e.clientX+'px');SPOT.style.setProperty('--my',e.clientY+'px');
     const b=e.target.closest('.card');
     $$('.card').forEach(m=>{if(m!==b&&!m.classList.contains('hold'))m.style.transform=''});
     if(b&&!b.classList.contains('hold')){const r=b.getBoundingClientRect(),px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5,k=b.classList.contains('kid')?4:7;
@@ -927,11 +953,13 @@ netSize();
 addEventListener('pointermove',e=>{ptr.x=e.clientX;ptr.y=e.clientY});
 addEventListener('pointerleave',()=>{ptr.x=ptr.y=-999});
 const D=150;
+/* impulsos: el brillo se dibuja una sola vez por color y luego solo se copia (mismo aspecto, mucho menos trabajo) */
+const GS=28,GLW={};const glow=c=>{if(GLW[c])return GLW[c];const k=Math.min(2,devicePixelRatio||1),cv=document.createElement('canvas');cv.width=cv.height=GS*k;const g=cv.getContext('2d');g.scale(k,k);g.fillStyle=c;g.shadowColor=c;g.shadowBlur=10;g.beginPath();g.arc(GS/2,GS/2,2.6,0,6.3);g.fill();return GLW[c]=cv};
 const netLoop=()=>{if(netRun)return;netRun=true;nlast=performance.now();requestAnimationFrame(netFrame)};
 const netFrame=now=>{
   if(!netOn){netRun=false;return}
   const dt=Math.max(0,Math.min(.05,(now-nlast)/1000));nlast=now;
-  if(document.hidden||scl||frz){requestAnimationFrame(netFrame);return}
+  if(document.hidden||scl){requestAnimationFrame(netFrame);return}
   const dark=root.classList.contains('dark'),lc=dark?'255,255,255':'0,113,227',la=dark?.16:.14;
   nx.clearRect(0,0,nw,nh);
   for(const n of nodes){
@@ -943,7 +971,7 @@ const netFrame=now=>{
   for(const n of nodes){const dd=Math.hypot(ptr.x-n.x,ptr.y-n.y);if(dd<180){nx.strokeStyle=`rgba(${lc},${(1-dd/180)*la*1.6})`;nx.beginPath();nx.moveTo(n.x,n.y);nx.lineTo(ptr.x,ptr.y);nx.stroke()}nx.fillStyle=`rgba(${lc},${dark?.45:.35})`;nx.beginPath();nx.arc(n.x,n.y,1.8,0,6.3);nx.fill()}
   spawn-=dt;if(spawn<=0&&edges.length&&!reduced){spawn=.22;const e=edges[Math.floor(Math.random()*edges.length)];pulses.push({a:e[0],b:e[1],t:0,c:COLS[Math.floor(Math.random()*COLS.length)],hops:2})}
   pulses=pulses.filter(p=>{p.t+=dt*1.4;const a=nodes[p.a],b=nodes[p.b];if(!a||!b)return false;if(p.t>=1){if(p.hops>0){const nb=edges.filter(e=>e[0]===p.b||e[1]===p.b);if(nb.length){const e=nb[Math.floor(Math.random()*nb.length)];p.a=p.b;p.b=e[0]===p.b?e[1]:e[0];p.t=0;p.hops--;return true}}return false}
-    const x=a.x+(b.x-a.x)*p.t,y=a.y+(b.y-a.y)*p.t;nx.fillStyle=p.c;nx.shadowColor=p.c;nx.shadowBlur=10;nx.beginPath();nx.arc(x,y,2.6,0,6.3);nx.fill();nx.shadowBlur=0;return true});
+    const x=a.x+(b.x-a.x)*p.t,y=a.y+(b.y-a.y)*p.t;const g=glow(p.c);nx.drawImage(g,x-GS/2,y-GS/2,GS,GS);return true});
   requestAnimationFrame(netFrame);
 };
 
@@ -979,6 +1007,7 @@ fontsReady.then(startIntro);
 <script src="herramientas-datos.js"></script>
 <script src="herramientas-ilus.js"></script>
 <script src="vacunas.js"></script>
+<script src="panel.js"></script>
 <script src="herramientas.js"></script>
 <script src="medicamentos-datos.js"></script>
 <script src="medicamentos-fichas.js"></script>

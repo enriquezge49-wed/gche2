@@ -95,5 +95,7 @@ const siguiente=()=>{const p=proximos(1)[0];if(!p)return null;const d=new Date(p
 addEventListener('cx-estudio',()=>{if(EL&&owns(location.hash.slice(1)))pinta();G.renderPanel&&G.renderPanel()});
 addEventListener('nube',()=>setTimeout(()=>{if(EL&&owns(location.hash.slice(1))){migra();pinta()}},800));
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(EL&&owns(location.hash.slice(1)))pinta()},150)});
-window.EX={owns,show,siguiente};
+/* bloques de un día (para el calendario del panel) */
+const deDia=f=>{const L=lunes(f),k=fISO(L),d=(f.getDay()+6)%7;return lista().filter(b=>(b.rep||b.wk===k)&&b.d===d).sort((a,b)=>a.i-b.i).map(b=>({titulo:esc(b.mat),tipo:TIP[b.tipo][0],k:b.tipo,color:TIP[b.tipo][1],hora:fh(b.i),i:b.i,dur:(b.nx?24+b.nx:b.f)-b.i,tema:esc(b.tema||'')}))};
+window.EX={owns,show,siguiente,deDia};
 })();

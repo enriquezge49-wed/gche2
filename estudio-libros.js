@@ -62,7 +62,8 @@ const show=(h,el)=>{EL=el;H=h;el.style.cssText='--c:'+COL;const p=h.split('-').s
   else{if(p.length===1)cursos();else curso(p[1])}};
 
 /* Mis materias */
-const materias=()=>{EL.innerHTML=`<div class="cx">${crumbs([['Mis materias']])}${head('Mis materias',`${nM} materias y ${nT} temas del ${LIB}, por áreas del ENARM (Examen Nacional de Aspirantes a Residencias Médicas).`)}
+const listos=()=>{const r=[];A.forEach(([a,ms],i)=>ms.forEach((m,j)=>m[2].forEach((t,k)=>{const T=(window.SXTEMAS||{})[`${slug(m[0])}-${k+1}`];if(T)r.push(`<a class="sx-row" href="#estudio-1-${i}-${j}-${k}"><span class="n">${k+1}</span><span class="tx"><b>${esc(T.titulo)}</b><small>${esc(m[0])} · resumen, ${T.preguntas.length} preguntas y audio</small></span></a>`)})));return r.length?`<section class="sx-area glass rise" style="--i:3"><h3>Listos para estudiar<small>${r.length} tema${r.length>1?'s':''}</small></h3><div class="sx-list">${r.join('')}</div></section>`:''};
+const materias=()=>{EL.innerHTML=`<div class="cx">${crumbs([['Mis materias']])}${head('Mis materias',`${nM} materias y ${nT} temas del ${LIB}, por áreas del ENARM (Examen Nacional de Aspirantes a Residencias Médicas).`)}${listos()}
 ${A.map(([a,ms],i)=>`<section class="sx-area glass rise" style="--i:${i+3}"><h3>${esc(a)}<small>${ms.reduce((s,m)=>s+m[2].length,0)} temas</small></h3><div class="sx-chips">${ms.map((m,j)=>`<a class="sx-chip" href="#estudio-1-${i}-${j}">${esc(m[0])}<i>${m[2].length}</i></a>`).join('')}</div></section>`).join('')}</div>`};
 const nota=(m,t)=>`nota-${slug(m[0])}-${t+1}`;
 const enCuenta=()=>window.CX&&(CX.modo==='nube'||CX.modo==='local');
@@ -71,16 +72,77 @@ const guardaNota=(id,meta,texto)=>{const o={id,nota:1,...meta,texto,fecha:new Da
 const conNota=m=>{const ids=m[2].map((_,t)=>nota(m,t));return new Set(ids.filter(id=>leeNota(id).trim()))};
 const materia=(a,j)=>{const m=A[a]&&A[a][1][j];if(!m){G.go('estudio-1');return}const cn=conNota(m);
   EL.innerHTML=`<div class="cx">${crumbs([['Mis materias','estudio-1'],[m[0]]])}${head(m[0],`${m[2].length} temas. Cada uno se va armando conforme lo estudias.`)}
-  <div class="sx-list glass rise" style="--i:3">${m[2].map((t,i)=>`<a class="sx-row" href="#estudio-1-${a}-${j}-${i}"><span class="n">${i+1}</span><span class="tx"><b>${esc(t[0])}</b><small>Páginas ${t[1]} a ${t[2]} del archivo · ${cn.has(nota(m,i))?'Con notas':'Resumen pendiente'}</small></span>${t[3]?'<span class="mx">Adaptar a México</span>':''}</a>`).join('')}</div></div>`};
+  <div class="sx-list glass rise" style="--i:3">${m[2].map((t,i)=>`<a class="sx-row" href="#estudio-1-${a}-${j}-${i}"><span class="n">${i+1}</span><span class="tx"><b>${esc(t[0])}</b><small>Páginas ${t[1]} a ${t[2]} del archivo · ${TM()[clave(m,i)]?(ESTADO(clave(m,i))?`Listo · último resultado ${ESTADO(clave(m,i)).ok} de ${ESTADO(clave(m,i)).tot}`:'Listo para estudiar'):'Resumen pendiente'}${cn.has(nota(m,i))?' · con notas':''}</small></span>${t[3]?'<span class="mx">Adaptar a México</span>':''}</a>`).join('')}</div></div>`};
 let tab={};
 const TABS=['Resumen','Preguntas','Mis notas','Audio','Profundizar'];
-const tema=(a,j,i)=>{const m=A[a]&&A[a][1][j],t=m&&m[2][i];if(!t){G.go('estudio-1');return}const k=H,tb=tab[k]||0,id=nota(m,i);
+const TM=()=>window.SXTEMAS||{};
+const clave=(m,i)=>`${slug(m[0])}-${i+1}`;
+const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+document.head.insertAdjacentHTML('beforeend',`<style>
+.sx-sec{border-radius:20px;padding:6px 18px 14px;margin-bottom:12px}.sx-sec h3{font-weight:600;font-size:17px;letter-spacing:-.015em;margin:12px 0 8px}
+.sx-sec ul{margin:0;padding-left:20px}.sx-sec li{margin:6px 0;line-height:1.5}.sx-sec b{font-weight:600}
+.sx-box{border-radius:18px;padding:14px 18px;margin:14px 0;border:1px solid color-mix(in srgb,var(--k) 35%,transparent);background:color-mix(in srgb,var(--k) 8%,transparent)}.sx-box h3{margin:0 0 6px;font-size:16px;font-weight:600;color:var(--k)}.sx-box ul{margin:0;padding-left:20px}.sx-box li{margin:5px 0}
+.sx-enf{color:var(--ink2);font-size:15px;margin:0 0 14px}
+.sx-q{border-radius:22px;padding:18px}.sx-q .cs{font-size:16px;line-height:1.55;margin:0 0 10px}.sx-q .pq{font-weight:600;margin:0 0 12px}
+.sx-op{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:13px 14px;margin:8px 0;border-radius:14px;background:var(--ctrl);font-size:15.5px;line-height:1.45;min-height:48px;transition:background .2s}
+.sx-op .l{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--solid);font-weight:600;font-size:13px}
+.sx-op.ok{background:color-mix(in srgb,var(--ok) 18%,var(--ctrl))}.sx-op.ok .l{background:var(--ok);color:#fff}.sx-op.no{background:color-mix(in srgb,#e5484d 16%,var(--ctrl))}.sx-op.no .l{background:#e5484d;color:#fff}
+.sx-ex{margin-top:12px;padding:14px;border-radius:14px;background:var(--solid);border:1px solid var(--line);font-size:15px;line-height:1.5}.sx-ex small{display:block;color:var(--ink2);margin-top:8px;font-size:13px}
+.sx-qbar{display:flex;align-items:center;gap:10px;margin:0 0 12px;color:var(--ink2);font-size:14px}.sx-qbar .sx-prog{flex:1;margin:0}
+.sx-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.sx-au{border-radius:18px;padding:14px 16px;margin:8px 0;transition:box-shadow .2s}.sx-au.on{box-shadow:0 0 0 2px var(--c)}.sx-au b{display:block;font-weight:600;margin-bottom:4px}.sx-au span{color:var(--ink2)}
+.sx-ref a{display:flex;gap:10px;align-items:center;color:var(--blue);min-height:44px;font-size:15px}
+</style>`);
+const ESTADO=k=>store.get('gche2-quiz',{})[k];
+const resumenHTML=T=>`<p class="sx-enf">${md(T.enfoque||'')}</p>${(T.resumen||[]).map(s=>`<section class="sx-sec glass"><h3>${md(s.h)}</h3>${s.li?`<ul>${s.li.map(x=>`<li>${md(x)}</li>`).join('')}</ul>`:''}${s.p?`<p>${md(s.p)}</p>`:''}</section>`).join('')}
+ ${T.perlas?`<div class="sx-box" style="--k:#8668ff"><h3>Lo más preguntado</h3><ul>${T.perlas.map(x=>`<li>${md(x)}</li>`).join('')}</ul></div>`:''}
+ ${T.mexico?`<div class="sx-box" style="--k:#03aa49"><h3>En México y diferencias con el CTO</h3><ul>${T.mexico.map(x=>`<li>${md(x)}</li>`).join('')}</ul></div>`:''}`;
+/* preguntas: opciones revueltas, retroalimentación inmediata, resultado guardado en el dispositivo */
+let QZ=null;
+const nuevoQuiz=(k,T,solo)=>{const idx=(solo&&solo.length?solo:T.preguntas.map((_,n)=>n));const ord=idx.map(n=>{const o=T.preguntas[n].o.map((t,j)=>[t,j]);for(let x=o.length-1;x>0;x--){const y=Math.floor(Math.random()*(x+1));[o[x],o[y]]=[o[y],o[x]]}return{n,o}});QZ={k,i:0,ord,res:{},fin:false};};
+const quizHTML=(k,T)=>{if(!QZ||QZ.k!==k)nuevoQuiz(k,T);const Z=QZ,tot=Z.ord.length;
+  if(Z.fin){const ok=Object.values(Z.res).filter(Boolean).length,mal=Object.keys(Z.res).filter(n=>!Z.res[n]).map(Number);
+    return `<div class="sx-q glass"><p class="pq" style="font-size:20px">${ok} de ${tot} correctas (${Math.round(100*ok/tot)}%)</p><p class="sx-enf">${ok/tot>=.8?'Muy bien: este tema está dominado.':ok/tot>=.6?'Vas bien; repasa las que fallaste.':'Conviene volver a leer el resumen y repetir.'}</p>
+    <div class="sx-btns"><button class="cxb" data-qz="otra">Repetir todas</button>${mal.length?`<button class="cxb" data-qz="mal" style="background:var(--ctrl);color:var(--ink)">Solo las ${mal.length} que fallé</button>`:''}</div></div>`}
+  const it=Z.ord[Z.i],q=T.preguntas[it.n],resp=Z.res[it.n],r=q.r,L='ABCD';
+  return `<div class="sx-qbar"><span>Pregunta ${Z.i+1} de ${tot}</span><span class="sx-prog"><i style="width:${Math.round(100*Z.i/tot)}%"></i></span><span>${(c=>`${c} correcta${c===1?'':'s'}`)(Object.values(Z.res).filter(Boolean).length)}</span></div>
+  <div class="sx-q glass"><p class="cs">${md(q.c)}</p><p class="pq">${md(q.p)}</p>${it.o.map(([t,j],x)=>`<button class="sx-op${resp===undefined?'':j===r?' ok':(Z.sel===j?' no':'')}" data-op="${j}" ${resp!==undefined?'disabled':''}><span class="l">${L[x]}</span><span>${md(t)}</span></button>`).join('')}
+  ${resp!==undefined?`<div class="sx-ex"><b>${resp?'Correcto.':'Incorrecto.'}</b> ${md(q.e)}<small>Fuente: ${md(q.f)}</small></div><div class="sx-btns"><button class="cxb" data-qz="sig">${Z.i+1<tot?'Siguiente':'Ver resultado'}</button></div>`:''}</div>`};
+/* audio con la voz del dispositivo */
+let AU={k:null,i:0,on:false};
+const voz=()=>{const vs=speechSynthesis.getVoices();return vs.find(v=>/es[-_]MX/i.test(v.lang))||vs.find(v=>/^es/i.test(v.lang))};
+const habla=(t,fin)=>{const u=new SpeechSynthesisUtterance(t);u.lang='es-MX';const v=voz();if(v)u.voice=v;u.rate=1;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)};
+const audioPaso=(T,el)=>{if(!AU.on)return;const p=T.audio[AU.i];if(!p){AU.on=false;AU.i=0;pintaAudio(T,el);return}pintaAudio(T,el);
+  habla(p[0],()=>{if(!AU.on)return;setTimeout(()=>{if(!AU.on)return;habla(p[1],()=>{if(!AU.on)return;setTimeout(()=>{AU.i++;audioPaso(T,el)},900)})},2500)})};
+const pintaAudio=(T,el)=>{const box=el.querySelector('#sxAu');if(!box)return;box.innerHTML=`<div class="sx-btns" style="margin:0 0 10px">${'speechSynthesis' in window?`<button class="cxb" data-au="${AU.on?'pausa':'play'}">${AU.on?'Pausar':AU.i?'Continuar':'Escuchar el repaso'}</button><button class="cxb" data-au="reinicia" style="background:var(--ctrl);color:var(--ink)">Desde el inicio</button>`:'<p class="sx-hint">Este dispositivo no tiene voz disponible; puedes leer el repaso.</p>'}</div>
+  <p class="sx-hint">Escucha la pregunta, responde en voz alta en la pausa y luego oye la respuesta. Funciona sin internet si tu dispositivo tiene voz en español.</p>
+  ${T.audio.map((p,n)=>`<div class="sx-au glass${AU.on&&AU.i===n?' on':''}"><b>${md(p[0])}</b><span>${md(p[1])}</span></div>`).join('')}`};
+const tema=(a,j,i)=>{const m=A[a]&&A[a][1][j],t=m&&m[2][i];if(!t){G.go('estudio-1');return}const k=H,tb=tab[k]||0,id=nota(m,i),ck=clave(m,i),T=TM()[ck];
+  if(AU.k!==ck){speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();AU={k:ck,i:0,on:false}}
   const PH=[['El resumen con lo más preguntado se arma cuando estudies este tema: definición, epidemiología, fisiopatología, cuadro clínico, diagnóstico, tratamiento y perlas para el examen.','Aquí irá la diferencia con la Guía de Práctica Clínica mexicana vigente, si la hay.'+(t[3]?' Este tema está hecho para España: se rehace con la normativa mexicana.':'')],['Aquí irán las 30 preguntas tipo ENARM del tema, con caso clínico, explicación de cada opción y su fuente.'],null,['Aquí irá el repaso en audio, en bloques cortos de pregunta y respuesta.'],['Aquí irán los capítulos del Harrison, Principios de Medicina Interna, 21.ª edición, que corresponden a este tema.','Aquí irá el enlace a la Guía de Práctica Clínica vigente.']];
-  EL.innerHTML=`<div class="cx">${crumbs([['Mis materias','estudio-1'],[m[0],`estudio-1-${a}-${j}`],['Tema '+(i+1)]])}<div class="phead"><div><h1 class="rise" style="--i:1">${esc(t[0])}</h1><p class="sx-src rise" style="--i:2">Fuente: ${LIB}, ${esc(m[0])}, capítulo ${i+1}, páginas ${t[1]} a ${t[2]} del archivo.</p></div></div>
-  <div class="sx-tabs rise" style="--i:3" role="tablist">${TABS.map((x,n)=>`<button role="tab" aria-selected="${n===tb}" class="${n===tb?'on':''}" data-tb="${n}">${x}</button>`).join('')}</div>
-  <div class="rise" style="--i:4">${tb===2?`<textarea class="sx-note" id="sxNota" placeholder="Escribe aquí tus notas de este tema. Se guardan solas.">${esc(leeNota(id))}</textarea><p class="sx-hint">${enCuenta()?'Se guardan en tu cuenta.':'Se guardan en este dispositivo. Al iniciar sesión se pasan a tu cuenta.'}</p>`:PH[tb].map(x=>`<div class="sx-ph">${x}</div>`).join('')}</div></div>`;
+  let body='';
+  if(tb===2)body=`<textarea class="sx-note" id="sxNota" placeholder="Escribe aquí tus notas de este tema. Se guardan solas.">${esc(leeNota(id))}</textarea><p class="sx-hint">${enCuenta()?'Se guardan en tu cuenta.':'Se guardan en este dispositivo. Al iniciar sesión se pasan a tu cuenta.'}</p>`;
+  else if(T&&tb===0)body=resumenHTML(T);
+  else if(T&&tb===1)body=`<div id="sxQz">${quizHTML(ck,T)}</div>`;
+  else if(T&&tb===3)body=`<div id="sxAu"></div>`;
+  else if(T&&tb===4)body=`<section class="sx-sec glass sx-ref"><h3>Harrison, Principios de Medicina Interna, 21.ª edición</h3>${T.profundizar.harrison.map(([n,x])=>`<p style="margin:6px 0">Capítulo ${n}: ${esc(x)}</p>`).join('')}<p class="sx-hint">Lo tienes en el chat de estudio; pídeme profundizar en cualquier punto.</p></section>
+    <section class="sx-sec glass sx-ref"><h3>Guías de Práctica Clínica y protocolos mexicanos</h3>${T.profundizar.guias.map(([x,u])=>/^https:\/\/([a-z0-9-]+\.)*gob\.mx\//.test(u||'')?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${icon('<path d="M14 3h7v7M10 14L21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/>',16)}<span>${esc(x)}</span></a>`:`<p style="margin:8px 0;color:var(--ink2);font-size:15px">${esc(x)}</p>`).join('')}</section>
+    <section class="sx-sec glass"><h3>Fuentes de este tema</h3><ul>${T.fuentes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`;
+  else body=PH[tb].map(x=>`<div class="sx-ph">${x}</div>`).join('');
+  EL.innerHTML=`<div class="cx">${crumbs([['Mis materias','estudio-1'],[m[0],`estudio-1-${a}-${j}`],['Tema '+(i+1)]])}<div class="phead"><div><h1 class="rise" style="--i:1">${esc(T&&T.titulo||t[0])}</h1><p class="sx-src rise" style="--i:2">${T?`Capítulo ${i+1} de ${esc(m[0])}: ${esc(t[0])}. `:''}Fuente base: ${LIB}, ${esc(m[0])}, capítulo ${i+1}, páginas ${t[1]} a ${t[2]} del archivo.</p></div></div>
+  <div class="sx-tabs rise" style="--i:3" role="tablist">${TABS.map((x,n)=>`<button role="tab" aria-selected="${n===tb}" class="${n===tb?'on':''}" data-tb="${n}">${x}${T&&n===1?` · ${T.preguntas.length}`:''}</button>`).join('')}</div>
+  <div class="rise" style="--i:4">${body}</div></div>`;
   EL.querySelector('.sx-tabs').onclick=e=>{const b=e.target.closest('[data-tb]');if(!b)return;tab[k]=+b.dataset.tb;vib();tema(a,j,i)};
-  const ta=$('#sxNota');if(ta){let tt;ta.oninput=()=>{clearTimeout(tt);tt=setTimeout(()=>guardaNota(id,{materia:m[0],tema:t[0]},ta.value),600)};ta.onblur=()=>{clearTimeout(tt);guardaNota(id,{materia:m[0],tema:t[0]},ta.value)}}};
+  const ta=$('#sxNota');if(ta){let tt;ta.oninput=()=>{clearTimeout(tt);tt=setTimeout(()=>guardaNota(id,{materia:m[0],tema:t[0]},ta.value),600)};ta.onblur=()=>{clearTimeout(tt);guardaNota(id,{materia:m[0],tema:t[0]},ta.value)}}
+  const qz=$('#sxQz');if(qz)qz.onclick=e=>{const o=e.target.closest('[data-op]'),b=e.target.closest('[data-qz]');const Z=QZ;
+    if(o&&!o.disabled){const it=Z.ord[Z.i],q=T.preguntas[it.n],j2=+o.dataset.op;Z.sel=j2;Z.res[it.n]=j2===q.r;vib();qz.innerHTML=quizHTML(ck,T);return}
+    if(!b)return;const v=b.dataset.qz;
+    if(v==='sig'){Z.sel=null;if(Z.i+1<Z.ord.length)Z.i++;else{Z.fin=true;const ok=Object.values(Z.res).filter(Boolean).length,s2=store.get('gche2-quiz',{});s2[ck]={ok,tot:Z.ord.length,fecha:new Date().toISOString()};store.set('gche2-quiz',s2)}}
+    else if(v==='otra')nuevoQuiz(ck,T);
+    else if(v==='mal')nuevoQuiz(ck,T,Object.keys(Z.res).filter(n=>!Z.res[n]).map(Number));
+    qz.innerHTML=quizHTML(ck,T);qz.scrollIntoView({block:'nearest'})};
+  const au=$('#sxAu');if(au){pintaAudio(T,EL);au.onclick=e=>{const b=e.target.closest('[data-au]');if(!b)return;const v=b.dataset.au;
+    if(v==='play'){AU.on=true;speechSynthesis.cancel();audioPaso(T,EL)}else if(v==='pausa'){AU.on=false;speechSynthesis.cancel();pintaAudio(T,EL)}else{AU.on=false;speechSynthesis.cancel();AU.i=0;pintaAudio(T,EL)}}}};
 /* al iniciar sesión, las notas del dispositivo pasan a la cuenta */
 const migra=()=>{const n=store.get('gche2-notas',{});const v=Object.values(n);if(enCuenta()&&v.length){v.forEach(o=>CX.guarda('estudio',o));store.set('gche2-notas',{})}};
 
@@ -157,7 +219,7 @@ let sx=null;$('#sxVs').addEventListener('touchstart',e=>{sx=e.touches.length===1
 $('#sxVs').addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>60){pg+=dx<0?1:-1;render()}});
 addEventListener('keydown',e=>{if(!vw.classList.contains('on'))return;if(e.key==='ArrowRight'){pg++;render()}else if(e.key==='ArrowLeft'){pg--;render()}else if(e.key==='Escape')cierra()});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(P)render()},150)});
-addEventListener('hashchange',()=>{if(vw.classList.contains('on'))cierra()});
+addEventListener('hashchange',()=>{if(vw.classList.contains('on'))cierra();try{AU.on=false;speechSynthesis.cancel()}catch(e){}});
 addEventListener('nube',()=>setTimeout(migra,900));
 carga();
 window.SX={owns,show};

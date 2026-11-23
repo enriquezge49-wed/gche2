@@ -20,3 +20,8 @@ App personal de consultas, medicamentos, estudio y herramientas clínicas del Dr
 
 - Mis cursos ahora tiene dos cursos: Farmacología y Flashcards Madera (4 partes, 1095 páginas, con lista de temas y buscador). Como en Farmacología, los documentos y su índice solo viven en el dispositivo.
 - Guías de Práctica Clínica: 84 guías de 58 temas de las rotaciones del Programa de Internado Rotatorio de Pregrado del IESIT, con buscador y enlace a cada guía.
+
+## Versión 1.10.0: primeros temas completos de Estudio
+
+- Diabetes tipo 2 (Endocrinología, tema 5), hipertensión arterial (Cardiología, tema 14) e infecciones respiratorias agudas altas (Enfermedades Infecciosas, tema 6): resumen, 30 preguntas tipo ENARM con opciones revueltas y explicación, repaso en audio con la voz del dispositivo, y fuentes.
+- El contenido vive en `estudio-temas.js`, redactado con palabras propias a partir de la bibliografía citada; solo enlaza a sitios .gob.mx.

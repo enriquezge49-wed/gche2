@@ -41,7 +41,7 @@ svg{display:block}
 .aurora i:nth-child(1){left:-20vmax;top:-25vmax;background:radial-gradient(circle,var(--a1),transparent 62%)}
 .aurora i:nth-child(2){right:-25vmax;top:5vh;background:radial-gradient(circle,var(--a2),transparent 62%);animation-duration:30s;animation-delay:-8s}
 .aurora i:nth-child(3){left:15vw;bottom:-35vmax;background:radial-gradient(circle,var(--a3),transparent 62%);animation-duration:27s;animation-delay:-15s}
-.scl .aurora i{animation-play-state:paused}
+.scl .aurora i,.frz .aurora i{animation-play-state:paused}
 @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(9vw,-7vh) scale(1.15)}100%{transform:translate(-7vw,9vh) scale(.92)}}
 .spot{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(420px circle at var(--mx,-500px) var(--my,-500px),color-mix(in srgb,var(--blue) 9%,transparent),transparent 70%)}
 #net{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
@@ -410,7 +410,7 @@ h1{margin:0;font-weight:600;font-size:clamp(34px,5.4vw,62px);line-height:1.05;le
         <div class="pins rise" style="--i:3" id="pins"></div>
         <div class="mods" id="mods"></div>
         <div class="tilesec"><div class="sec rise" style="--i:9"><h3>Resumen del día</h3><small>Se llenará con tus datos</small></div><div class="tiles" id="tiles"></div></div>
-        <div class="foot rise" style="--i:14"><span>Versión 1.10.1 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
+        <div class="foot rise" style="--i:14"><span>Versión 1.10.2 · Consultas, Medicamentos, Herramientas y Estudio, con tus materias, tus cursos y tus Guías de Práctica Clínica, ya funcionan.</span><span class="netst" id="netst">Guardado · En línea</span></div>
       </section>
       <section class="view" id="v-page"></section>
     </div>
@@ -589,14 +589,16 @@ const ACC=[['Azul','#0071e3'],['Violeta','#8668ff'],['Verde','#03aa49'],['Naranj
 const setAcc=c=>{root.style.setProperty('--blue',c);store.set('gche2-acc',c)};setAcc(store.get('gche2-acc','#0071e3'));
 const FS=[['Normal',1],['Grande',1.1],['Muy grande',1.2]];
 const setFs=v=>{root.style.setProperty('--fs',v);store.set('gche2-fs',v)};setFs(store.get('gche2-fs',1));
+/* durante el cambio de modo el fondo animado se congela para que el círculo vaya fluido */
+let frz=false;
 const toggleTheme=e=>{
   const d=!root.classList.contains('dark');
   if(!document.startViewTransition||reduced){applyMode(d);return}
   const x=e&&e.clientX?e.clientX:innerWidth-40,y=e&&e.clientY?e.clientY:30,r=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
-  root.classList.add('vt-theme');
+  root.classList.add('vt-theme','frz');frz=true;
   const vt=document.startViewTransition(()=>applyMode(d));
-  vt.ready.then(()=>root.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${r}px at ${x}px ${y}px)`]},{duration:650,easing:'cubic-bezier(.2,.8,.2,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{});
-  vt.finished.finally(()=>root.classList.remove('vt-theme'));
+  vt.ready.then(()=>root.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${r}px at ${x}px ${y}px)`]},{duration:450,easing:'cubic-bezier(.2,.8,.2,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{});
+  vt.finished.finally(()=>{root.classList.remove('vt-theme','frz');frz=false});
 };
 const toggleNight=()=>{const on=!root.classList.contains('guardia');root.classList.toggle('guardia',on);if(on&&!root.classList.contains('dark'))applyMode(true);syncSw();toast(on?'Modo guardia nocturna activado':'Modo guardia nocturna desactivado')};
 const toggleHc=()=>{const on=!root.classList.contains('hc');root.classList.toggle('hc',on);store.set('gche2-hc',on);syncSw()};
@@ -692,7 +694,7 @@ const SHEETS={
     <div class="srow" style="flex-wrap:wrap;padding-block:8px">Tamaño de letra <span class="chips" style="margin:0">${FS.map(([n,v])=>`<button class="chip" data-fs="${v}">${n}</button>`).join('')}</span></div>
     ${window.CX?CX.cuentaRow():''}
     <button class="srow" style="width:100%" data-sw="install">Instalar app ${icon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',18)}</button>
-    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.10.1</p>`);syncSw();syncSet()},
+    ${chips(['Datos del médico','Logo y firma','Animaciones','Modo discreto','Respaldos'])}<p style="font-size:13px">GCHE2 versión 1.10.2</p>`);syncSw();syncSet()},
   help:()=>openSheet('Ayuda y atajos',`<p>Aquí irían el recorrido de bienvenida y la guía de cada módulo. ${PEND}.</p><div class="nlist">${[['/','Abrir el buscador'],['C','Abrir la calculadora'],['M','Medicamentos rápidos'],['T','Temporizador'],['D','Modo claro u oscuro'],['P','Mostrar u ocultar el panel']].map(([k,t])=>`<div><b style="min-width:34px;text-align:center;padding:4px 0;border-radius:8px;border:1px solid var(--line)">${k}</b><span>${t}</span></div>`).join('')}</div><p>En el celular: desliza desde la orilla izquierda para regresar y desde la derecha para abrir el panel. Mantén presionada una tarjeta para ver su vista previa.</p><p><b>Instalar en Android:</b> menú de Chrome y luego Instalar app. <b>Instalar en iPhone:</b> botón Compartir de Safari y luego Agregar a inicio.</p>${chips(['Repetir recorrido'])}`)
 };
 const syncSet=()=>{const a=getComputedStyle(root).getPropertyValue('--blue').trim(),f=String(store.get('gche2-fs',1));$$('[data-acc]').forEach(b=>b.classList.toggle('on',b.dataset.acc===a));$$('[data-fs]').forEach(b=>b.classList.toggle('on',b.dataset.fs===f))};
@@ -834,7 +836,7 @@ if(hoverable&&!reduced){
 const cv=$('#pc'),cx=cv.getContext('2d');
 let W=0,H=0,P=[],T0=0,running=false,burst=false,peak=[0,0],ecg=[],peakI=0,done=false,last=0,BT=.31;
 const MP={on:false,x:0,y:0},GLOW={l:'#2997ff',d:'#6cb8ff'};
-const VER='1.10.1',NOVEDADES=[['1.10.1',['Deslizar más fluido: el fondo animado se pausa mientras deslizas y sigue al soltar']],['1.10.0',['Estudio: tres temas listos para la consulta, cada uno con resumen, 30 preguntas tipo ENARM con explicación y repaso en audio: diabetes tipo 2, hipertensión arterial e infecciones respiratorias agudas','En Mis materias aparece la lista Listos para estudiar']],['1.9.0',['Calculadora de medicamentos paso a paso, con dibujo de jeringa o tableta y horario de tomas; ya no toma el peso del expediente','Vacunas: esquema 2026 con atrasados para niños, adolescentes, adultos, adultos mayores y embarazadas, y registro de dosis en el expediente','Botón para regresar un paso, abajo a la izquierda','Botón Guardar y lista Por terminar en Consultas','75 de 90 Guías de Práctica Clínica ya abren su sitio oficial']],['1.8.1',['Se quitaron los 32 enlaces de Guías de Práctica Clínica que llevaban a sitios no oficiales; esas guías muestran su clave para buscarlas','La app solo abre guías del Instituto Mexicano del Seguro Social y de gob.mx']],['1.8.0',['Las 118 fichas de medicamentos ya están completas, cada una con su fuente oficial','La calculadora muestra dosis únicas, mililitros y gramos cuando corresponde, y redondea con más precisión las dosis pequeñas']],['1.7.1',['Las ilustraciones de las escalas ya no se enciman sobre las opciones','Las letras GCHE2 de la bienvenida responden al mouse y al dedo: se apartan, brillan y, al tocar, estallan y se vuelven a armar','La versión aparece en la bienvenida con sus novedades']],['1.7.0',['Tarjetas de repaso en Mis cursos y Guías de Práctica Clínica en Estudio']],['1.6.0',['Mis materias con 421 temas y Mis cursos con visor y buscador']],['1.5.0',['Impresión profesional en blanco y negro, con la receta en media carta','Calculadora con ficha breve de cada medicamento verificado','Escala de Glasgow ilustrada y texto editable para la nota en todas las herramientas','Mejorar con ChatGPT por copiar y pegar, sin datos del paciente','Referir paciente desde el botón +','Calendario semanal de Estudio','Reloj y animación de entrada corregidos']]];
+const VER='1.10.2',NOVEDADES=[['1.10.2',['Cambio entre modo claro y oscuro más fluido y más rápido']],['1.10.1',['Deslizar más fluido: el fondo animado se pausa mientras deslizas y sigue al soltar']],['1.10.0',['Estudio: tres temas listos para la consulta, cada uno con resumen, 30 preguntas tipo ENARM con explicación y repaso en audio: diabetes tipo 2, hipertensión arterial e infecciones respiratorias agudas','En Mis materias aparece la lista Listos para estudiar']],['1.9.0',['Calculadora de medicamentos paso a paso, con dibujo de jeringa o tableta y horario de tomas; ya no toma el peso del expediente','Vacunas: esquema 2026 con atrasados para niños, adolescentes, adultos, adultos mayores y embarazadas, y registro de dosis en el expediente','Botón para regresar un paso, abajo a la izquierda','Botón Guardar y lista Por terminar en Consultas','75 de 90 Guías de Práctica Clínica ya abren su sitio oficial']],['1.8.1',['Se quitaron los 32 enlaces de Guías de Práctica Clínica que llevaban a sitios no oficiales; esas guías muestran su clave para buscarlas','La app solo abre guías del Instituto Mexicano del Seguro Social y de gob.mx']],['1.8.0',['Las 118 fichas de medicamentos ya están completas, cada una con su fuente oficial','La calculadora muestra dosis únicas, mililitros y gramos cuando corresponde, y redondea con más precisión las dosis pequeñas']],['1.7.1',['Las ilustraciones de las escalas ya no se enciman sobre las opciones','Las letras GCHE2 de la bienvenida responden al mouse y al dedo: se apartan, brillan y, al tocar, estallan y se vuelven a armar','La versión aparece en la bienvenida con sus novedades']],['1.7.0',['Tarjetas de repaso en Mis cursos y Guías de Práctica Clínica en Estudio']],['1.6.0',['Mis materias con 421 temas y Mis cursos con visor y buscador']],['1.5.0',['Impresión profesional en blanco y negro, con la receta en media carta','Calculadora con ficha breve de cada medicamento verificado','Escala de Glasgow ilustrada y texto editable para la nota en todas las herramientas','Mejorar con ChatGPT por copiar y pegar, sin datos del paciente','Referir paciente desde el botón +','Calendario semanal de Estudio','Reloj y animación de entrada corregidos']]];
 const NP=innerWidth<640?420:760,DRAW=.62;
 const size=()=>{const d=Math.min(1.5,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};
 const buildEcg=()=>{
@@ -929,7 +931,7 @@ const netLoop=()=>{if(netRun)return;netRun=true;nlast=performance.now();requestA
 const netFrame=now=>{
   if(!netOn){netRun=false;return}
   const dt=Math.max(0,Math.min(.05,(now-nlast)/1000));nlast=now;
-  if(document.hidden||scl){requestAnimationFrame(netFrame);return}
+  if(document.hidden||scl||frz){requestAnimationFrame(netFrame);return}
   const dark=root.classList.contains('dark'),lc=dark?'255,255,255':'0,113,227',la=dark?.16:.14;
   nx.clearRect(0,0,nw,nh);
   for(const n of nodes){

@@ -56,7 +56,7 @@ let EL=null,H='';
 const crumbs=a=>`<nav class="crumbs rise" aria-label="Ruta"><a href="#inicio">Inicio</a><span>›</span><a href="#estudio">Estudio</a>${a.map(([t,h],i)=>`<span>›</span>${i===a.length-1?`<b>${esc(t)}</b>`:`<a href="#${h}">${esc(t)}</a>`}`).join('')}</nav>`;
 const head=(t,s)=>`<div class="phead"><div><h1 class="rise" style="--i:1">${esc(t)}</h1><p class="lead rise" style="--i:2">${s}</p></div></div>`;
 const owns=h=>/^estudio-[125](-|$)/.test(h);
-const show=(h,el)=>{EL=el;H=h;el.style.cssText='--c:'+COL;const p=h.split('-').slice(1).map(Number);
+const show=(h,el)=>{EL=el;H=h;if(window.SX)SX.cur=null;el.style.cssText='--c:'+COL;const p=h.split('-').slice(1).map(Number);
   if(p[0]===1){if(p.length===1)materias();else if(p.length===3)materia(p[1],p[2]);else tema(p[1],p[2],p[3])}
   else if(p[0]===5)guias();
   else{if(p.length===1)cursos();else curso(p[1])}};
@@ -134,6 +134,7 @@ const tema=(a,j,i)=>{const m=A[a]&&A[a][1][j],t=m&&m[2][i];if(!t){G.go('estudio-
   EL.innerHTML=`<div class="cx">${crumbs([['Mis materias','estudio-1'],[m[0],`estudio-1-${a}-${j}`],['Tema '+(i+1)]])}<div class="phead"><div><h1 class="rise" style="--i:1">${esc(T&&T.titulo||t[0])}</h1><p class="sx-src rise" style="--i:2">${T?`Capítulo ${i+1} de ${esc(m[0])}: ${esc(t[0])}. `:''}Fuente base: ${LIB}, ${esc(m[0])}, capítulo ${i+1}, páginas ${t[1]} a ${t[2]} del archivo.</p></div></div>
   <div class="sx-tabs rise" style="--i:3" role="tablist">${TABS.map((x,n)=>`<button role="tab" aria-selected="${n===tb}" class="${n===tb?'on':''}" data-tb="${n}">${x}${T&&n===1?` · ${T.preguntas.length}`:''}</button>`).join('')}</div>
   <div class="rise" style="--i:4">${body}</div></div>`;
+  window.SX&&(SX.cur={id,meta:{materia:m[0],tema:t[0]},titulo:T&&T.titulo||t[0]});/* para la barra de lectura y las notas flotantes (estudio-lectura.js) */
   if(T&&tb===0&&ILU(ck))try{ILU(ck).init(EL.querySelector('.sxi'))}catch(e){console.error(e)}
   EL.querySelector('.sx-tabs').onclick=e=>{const b=e.target.closest('[data-tb]');if(!b)return;tab[k]=+b.dataset.tb;vib();tema(a,j,i)};
   const ta=$('#sxNota');if(ta){let tt;ta.oninput=()=>{clearTimeout(tt);tt=setTimeout(()=>guardaNota(id,{materia:m[0],tema:t[0]},ta.value),600)};ta.onblur=()=>{clearTimeout(tt);guardaNota(id,{materia:m[0],tema:t[0]},ta.value)}}
@@ -225,5 +226,5 @@ let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(P)r
 addEventListener('hashchange',()=>{if(vw.classList.contains('on'))cierra();try{AU.on=false;speechSynthesis.cancel()}catch(e){}});
 addEventListener('nube',()=>setTimeout(migra,900));
 carga();
-window.SX={owns,show};
+window.SX={owns,show,leeNota,guardaNota};
 })();

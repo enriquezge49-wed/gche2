@@ -64,14 +64,19 @@ const wxSheet=()=>{const d=wx(),G=g();
 let mesOf=0;
 const citasDe=isoD=>{try{return window.CX&&CX.col?CX.col('citas').filter(c=>c.fecha===isoD&&c.estado!=='cancelada').sort((a,b)=>(a.hora||'').localeCompare(b.hora||'')):[]}catch(e){return[]}};
 const bloquesDe=f=>{try{return window.EX&&EX.deDia?EX.deDia(f):[]}catch(e){return[]}};
-const hoyCard=()=>{const now=new Date(),base=new Date(now.getFullYear(),now.getMonth()+mesOf,1),y=base.getFullYear(),m=base.getMonth(),first=(base.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),hoyI=iso(now);
+const calHTML=()=>{const now=new Date(),base=new Date(now.getFullYear(),now.getMonth()+mesOf,1),y=base.getFullYear(),m=base.getMonth(),first=(base.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),hoyI=iso(now);
   let c=['L','M','M','J','V','S','D'].map(x=>`<span class="wd">${x}</span>`).join('');for(let i=0;i<first;i++)c+='<span></span>';
   for(let d=1;d<=days;d++){const f=new Date(y,m,d),k=iso(f),ci=citasDe(k).length,bl=bloquesDe(f).length;
     c+=`<span class="dd${k===hoyI?' hoy':''}" data-day="${k}" role="button" tabindex="0" aria-label="${d}${ci?`, ${ci} citas`:''}${bl?`, ${bl} bloques`:''}">${d}${ci||bl?`<i>${ci?'<em class="c"></em>':''}${bl?'<em class="b"></em>':''}</i>`:''}</span>`}
   const mes=cap(base.toLocaleDateString('es-MX',{month:'long',year:'numeric'}));
+  return `<div class="hoy-mh"><span data-mes="-1" role="button" tabindex="0" aria-label="Mes anterior">‹</span><b>${esc(mes)}</b><span data-mes="1" role="button" tabindex="0" aria-label="Mes siguiente">›</span></div><div class="hoy-g">${c}</div>
+  <small class="hoy-ley"><em class="c"></em>Citas <em class="b"></em>Estudio o guardia</small>`};
+const hoyCard=()=>{const now=new Date();
   return `<div class="hoy"><div class="hoy-top"><span class="hoy-clk"><b id="hoyH">${now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:false})}</b><small>${esc(fLarga(now))}</small></span>${wxMini()}</div>
-  <div class="hoy-cal"><div class="hoy-mh"><span data-mes="-1" role="button" tabindex="0" aria-label="Mes anterior">‹</span><b>${esc(mes)}</b><span data-mes="1" role="button" tabindex="0" aria-label="Mes siguiente">›</span></div><div class="hoy-g">${c}</div>
-  <small class="hoy-ley"><em class="c"></em>Citas <em class="b"></em>Estudio o guardia</small></div></div>`};
+  <div class="hoy-cal" id="hoyCal">${calHTML()}</div></div>`};
+/* cambiar de mes: solo se reemplaza el calendario, el resto del panel queda quieto */
+const cambiaMes=d=>{mesOf+=d;const el=document.getElementById('hoyCal');if(!el){refresh();return}
+  el.innerHTML=calHTML();const gr=el.querySelector('.hoy-g');if(gr&&!document.documentElement.classList.contains('reduce')){gr.classList.remove('mv-l','mv-r');void gr.offsetWidth;gr.classList.add(d>0?'mv-r':'mv-l')}};
 const diaSheet=k=>{const f=D0(k),ci=citasDe(k),bl=bloquesDe(f),G=g();
   const dn=n=>{try{return st.get('gche2-disc',false)?String(n||'').trim().split(/\s+/).map(w=>w[0]?w[0].toUpperCase()+'.':'').join(' '):n}catch(e){return n}};
   G.openSheet(fLarga(f),`<p class="lbl" style="margin:4px 0 6px">Citas</p>${ci.length?`<div class="nlist">${ci.map(c=>`<button data-cxh="consultas-0"><i style="background:#0071e3"></i><span><b style="font-size:15px">${esc(c.hora||'Sin hora')} · ${esc(dn(c.nombre||'Sin nombre'))}</b><small>${esc(c.motivo||'')}</small></span></button>`).join('')}</div>`:'<p class="hint">Sin citas.</p>'}
@@ -153,6 +158,6 @@ const avisosCard=()=>{let ci=0,pe=0;try{ci=citasDe(iso(new Date())).length}catch
   try{const d=document.createElement('div');d.innerHTML=window.CX?CX.avisos():'';pe=d.querySelectorAll('.nlist button').length}catch(e){}
   return `<div class="count"><b>${ci}<small>Citas hoy</small></b><b>${pe}<small>Avisos</small></b></div>`};
 
-window.PX={hoyCard,wxSheet,wxActivar,diaSheet,mes:d=>{mesOf+=d;refresh()},visto,recientes,notasCard,notasSheet,timerCard,timerSheet,enarmCard,enarmSheet,semanaCard,perlaCard,preguntaCard,preguntaSheet,avisosCard,wxPedir};
+window.PX={hoyCard,wxSheet,wxActivar,diaSheet,mes:cambiaMes,visto,recientes,notasCard,notasSheet,timerCard,timerSheet,enarmCard,enarmSheet,semanaCard,perlaCard,preguntaCard,preguntaSheet,avisosCard,wxPedir};
 setTimeout(()=>wxPedir(false),3000);
 })();
